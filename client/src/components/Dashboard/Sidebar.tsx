@@ -3,15 +3,51 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { removeToken } from '@store/slices/tokenSlice';
 import { removeUser } from '@store/slices/userSlice';
+import { RootState } from '@store/store';
 import { useRouter } from 'next/navigation';
+
+// Import icons from lucide-react
+import {
+  LayoutDashboard,
+  Users,
+  ClipboardList,
+  MessageSquare,
+  FileText,
+  Receipt,
+  Repeat,
+  Calendar,
+  ListChecks,
+  LogOut,
+} from 'lucide-react';
+
+interface NavItemProps {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
+}
+
+const NavItem: React.FC<NavItemProps> = ({ href, icon, label, isActive }) => {
+  return (
+    <li className="mb-2">
+      <Link href={href} className={`flex items-center py-2 px-4 rounded ${
+        isActive ? 'bg-gray-700 text-white' : 'hover:bg-gray-700 text-white'
+      }`}>
+        <span className="mr-3">{icon}</span>
+        <span>{label}</span>
+      </Link>
+    </li>
+  );
+};
 
 export default function Sidebar() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
+  const userRole = useSelector((state: RootState) => state.user.role);
 
   const handleLogout = () => {
     dispatch(removeToken());
@@ -21,33 +57,86 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-64 bg-gray-800 text-white flex flex-col p-4">
-      <div className="text-2xl font-bold mb-6">CRM Dashboard</div>
+    <div className="w-64 bg-gray-800 text-white flex flex-col p-4 shadow-lg">
+      <div className="text-2xl font-bold mb-8 text-center">CRM App</div> {/* Placeholder for logo/app name */}
+      
       <nav className="flex-1">
+        <h3 className="text-xs font-semibold uppercase text-gray-400 mb-4">GENERAL</h3>
         <ul>
-          <li className="mb-2">
-            <Link href="/dashboard" className={`block py-2 px-4 rounded ${pathname === '/dashboard' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
-              Dashboard
-            </Link>
-          </li>
-          <li className="mb-2">
-            <Link href="/dashboard/leads" className={`block py-2 px-4 rounded ${pathname === '/dashboard/leads' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
-              Leads
-            </Link>
-          </li>
-          <li className="mb-2">
-            <Link href="/dashboard/contacts" className={`block py-2 px-4 rounded ${pathname === '/dashboard/contacts' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}>
-              Contacts
-            </Link>
-          </li>
-          {/* Add more navigation links as needed */}
+          <NavItem
+            href="/dashboard"
+            icon={<LayoutDashboard size={20} />}
+            label="Dashboard"
+            isActive={pathname === '/dashboard'}
+          />
+        </ul>
+
+        <h3 className="text-xs font-semibold uppercase text-gray-400 mt-8 mb-4">MANAGEMENT</h3>
+        <ul>
+          {userRole === 'superadmin' && ( // Conditional rendering based on user role
+            <NavItem
+              href="/dashboard/users"
+              icon={<Users size={20} />}
+              label="Manage Users"
+              isActive={pathname === '/dashboard/users'}
+            />
+          )}
+          <NavItem
+            href="/dashboard/leads"
+            icon={<ClipboardList size={20} />}
+            label="All Leads"
+            isActive={pathname === '/dashboard/leads'}
+          />
+          <NavItem
+            href="/dashboard/contacts"
+            icon={<MessageSquare size={20} />}
+            label="Contacts"
+            isActive={pathname === '/dashboard/contacts'}
+          />
+          <NavItem
+            href="/dashboard/quotations"
+            icon={<FileText size={20} />}
+            label="Quotations"
+            isActive={pathname === '/dashboard/quotations'}
+          />
+          <NavItem
+            href="/dashboard/invoices"
+            icon={<Receipt size={20} />}
+            label="Invoices"
+            isActive={pathname === '/dashboard/invoices'}
+          />
+          <NavItem
+            href="/dashboard/deals-bill"
+            icon={<ListChecks size={20} />} 
+            label="Deals Bill"
+            isActive={pathname === '/dashboard/deals-bill'}
+          />
+          <NavItem
+            href="/dashboard/transactions"
+            icon={<Repeat size={20} />}
+            label="Transactions"
+            isActive={pathname === '/dashboard/transactions'}
+          />
+          <NavItem
+            href="/dashboard/meetings"
+            icon={<Calendar size={20} />}
+            label="Meetings"
+            isActive={pathname === '/dashboard/meetings'}
+          />
+          <NavItem
+            href="/dashboard/task-assigning"
+            icon={<ListChecks size={20} />}
+            label="Task Assigning"
+            isActive={pathname === '/dashboard/task-assigning'}
+          />
         </ul>
       </nav>
-      <div className="mt-auto">
+      <div className="mt-auto pt-4 border-t border-gray-700">
         <button
           onClick={handleLogout}
-          className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          className="flex items-center w-full py-2 px-4 rounded-lg text-white hover:bg-gray-700 transition-colors duration-200"
         >
+          <LogOut size={20} className="mr-3" />
           Logout
         </button>
       </div>
