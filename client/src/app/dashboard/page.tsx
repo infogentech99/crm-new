@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "@store/store";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import DashboardCards from "@components/Dashboard/DashboardCards";
+import RecentActivityTable from "@components/Dashboard/RecentActivityTable";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -12,19 +14,20 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!token) {
-      router.push("/"); // Redirect to login if not authenticated
+      router.push("/");
     }
   }, [token, router]);
 
   if (!token) {
-    return null; // Or a loading spinner
+    return null; 
   }
 
   return (
     <DashboardLayout>
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Welcome to your Dashboard!</h1>
-      <p className="text-gray-600">This is a placeholder for your CRM dashboard content.</p>
-      {/* More dashboard content will go here */}
+      <p className="text-gray-600 mb-8">Here&#39;s a quick overview of your CRM activities.</p>
+      <DashboardCards />
+      <RecentActivityTable />
     </DashboardLayout>
   );
 }

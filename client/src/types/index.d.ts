@@ -12,3 +12,24 @@ export interface AuthResponse {
     role: string;
   };
 }
+
+export interface DashboardSummary {
+  totalLeads: number;
+  newContacts: number;
+  openDeals: string; 
+  tasksDue: number;
+}
+
+export interface RecentActivity {
+  id: number;
+  type: string;
+  description: string;
+  date: string;
+}
+
+export interface Lead {
+  _id: string;
+  name: string;
+  company: string;
+  createdAt: string;
+}
