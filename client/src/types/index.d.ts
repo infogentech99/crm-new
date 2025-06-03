@@ -27,6 +27,14 @@ export interface RecentActivity {
   date: string;
 }
 
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  // Add other user properties if needed from the backend response
+}
+
 export interface Lead {
   _id: string;
   name: string;

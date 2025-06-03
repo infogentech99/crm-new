@@ -1,6 +1,6 @@
 import { LoginCredentials, AuthResponse } from '@customTypes/index';
 
-const API_URL = '/api/auth'; // Base URL for authentication endpoints
+const API_URL = '/api/auth';
 
 export const loginUser = async (credentials: LoginCredentials): Promise<AuthResponse> => {
   const response = await fetch(`${API_URL}/login`, {

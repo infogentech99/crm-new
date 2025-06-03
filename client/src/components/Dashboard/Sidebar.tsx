@@ -3,10 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { removeToken } from '@store/slices/tokenSlice';
 import { removeUser } from '@store/slices/userSlice';
-import { RootState } from '@store/store';
 import { useRouter } from 'next/navigation';
 
 // Import icons from lucide-react
@@ -47,7 +46,6 @@ export default function Sidebar() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
-  const userRole = useSelector((state: RootState) => state.user.role);
 
   const handleLogout = () => {
     dispatch(removeToken());
@@ -73,14 +71,12 @@ export default function Sidebar() {
 
         <h3 className="text-xs font-semibold uppercase text-gray-400 mt-8 mb-4">MANAGEMENT</h3>
         <ul>
-          {userRole === 'superadmin' && ( // Conditional rendering based on user role
-            <NavItem
-              href="/dashboard/users"
-              icon={<Users size={20} />}
-              label="Manage Users"
-              isActive={pathname === '/dashboard/users'}
-            />
-          )}
+          <NavItem
+            href="/dashboard/users"
+            icon={<Users size={20} />}
+            label="Manage Users"
+            isActive={pathname === '/dashboard/users'}
+          />
           <NavItem
             href="/dashboard/leads"
             icon={<ClipboardList size={20} />}
