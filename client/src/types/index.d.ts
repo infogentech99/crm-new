@@ -67,6 +67,18 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface Meeting {
+  _id: string;
+  title: string;
+  date: string; // Combined date and time, ISO string
+  duration: string; // e.g., "30 Min"
+  status: 'Scheduled' | 'Completed' | 'Cancelled';
+  participants?: (string | User | Contact | Lead)[]; // Array of IDs or populated objects
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Bill {
   _id: string;
   billNumber: string;
