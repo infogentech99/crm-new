@@ -11,20 +11,37 @@ const getAuthHeaders = () => {
 };
 
 export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
-  // Mock data for demonstration purposes
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        totalLeads: 63,
-        newContacts: 15,
-        openDeals: "12500.00",
-        tasksDue: 5,
-        approvedQuotations: 4,
-        approvedInvoices: 0,
-        lostLeads: 2,
-      });
-    }, 500); // Simulate network delay
-  });
+  const headers = getAuthHeaders();
+
+  // Fetch total leads
+  const totalLeadsResponse = await fetch(`${API_URL}/leads?limit=1`, { headers });
+  const totalLeadsData = await totalLeadsResponse.json();
+  const totalLeads = totalLeadsData?.totalLeads || 0;
+
+  // Fetch approved quotations (leads with status 'quotation_approved')
+  const approvedQuotationsResponse = await fetch(`${API_URL}/leads?status=quotation_approved&limit=1`, { headers });
+  const approvedQuotationsData = await approvedQuotationsResponse.json();
+  const approvedQuotations = approvedQuotationsData?.totalLeads || 0;
+
+  // Fetch approved invoices (leads with status 'invoice_accepted')
+  const approvedInvoicesResponse = await fetch(`${API_URL}/leads?status=invoice_accepted&limit=1`, { headers });
+  const approvedInvoicesData = await approvedInvoicesResponse.json();
+  const approvedInvoices = approvedInvoicesData?.totalLeads || 0;
+
+  // Fetch lost leads (leads with status 'lost')
+  const lostLeadsResponse = await fetch(`${API_URL}/leads?status=lost&limit=1`, { headers });
+  const lostLeadsData = await lostLeadsResponse.json();
+  const lostLeads = lostLeadsData?.totalLeads || 0;
+
+  return {
+    totalLeads,
+    newContacts: 0, // No backend endpoint found for this, setting to 0
+    openDeals: "0.00", // No backend endpoint found for this, setting to "0.00"
+    tasksDue: 0, // No backend endpoint found for this, setting to 0
+    approvedQuotations,
+    approvedInvoices,
+    lostLeads,
+  };
 };
 
 export const fetchRecentActivities = async (): Promise<RecentActivity[]> => {

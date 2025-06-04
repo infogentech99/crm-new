@@ -19,13 +19,14 @@ import {
   SelectValue,
 } from '@components/ui/select';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
-import { useSelector } from 'react-redux'; // Import useSelector
-import { RootState } from '@store/store'; // Import RootState
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/store'; 
 
 const ManageLeadsPage: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
@@ -78,6 +79,11 @@ const ManageLeadsPage: React.FC = () => {
     setPage(1); // Reset to first page on filter change
   };
 
+  const handleLimitChange = (value: string) => {
+    setLimit(Number(value));
+    setPage(1); // Reset to first page on limit change
+  };
+
   const statusOptions = [
     { value: 'all', label: 'All Status' }, // Changed from '' to 'all'
     { value: 'pending_approval', label: 'Pending Approval' },
@@ -122,6 +128,17 @@ const ManageLeadsPage: React.FC = () => {
                   {option.label}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          <Select onValueChange={handleLimitChange} value={String(limit)}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="Limit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
             </SelectContent>
           </Select>
         </div>

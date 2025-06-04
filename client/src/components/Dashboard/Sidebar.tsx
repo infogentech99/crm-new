@@ -55,7 +55,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-64 bg-gray-800 text-white flex flex-col p-4 shadow-lg">
+    <div className="w-84 bg-gray-800 text-white flex flex-col p-4 shadow-lg">
       <div className="text-2xl font-bold mb-8 text-center">CRM App</div> {/* Placeholder for logo/app name */}
       
       <nav className="flex-1">
