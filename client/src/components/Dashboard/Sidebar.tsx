@@ -102,10 +102,10 @@ export default function Sidebar() {
             isActive={pathname === '/dashboard/invoices'}
           />
           <NavItem
-            href="/dashboard/deals-bill"
+            href="/dashboard/bills"
             icon={<ListChecks size={20} />} 
             label="Deals Bill"
-            isActive={pathname === '/dashboard/deals-bill'}
+            isActive={pathname === '/dashboard/bills'}
           />
           <NavItem
             href="/dashboard/transactions"
