@@ -22,5 +22,4 @@ router
   .patch(protect, authorize(['superadmin','admin', 'manager']), updateMeeting) // Add authorize
   .delete(protect, authorize(['superadmin','admin', 'manager']), deleteMeeting); // Add authorize
 
-
 export default router;

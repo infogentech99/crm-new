@@ -67,6 +67,19 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface Transaction {
+  _id: string;
+  type: 'Credit' | 'Debit';
+  amount: number;
+  date: string; // ISO date string
+  description: string;
+  relatedInvoice?: string; // Optional: ID of related invoice
+  relatedBill?: string; // Optional: ID of related bill
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Meeting {
   _id: string;
   title: string;
