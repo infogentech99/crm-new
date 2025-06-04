@@ -7,24 +7,42 @@ import { addToken } from "@store/slices/tokenSlice";
 import { addUser } from "@store/slices/userSlice";
 import { toast } from "sonner";
 import AuthCelebration from "@components/Common/AuthCelebration";
+import { useMutation } from "@tanstack/react-query";
+import { Input } from "@components/ui/input";
+import { Button } from "@components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+const formSchema = z.object({
+  email: z.string().email({ message: "Invalid email address." }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+});
 
 export default function LoginForm() {
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
   const [showCelebration, setShowCelebration] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-    try {
-      const data = await loginUser(form);
+  const loginMutation = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
       const { id, name, email, role } = data.user;
       dispatch(
         addUser({
@@ -40,17 +58,19 @@ export default function LoginForm() {
       setShowCelebration(true);
       toast.success("Login successful!");
       router.push("/dashboard");
-    } catch (err: unknown) {
-      setError((err as Error).message || "Login failed");
-      toast.error((err as Error).message || "Login failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Login failed. Please try again.");
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    loginMutation.mutate(values);
   };
 
   return (
     <div
-      className="flex min-h-screen items-center  justify-between bg-gradient-to-br from-blue-100 to-blue-300"
+      className="flex min-h-screen items-center justify-between bg-gradient-to-br from-blue-100 to-blue-300"
     >
       <div className="hidden lg:flex flex-col items-center justify-center p-4 w-1/2">
         <img
@@ -60,11 +80,8 @@ export default function LoginForm() {
         />
       </div>
       <div
-        className="flex flex-col justify-center p-8 md:p-24 min-h-screen w-full lg:w-1/2 bg-white rounded-tl-[120px] shadow-lg"
-        style={{
-          maxWidth: "700px",
-          backgroundColor: "#d9f5ff", // Keeping original color for now, can convert to Tailwind later
-        }}
+        className="flex flex-col justify-center p-8 md:p-24 min-h-screen w-full lg:w-1/2 bg-blue-50 rounded-tl-[120px] shadow-lg"
+        style={{ maxWidth: "700px" }}
       >
         <div className="text-center mb-10">
           <img
@@ -79,56 +96,57 @@ export default function LoginForm() {
           Please enter your credentials to log in to your account.
         </p>
 
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span className="block sm:inline">{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
-            <input
-              type="email"
-              id="email"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
               name="email"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="name@example.com"
-              value={form.email}
-              onChange={handleChange}
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email address</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="name@example.com"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              id="password"
+            <FormField
+              control={form.control}
               name="password"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="******"
-              value={form.password}
-              onChange={handleChange}
-              required
-              minLength={6}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="******"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            disabled={isLoading}
-          >
-            {isLoading && (
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            )}
-            {isLoading ? "Logging in…" : "Login"}
-          </button>
-        </form>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending && (
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              )}
+              {loginMutation.isPending ? "Logging in…" : "Login"}
+            </Button>
+          </form>
+        </Form>
       </div>
       {showCelebration && (
         <AuthCelebration

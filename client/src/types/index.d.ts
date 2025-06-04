@@ -38,6 +38,27 @@ export interface User {
 export interface Lead {
   _id: string;
   name: string;
-  company: string;
+  email: string;
+  phone: string;
+  createdBy: string; // Assuming this will be the user ID string
+  company?: string;
+  jobTitle?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  zipCode?: string;
+  website?: string;
+  linkedIn?: string;
+  source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
+  industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
+  notes?: string;
+  status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
+  gstin?: string;
+  bestTimeToCall?: string;
+  callResponse?: 'Picked' | 'Not Response' | 'Talk to later';
+  denialReason?: string;
+  remark?: string;
   createdAt: string;
+  updatedAt: string;
 }

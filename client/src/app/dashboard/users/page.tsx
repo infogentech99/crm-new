@@ -4,17 +4,13 @@ import React, { useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchUsers } from '@services/userService';
 import DataTable from '@components/Common/DataTable';
-import { useSelector } from 'react-redux';
-import { RootState } from '@store/store';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import CreateUserButton from '@components/Common/CreateUserButton';
 import { manageUsersConfig } from '@config/manageUsersConfig';
 import Modal from '@components/Common/Modal';
 import { User } from '@customTypes/index';
 
-interface ManageUsersPageProps {}
-
-const ManageUsersPage: React.FC<ManageUsersPageProps> = () => {
+const ManageUsersPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
