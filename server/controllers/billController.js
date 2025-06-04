@@ -20,12 +20,34 @@ export const genrate = async (req, res) => {
 
 export const getAllBills = async (req, res) => {
   try {
-    const bills = await Bill.find({});
-    if (!bills || bills.length === 0) {
-      return res.status(404).json({ error: 'No bills found' });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { billNumber: { $regex: search, $options: 'i' } }, // Assuming billNumber exists
+        { vendorName: { $regex: search, $options: 'i' } }, // Assuming vendorName exists
+        { description: { $regex: search, $options: 'i' } },
+      ];
     }
-    res.json(bills);
+
+    const total = await Bill.countDocuments(query);
+    const bills = await Bill.find(query)
+      .sort('-createdAt')
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.status(200).json({
+      bills,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalBills: total,
+    });
   } catch (err) {
+    console.error('getAllBills error:', err);
     res.status(500).json({ error: 'Failed to fetch bills' });
   }
 };
