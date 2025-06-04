@@ -9,11 +9,34 @@ export const createContact = async (req, res, next) => {
   }
 };
 
-// Get All Contacts
+// GET Contacts (with search and pagination)
 export const getContacts = async (req, res, next) => {
   try {
-    const contacts = await Contact.find().sort('-createdAt');
-    res.status(200).json({ success: true, count: contacts.length, data: contacts });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const total = await Contact.countDocuments(query);
+    const contacts = await Contact.find(query)
+      .sort('-createdAt')
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.status(200).json({
+      contacts,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalContacts: total, // Renamed from 'count' to 'totalContacts' for consistency with leads
+    });
   } catch (err) {
     next(err);
   }
