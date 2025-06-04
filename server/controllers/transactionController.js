@@ -50,10 +50,71 @@ export const getTransactionsByInvoice = async (req, res, next) => {
 
 
 export const listTransactions = async (req, res, next) => {
-    try {
-      const txns = await Transaction.find().populate('invoice').populate('user').sort('-createdAt');
-      res.json(txns);
-    } catch (err) {
-      next(err);
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { description: { $regex: search, $options: 'i' } },
+        { type: { $regex: search, $options: 'i' } },
+      ];
     }
-  };
+
+    const total = await Transaction.countDocuments(query);
+    const txns = await Transaction.find(query)
+      .populate({ path: 'invoice', select: '_id invoiceNumber' }) // Populate invoice with _id and invoiceNumber
+      .populate({ path: 'user', select: 'name email' }) // Populate user with name and email
+      .sort('-createdAt')
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.status(200).json({
+      transactions: txns,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalTransactions: total,
+    });
+  } catch (err) {
+    console.error('listTransactions error:', err);
+    next(err);
+  }
+};
+
+export const getTransaction = async (req, res, next) => {
+  try {
+    const txn = await Transaction.findById(req.params.id)
+      .populate({ path: 'invoice', select: '_id invoiceNumber' })
+      .populate({ path: 'user', select: 'name email' });
+    if (!txn) return res.status(404).json({ success: false, message: 'Transaction not found' });
+    res.status(200).json({ success: true, data: txn });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateTransaction = async (req, res, next) => {
+  try {
+    const txn = await Transaction.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+    if (!txn) return res.status(404).json({ success: false, message: 'Transaction not found' });
+    res.status(200).json({ success: true, data: txn });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteTransaction = async (req, res, next) => {
+  try {
+    const txn = await Transaction.findByIdAndDelete(req.params.id);
+    if (!txn) return res.status(404).json({ success: false, message: 'Transaction not found' });
+    res.status(200).json({ success: true, message: 'Transaction deleted' });
+  } catch (err) {
+    next(err);
+  }
+};
