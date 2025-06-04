@@ -1,16 +1,14 @@
 "use client";
 
 import React, { useCallback, useState } from 'react';
-// Added this comment to trigger re-evaluation
 import { useQuery } from '@tanstack/react-query';
-import { getContacts } from '@services/contactService'; // Will create this service
+import { getContacts } from '@services/contactService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import CreateContactButton from '@components/Common/CreateContactButton'; // Will create this component
-import { manageContactsConfig } from '@config/manageContactsConfig'; // Will create this config
+import CreateContactButton from '@components/Common/CreateContactButton';
+import { manageContactsConfig } from '@config/manageContactsConfig';
 import Modal from '@components/Common/Modal';
-import { Contact } from '@customTypes/index'; // Use Contact interface
-// import ContactSummaryCards from '@components/Contacts/ContactSummaryCards'; // Will create this component
+import { Contact } from '@customTypes/index';
 import { Input } from '@components/ui/input';
 import {
   Select,
@@ -58,6 +56,7 @@ const ManageContactsPage: React.FC = () => {
     queryFn: () => getContacts(page, limit, search), // Removed statusFilter from queryFn
   });
 
+
   const contacts = data?.contacts || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
@@ -80,12 +79,10 @@ const ManageContactsPage: React.FC = () => {
     setPage(1); // Reset to first page on limit change
   };
 
-  // Removed statusOptions as contacts typically don't have complex statuses
 
   return (
     <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
-        {/* <ContactSummaryCards /> Add the summary cards here */}
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
           <CreateContactButton onClick={config.createContactButtonAction} />
