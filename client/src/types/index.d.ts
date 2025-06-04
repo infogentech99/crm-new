@@ -67,6 +67,19 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface Deal {
+  _id: string;
+  dealName: string;
+  amount: number;
+  stage: 'Prospecting' | 'Qualification' | 'Proposal' | 'Negotiation' | 'Closed Won' | 'Closed Lost';
+  closeDate: string; // ISO date string
+  contactPerson?: string | Contact | Lead; // Can be Contact/Lead ID or populated object
+  company?: string;
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Invoice {
   _id: string;
   invoiceNumber: string;
