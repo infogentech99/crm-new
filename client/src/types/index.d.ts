@@ -75,3 +75,26 @@ export interface Contact {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface QuotationItem {
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface Quotation {
+  _id: string;
+  quotationNumber: string;
+  clientName: string;
+  clientEmail: string;
+  items: QuotationItem[];
+  totalAmount: number;
+  status: 'Draft' | 'Sent' | 'Approved' | 'Rejected' | 'Expired';
+  issueDate: string; // ISO date string
+  validUntil: string; // ISO date string
+  createdBy: string | User; // User ID or populated User object
+  createdAt: string;
+  updatedAt: string;
+}

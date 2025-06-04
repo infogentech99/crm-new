@@ -17,7 +17,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import leadImportRoutes from './routes/leadImport.js';
 import meetingRoutes from './routes/meetingRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
-import newQuotationRoutes from './routes/newQuotationRoutes.js';
+import quotationRoutes from './routes/quotationRoutes.js';
 import BillRoutes from './routes/billRoutes.js';
 import EmailRoutes from './routes/emailRoutes.js';
 import EmailUserRoutes from './routes/EmailUserRoutes.js';
@@ -68,7 +68,7 @@ app.use('/api/leads', leadImportRoutes);
 app.use('/api/meetings', meetingRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/quotations', newQuotationRoutes);
+app.use('/api/quotations', quotationRoutes);
 app.use('/api/invoice', invoiceRoutes);
 app.use('/api/bills', BillRoutes);
 app.use('/api', EmailRoutes);
@@ -80,4 +80,3 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log('Allowed CORS origins:', allowedOrigins);
 });
-
