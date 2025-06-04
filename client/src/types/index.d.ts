@@ -35,8 +35,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
-  phone?: string; // Added phone property
-  // Add other user properties if needed from the backend response
+  phone?: string;
 }
 
 export interface Lead {
