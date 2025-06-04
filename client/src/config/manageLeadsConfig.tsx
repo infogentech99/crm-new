@@ -6,10 +6,12 @@ export const manageLeadsConfig = (
   handleViewLead: (lead: Lead) => void,
   handleEditLead: (lead: Lead) => void,
   handleDeleteLead: (lead: Lead) => void,
-  userRole: string // Add userRole parameter
+  userRole: string, // Add userRole parameter
+  currentPage: number, // Add currentPage parameter
+  limit: number // Add limit parameter
 ) => {
   const baseColumns = [
-    { key: '_id', label: 'S.NO', render: (item: Lead, index?: number) => <span>{index !== undefined ? index + 1 : ''}</span> },
+    { key: '_id', label: 'S.NO', render: (item: Lead, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'name', label: 'NAME' },
     { key: 'company', label: 'COMPANY' },
     {

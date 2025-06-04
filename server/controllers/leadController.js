@@ -48,9 +48,9 @@ export const getLeads = async (req, res) => {
 
     res.status(200).json({
       leads,
-      page,
-      pages: Math.ceil(total / limit),
-      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalLeads: total,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

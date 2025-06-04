@@ -26,7 +26,6 @@ const ManageLeadsPage: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
@@ -52,8 +51,6 @@ const ManageLeadsPage: React.FC = () => {
     // Implement actual delete logic here
   }, []);
 
-  const config = manageLeadsConfig(handleViewLead, handleEditLead, handleDeleteLead, userRole); // Pass userRole
-
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['leads', page, limit, search, statusFilter],
     queryFn: () => getLeads(page, limit, search, statusFilter),
@@ -62,6 +59,8 @@ const ManageLeadsPage: React.FC = () => {
   const leads = data?.leads || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
+
+  const config = manageLeadsConfig(handleViewLead, handleEditLead, handleDeleteLead, userRole, currentPage, limit); // Pass userRole, currentPage, and limit
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
