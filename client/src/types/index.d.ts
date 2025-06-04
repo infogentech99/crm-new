@@ -66,6 +66,22 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface Invoice {
+  _id: string;
+  invoiceNumber: string;
+  clientName: string;
+  clientEmail: string;
+  items: QuotationItem[]; // Reusing QuotationItem for consistency
+  totalAmount: number;
+  status: 'Pending' | 'Paid' | 'Overdue' | 'Cancelled';
+  issueDate: string; // ISO date string
+  dueDate: string; // ISO date string
+  relatedQuotation?: string; // Optional: ID of the related quotation
+  createdBy: string | User; // User ID or populated User object
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Contact {
   _id: string;
   name: string;
