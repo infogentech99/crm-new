@@ -7,7 +7,7 @@ interface DataTableProps {
   columns: {
     key: string;
     label: string;
-    render?: (item: User) => React.ReactNode; // Optional rendering function for custom content
+    render?: (item: User, index?: number) => React.ReactNode; // Optional rendering function for custom content
   }[];
   data: User[];
   isLoading: boolean;
@@ -37,15 +37,15 @@ const DataTable: React.FC<DataTableProps> = ({ columns, data, isLoading, error }
   }
 
   return (
-    <div className="bg-white bg-opacity-70 backdrop-blur-md p-6 rounded-lg shadow-md overflow-x-auto">
+    <div className="bg-white bg-opacity-50 backdrop-blur-md p-6 rounded-lg shadow-md overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-100">
+        <thead className="bg-gray-50">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider"
               >
                 {column.label}
               </th>
@@ -53,14 +53,14 @@ const DataTable: React.FC<DataTableProps> = ({ columns, data, isLoading, error }
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((item) => (
-            <tr key={item._id} className="hover:bg-gray-50 transition-colors duration-150">
+          {data.map((item, i) => (
+            <tr key={item._id} className="hover:bg-gray-100 transition-colors duration-200">
               {columns.map((column) => (
                 <td
                   key={`${item._id}-${column.key}`}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
                 >
-                  {column.render ? column.render(item) : item[column.key as keyof User]}
+                  {column.render ? column.render(item, i) : item[column.key as keyof User]}
                 </td>
               ))}
             </tr>
