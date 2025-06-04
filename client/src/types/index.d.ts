@@ -35,6 +35,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
+  phone?: string; // Added phone property
   // Add other user properties if needed from the backend response
 }
 
@@ -43,7 +44,7 @@ export interface Lead {
   name: string;
   email: string;
   phone: string;
-  createdBy: string | User; // Can be user ID string or populated User object
+  createdBy: string | User;
   company?: string;
   jobTitle?: string;
   address?: string;
@@ -71,8 +72,10 @@ export interface Invoice {
   invoiceNumber: string;
   clientName: string;
   clientEmail: string;
+  clientPhone?: string; // Added for contact column
   items: QuotationItem[]; // Reusing QuotationItem for consistency
   totalAmount: number;
+  paidAmount?: number; // Added for due amount calculation
   status: 'Pending' | 'Paid' | 'Overdue' | 'Cancelled';
   issueDate: string; // ISO date string
   dueDate: string; // ISO date string
@@ -80,6 +83,13 @@ export interface Invoice {
   createdBy: string | User; // User ID or populated User object
   createdAt: string;
   updatedAt: string;
+  // Add the populated user and totals objects
+  user: User; // Assuming the populated user will conform to the User interface
+  totals: {
+    taxable: number;
+    igst: number;
+    total: number;
+  };
 }
 
 export interface Contact {
