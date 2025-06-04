@@ -1,5 +1,5 @@
 import { Meeting } from '@customTypes/index';
-import { Eye, Trash2, Pencil } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react';
 import React from 'react';
 
 export const manageMeetingsConfig = (
