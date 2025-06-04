@@ -50,7 +50,7 @@ export default function LoginForm() {
 
   return (
     <div
-      className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300 p-4"
+      className="flex min-h-screen items-center  justify-between bg-gradient-to-br from-blue-100 to-blue-300"
     >
       <div className="hidden lg:flex flex-col items-center justify-center p-4 w-1/2">
         <img
