@@ -67,6 +67,20 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface Bill {
+  _id: string;
+  billNumber: string;
+  vendorName: string;
+  amount: number;
+  status: 'Pending' | 'Paid' | 'Due' | 'Overdue';
+  issueDate: string; // ISO date string
+  dueDate: string; // ISO date string
+  items?: QuotationItem[]; // Optional items, reusing QuotationItem
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Deal {
   _id: string;
   dealName: string;
