@@ -120,10 +120,10 @@ export default function Sidebar() {
             isActive={pathname === '/dashboard/meetings'}
           />
           <NavItem
-            href="/dashboard/task-assigning"
+            href="/dashboard/tasks"
             icon={<ListChecks size={20} />}
             label="Task Assigning"
-            isActive={pathname === '/dashboard/task-assigning'}
+            isActive={pathname === '/dashboard/tasks'}
           />
         </ul>
       </nav>
