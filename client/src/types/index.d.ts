@@ -18,6 +18,9 @@ export interface DashboardSummary {
   newContacts: number;
   openDeals: string; 
   tasksDue: number;
+  approvedQuotations: number;
+  approvedInvoices: number;
+  lostLeads: number;
 }
 
 export interface RecentActivity {
@@ -40,7 +43,7 @@ export interface Lead {
   name: string;
   email: string;
   phone: string;
-  createdBy: string; // Assuming this will be the user ID string
+  createdBy: string | User; // Can be user ID string or populated User object
   company?: string;
   jobTitle?: string;
   address?: string;

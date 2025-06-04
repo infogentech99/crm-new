@@ -1,0 +1,187 @@
+"use client";
+
+import React, { useCallback, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getLeads } from '@services/leadService';
+import DataTable from '@components/Common/DataTable';
+import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import CreateLeadButton from '@components/Common/CreateLeadButton';
+import { manageLeadsConfig } from '@config/manageLeadsConfig';
+import Modal from '@components/Common/Modal';
+import { Lead } from '@customTypes/index';
+import LeadSummaryCards from '@components/Leads/LeadSummaryCards';
+import { Input } from '@components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
+import { useSelector } from 'react-redux'; // Import useSelector
+import { RootState } from '@store/store'; // Import RootState
+
+const ManageLeadsPage: React.FC = () => {
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const userRole = useSelector((state: RootState) => state.user.role || ''); // Get user role from Redux, provide default empty string
+
+  const handleViewLead = useCallback((lead: Lead) => {
+    setSelectedLead(lead);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedLead(null);
+  };
+
+  const handleEditLead = useCallback((lead: Lead) => {
+    alert(`Edit lead: ${lead.name}`);
+    // Implement actual edit logic here
+  }, []);
+
+  const handleDeleteLead = useCallback((lead: Lead) => {
+    alert(`Delete lead: ${lead.name}`);
+    // Implement actual delete logic here
+  }, []);
+
+  const config = manageLeadsConfig(handleViewLead, handleEditLead, handleDeleteLead, userRole); // Pass userRole
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['leads', page, limit, search, statusFilter],
+    queryFn: () => getLeads(page, limit, search, statusFilter),
+  });
+
+  const leads = data?.leads || [];
+  const totalPages = data?.totalPages || 1;
+  const currentPage = data?.currentPage || 1;
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+    setPage(1); // Reset to first page on search
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setPage(1); // Reset to first page on filter change
+  };
+
+  const statusOptions = [
+    { value: 'all', label: 'All Status' }, // Changed from '' to 'all'
+    { value: 'pending_approval', label: 'Pending Approval' },
+    { value: 'denied', label: 'Denied' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'quotation_submitted', label: 'Quotation Submitted' },
+    { value: 'quotation_rejected', label: 'Quotation Rejected' },
+    { value: 'quotation_approved', label: 'Quotation Approved' },
+    { value: 'invoice_issued', label: 'Invoice Issued' },
+    { value: 'invoice_accepted', label: 'Invoice Accepted' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'processing_payments', label: 'Processing Payments' },
+    { value: 'new', label: 'New' },
+    { value: 'contacted', label: 'Contacted' },
+    { value: 'qualified', label: 'Qualified' },
+    { value: 'lost', label: 'Lost' },
+  ];
+
+  return (
+    <DashboardLayout>
+      <div className="p-6 rounded-lg shadow-md bg-white">
+        <LeadSummaryCards /> {/* Add the summary cards here */}
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
+          <CreateLeadButton onClick={config.createLeadButtonAction} />
+        </div>
+
+        <div className="flex items-center justify-between mb-4 space-x-4">
+          <Input
+            placeholder="Search by name..."
+            value={search}
+            onChange={handleSearchChange}
+            className="max-w-sm"
+          />
+          <Select onValueChange={handleStatusFilterChange} value={statusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <DataTable
+          columns={config.tableColumns}
+          data={leads}
+          isLoading={isLoading}
+          error={isError ? error?.message || 'Unknown error' : null}
+        />
+
+        <div className="mt-4 flex justify-end">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <PaginationItem key={i}>
+                  <PaginationLink
+                    href="#"
+                    onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(i + 1); }}
+                    isActive={currentPage === i + 1}
+                  >
+                    {i + 1}
+                  </PaginationLink>
+              </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
+                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+
+        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+          {selectedLead && (
+            <div className="p-4">
+              <h2 className="text-xl font-semibold mb-2">Lead Details</h2>
+              <p>Name: {selectedLead.name}</p>
+              <p>Email: {selectedLead.email}</p>
+              <p>Phone: {selectedLead.phone}</p>
+              <p>Company: {selectedLead.company}</p>
+              <p>Status: {selectedLead.status}</p>
+              {/* Add more lead details as needed */}
+            </div>
+          )}
+        </Modal>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default ManageLeadsPage;

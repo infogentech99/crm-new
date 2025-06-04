@@ -1,23 +1,24 @@
 "use client";
 
 import React from 'react';
-import { User } from '@customTypes/index'; // Assuming User type
+import { cn } from "@lib/utils"; // Import cn
 
-interface DataTableProps {
+interface DataTableProps<T extends { _id: string }> { // T must have an _id for keying
   columns: {
     key: string;
     label: string;
-    render?: (item: User, index?: number) => React.ReactNode; // Optional rendering function for custom content
+    render?: (item: T, index?: number) => React.ReactNode; // Optional rendering function for custom content
   }[];
-  data: User[];
+  data: T[];
   isLoading: boolean;
   error: string | null;
+  className?: string; // Allow custom classNames
 }
 
-const DataTable: React.FC<DataTableProps> = ({ columns, data, isLoading, error }) => {
+const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error, className }: DataTableProps<T> ) => {
   if (isLoading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md animate-pulse">
+      <div className={cn("p-6 rounded-lg shadow-md animate-pulse", className)}>
         <h2 className="text-xl font-semibold text-gray-800 mb-4 h-6 bg-gray-200 w-1/2"></h2>
         <div className="space-y-2">
           {[...Array(5)].map((_, i) => (
@@ -30,37 +31,41 @@ const DataTable: React.FC<DataTableProps> = ({ columns, data, isLoading, error }
 
   if (error) {
     return (
-      <div className="text-red-500 text-center bg-white p-6 rounded-lg shadow-md">
+      <div className={cn("text-red-500 text-center p-6 rounded-lg shadow-md", className)}>
         Error loading data: {error}
       </div>
     );
   }
 
   return (
-    <div className="bg-white bg-opacity-50 backdrop-blur-md p-6 rounded-lg shadow-md overflow-x-auto">
+    <div className={cn(
+      "relative overflow-x-auto rounded-lg shadow-lg",
+      "bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-opacity-30 border-white", // Glassmorphism effect
+      className
+    )}>
       <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+        <thead className="bg-gray-50 bg-opacity-30">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
                 scope="col"
-                className="px-6 py-3 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider"
               >
                 {column.label}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="divide-y divide-gray-200">
           {data.map((item, i) => (
-            <tr key={item._id} className="hover:bg-gray-100 transition-colors duration-200">
+            <tr key={item._id} className="bg-white bg-opacity-50 hover:bg-opacity-70 transition-colors duration-200">
               {columns.map((column) => (
                 <td
                   key={`${item._id}-${column.key}`}
                   className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
                 >
-                  {column.render ? column.render(item, i) : item[column.key as keyof User]}
+                  {column.render ? column.render(item, i) : (item[column.key as keyof T] as React.ReactNode)}
                 </td>
               ))}
             </tr>

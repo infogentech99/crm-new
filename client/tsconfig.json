@@ -31,7 +31,8 @@
       "@theme/*": ["./src/theme/*"],
       "@src/*": ["./src/*"],
       "@public/*": ["./public/*"],
-      "@config/*": ["./src/config/*"]
+      "@config/*": ["./src/config/*"],
+      "@lib/*": ["./src/lib/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/types/**/*.d.ts"],
