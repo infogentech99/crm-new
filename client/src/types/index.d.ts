@@ -66,6 +66,18 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface Task {
+  _id: string;
+  title: string;
+  dueDate: string; // ISO date string
+  priority: 'High' | 'Medium' | 'Low';
+  assignee?: string | User; // User ID or populated User object
+  status: 'Pending' | 'Completed' | 'In Progress';
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Transaction {
   _id: string;
   type: 'Credit' | 'Debit';
