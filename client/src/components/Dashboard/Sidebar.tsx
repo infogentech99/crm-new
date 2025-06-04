@@ -8,7 +8,7 @@ import { removeToken } from '@store/slices/tokenSlice';
 import { removeUser } from '@store/slices/userSlice';
 import { useRouter } from 'next/navigation';
 
-// Import icons from lucide-react
+
 import {
   LayoutDashboard,
   Users,
@@ -55,8 +55,8 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-84 bg-gray-800 text-white flex flex-col p-4 shadow-lg">
-      <div className="text-2xl font-bold mb-8 text-center">CRM App</div> {/* Placeholder for logo/app name */}
+   <div className="fixed top-0 left-0 h-screen w-64 bg-gray-800 text-white flex flex-col p-4 shadow-lg z-50">
+      <div className="text-2xl font-bold mb-8 text-center">CRM App</div> 
       
       <nav className="flex-1">
         <h3 className="text-xs font-semibold uppercase text-gray-400 mb-4">GENERAL</h3>
