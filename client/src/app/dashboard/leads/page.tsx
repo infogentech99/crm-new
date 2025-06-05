@@ -1,13 +1,15 @@
+// File: src/pages/leads/ManageLeadsPage.tsx
 "use client";
 
 import React, { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getLeads } from '@services/leadService';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { getLeads, deleteLead } from '@services/leadService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import CreateLeadButton from '@components/Common/CreateLeadButton';
 import { manageLeadsConfig } from '@config/manageLeadsConfig';
 import { Lead } from '@customTypes/index';
+import DeleteModal from '@components/Common/DeleteModal';
 import LeadSummaryCards from '@components/Leads/LeadSummaryCards';
 import { Input } from '@components/ui/input';
 import {
@@ -17,60 +19,89 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import LeadForm from '@components/Leads/Leadform';
 import Modal from '@components/Common/Modal';
 
 const ManageLeadsPage: React.FC = () => {
+  const queryClient = useQueryClient();
+
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const userRole = useSelector((state: RootState) => state.user.role || ''); // Get user role from Redux, provide default empty string
+  const userRole = useSelector((state: RootState) => state.user.role || '');
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["leads", page, limit, search, statusFilter],
+    queryFn: () => getLeads(page, limit, search, statusFilter),
+  });
+
+  const leads = data?.leads || [];
+  const totalPages = data?.totalPages || 1;
+  const currentPage = data?.currentPage || 1;
 
   const handleViewLead = useCallback((lead: Lead) => {
     setSelectedLead(lead);
     setIsModalOpen(true);
   }, []);
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleEditLead = useCallback((lead: Lead) => {
+    setSelectedLead(lead);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCreateLead = () => {
     setSelectedLead(null);
+    setIsModalOpen(true);
   };
 
-// In `handleEditLead`:
-const handleEditLead = useCallback((lead: Lead) => {
-  setSelectedLead(lead);
-  setIsModalOpen(true);
-}, []);
+  const handleDeleteLead = useCallback((lead: Lead) => {
+    setLeadToDelete(lead);
+    setIsDeleteModalOpen(true);
+  }, []);
 
-const handleCreateLead = () => {
-  setSelectedLead(null);
-  setIsModalOpen(true);
-};
+ 
+   const handleConfirmDelete = async () => {
+    if (!leadToDelete) return;
 
-const handleDeleteLead = useCallback((lead: Lead) => {
-  alert(`Delete lead: ${lead.name}`);
-  // Implement actual delete logic here
-}, []);
+    try {
+      // Use _id instead of id
+      await deleteLead(leadToDelete._id);
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+    } catch (err) {
+      console.error("Failed to delete lead:", err);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setLeadToDelete(null);
+    }
+  };
 
-const { data, isLoading, isError, error } = useQuery({
-  queryKey: ['leads', page, limit, search, statusFilter],
-  queryFn: () => getLeads(page, limit, search, statusFilter),
-});
-
-const leads = data?.leads || [];
-const totalPages = data?.totalPages || 1;
-const currentPage = data?.currentPage || 1;
-// Pass userRole, currentPage, and limit
-
-const config = manageLeadsConfig(handleViewLead, handleEditLead, handleDeleteLead, userRole, currentPage, limit);
-config.createLeadButtonAction = handleCreateLead;
+  const config = manageLeadsConfig(
+    handleViewLead,
+    handleEditLead,
+    handleDeleteLead,
+    userRole,
+    currentPage,
+    limit
+  );
+  config.createLeadButtonAction = handleCreateLead;
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -80,17 +111,17 @@ config.createLeadButtonAction = handleCreateLead;
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); // Reset to first page on search
+    setPage(1);
   };
 
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value);
-    setPage(1); // Reset to first page on filter change
+    setPage(1);
   };
 
   const handleLimitChange = (value: string) => {
     setLimit(Number(value));
-    setPage(1); // Reset to first page on limit change
+    setPage(1);
   };
 
   const statusOptions = [
@@ -111,12 +142,16 @@ config.createLeadButtonAction = handleCreateLead;
     { value: 'lost', label: 'Lost' },
   ];
 
+
   return (
     <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
-        <LeadSummaryCards /> {/* Add the summary cards here */}
+        <LeadSummaryCards />
+
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            {config.pageTitle}
+          </h1>
           <CreateLeadButton onClick={config.createLeadButtonAction} />
         </div>
 
@@ -156,7 +191,7 @@ config.createLeadButtonAction = handleCreateLead;
           columns={config.tableColumns}
           data={leads}
           isLoading={isLoading}
-          error={isError ? error?.message || 'Unknown error' : null}
+           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
@@ -173,7 +208,7 @@ config.createLeadButtonAction = handleCreateLead;
                 <PaginationItem key={i}>
                   <PaginationLink
                     href="#"
-                    onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(i + 1); }}
+                     onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(i + 1); }}
                     isActive={currentPage === i + 1}
                   >
                     {i + 1}
@@ -183,22 +218,33 @@ config.createLeadButtonAction = handleCreateLead;
               <PaginationItem>
                 <PaginationNext
                   href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
+                   onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
                   className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
                 />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
         </div>
+   
+        <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
+          <LeadForm
+            initialData={selectedLead || undefined}
+            mode={selectedLead ? "edit" : "create"}
+            onClose={() => { setIsModalOpen(false); setSelectedLead(null); }}
+          />
+        </Modal>
 
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} widthClass="max-w-3xl">
-  <LeadForm
-    initialData={selectedLead || undefined}
-    mode={selectedLead ? "edit" : "create"}
-    onClose={handleCloseModal}
-  />
-</Modal>
-
+        {leadToDelete && (
+          <DeleteModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => {
+              setIsDeleteModalOpen(false);
+              setLeadToDelete(null);
+            }}
+            onConfirm={handleConfirmDelete}
+            itemLabel={leadToDelete.name}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
