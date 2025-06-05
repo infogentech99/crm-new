@@ -2,13 +2,13 @@
 
 import React, { useCallback, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getContacts } from '@services/contactService';
+import { getDeals } from '@services/dealService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import CreateContactButton from '@components/Common/CreateContactButton';
-import { manageContactsConfig } from '@config/manageContactsConfig';
+import CreateDealButton from '@components/Common/CreateDealButton';
+import { manageDealsConfig } from '@config/manageDealsConfig';
 import Modal from '@components/Common/Modal';
-import { Contact } from '@customTypes/index';
+import { Deal } from '@customTypes/index';
 import { Input } from '@components/ui/input';
 import {
   Select,
@@ -21,47 +21,45 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 
-const ManageContactsPage: React.FC = () => {
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+const ManageDealsPage: React.FC = () => {
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
-  // Removed statusFilter as contacts typically don't have complex statuses like leads
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
-  const handleViewContact = useCallback((contact: Contact) => {
-    setSelectedContact(contact);
+  const handleViewDeal = useCallback((deal: Deal) => {
+    setSelectedDeal(deal);
     setIsModalOpen(true);
   }, []);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedContact(null);
+    setSelectedDeal(null);
   };
 
-  const handleEditContact = useCallback((contact: Contact) => {
-    alert(`Edit contact: ${contact.name}`);
+  const handleEditDeal = useCallback((deal: Deal) => {
+    alert(`Edit deal: ${deal.dealName}`);
     // Implement actual edit logic here
   }, []);
 
-  const handleDeleteContact = useCallback((contact: Contact) => {
-    alert(`Delete contact: ${contact.name}`);
+  const handleDeleteDeal = useCallback((deal: Deal) => {
+    alert(`Delete deal: ${deal.dealName}`);
     // Implement actual delete logic here
   }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['contacts', page, limit, search], // Removed statusFilter from queryKey
-    queryFn: () => getContacts(page, limit, search), // Removed statusFilter from queryFn
+    queryKey: ['deals', page, limit, search],
+    queryFn: () => getDeals(page, limit, search),
   });
 
-
-  const contacts = data?.contacts || [];
+  const deals = data?.deals || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
 
-  const config = manageContactsConfig(handleViewContact, handleEditContact, handleDeleteContact, userRole, currentPage, limit); // Pass userRole, currentPage, and limit
+  const config = manageDealsConfig(handleViewDeal, handleEditDeal, handleDeleteDeal, userRole, currentPage, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -79,23 +77,21 @@ const ManageContactsPage: React.FC = () => {
     setPage(1); // Reset to first page on limit change
   };
 
-
   return (
     <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
-          <CreateContactButton onClick={config.createContactButtonAction} />
+          <CreateDealButton onClick={config.createDealButtonAction} />
         </div>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
           <Input
-            placeholder="Search by name or email..."
+            placeholder="Search by deal name or company..."
             value={search}
             onChange={handleSearchChange}
             className="max-w-sm"
           />
-          {/* Removed status filter select */}
           <Select onValueChange={handleLimitChange} value={String(limit)}>
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Limit" />
@@ -111,7 +107,7 @@ const ManageContactsPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={contacts}
+          data={deals}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
@@ -149,14 +145,16 @@ const ManageContactsPage: React.FC = () => {
         </div>
 
         <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-          {selectedContact && (
+          {selectedDeal && (
             <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Contact Details</h2>
-              <p>Name: {selectedContact.name}</p>
-              <p>Email: {selectedContact.email}</p>
-              <p>Phone: {selectedContact.phone}</p>
-              <p>Company: {selectedContact.company}</p>
-              {/* Add more contact details as needed */}
+              <h2 className="text-xl font-semibold mb-2">Deal Details</h2>
+              <p>Deal Name: {selectedDeal.dealName}</p>
+              <p>Amount: ${selectedDeal.amount.toFixed(2)}</p>
+              <p>Stage: {selectedDeal.stage}</p>
+              <p>Close Date: {new Date(selectedDeal.closeDate).toLocaleDateString()}</p>
+              <p>Company: {selectedDeal.company || 'N/A'}</p>
+              <p>Contact Person: {typeof selectedDeal.contactPerson === 'object' ? selectedDeal.contactPerson.name : selectedDeal.contactPerson || 'N/A'}</p>
+              {/* Add more deal details as needed */}
             </div>
           )}
         </Modal>
@@ -165,4 +163,4 @@ const ManageContactsPage: React.FC = () => {
   );
 };
 
-export default ManageContactsPage;
+export default ManageDealsPage;

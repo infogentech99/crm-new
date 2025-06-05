@@ -6,23 +6,20 @@ import {
   updateMeeting,
   deleteMeeting,
 } from '../controllers/meetingController.js';
-import { protect } from '../middlewares/authMiddleware.js';
+import { protect, authorize } from '../middlewares/authMiddleware.js'; // Import authorize
 
 const router = express.Router();
 
-router.use(protect);
-
 router
   .route('/')
-  .get(getAllMeetings)
-  .post(createMeeting);
+  .get(protect, authorize(['superadmin','admin', 'manager', 'employee']), getAllMeetings) // Add authorize
+  .post(protect, authorize(['superadmin','admin', 'manager', 'employee']), createMeeting); // Add authorize
 
 router
   .route('/:id')
-  .get(getMeeting)
-  .put(updateMeeting)
-  .patch(updateMeeting)
-  .delete(deleteMeeting);
-
+  .get(protect, authorize(['superadmin','admin', 'manager', 'employee']), getMeeting) // Add authorize
+  .put(protect, authorize(['superadmin','admin', 'manager']), updateMeeting) // Add authorize
+  .patch(protect, authorize(['superadmin','admin', 'manager']), updateMeeting) // Add authorize
+  .delete(protect, authorize(['superadmin','admin', 'manager']), deleteMeeting); // Add authorize
 
 export default router;

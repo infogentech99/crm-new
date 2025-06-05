@@ -57,8 +57,32 @@ export const approveQuotation = async (req, res, next) => {
 
 export const listQuotations = async (req, res, next) => {
   try {
-    const quotes = await Quotation.find().sort('-createdAt');
-    res.json(quotes);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { quotationNumber: { $regex: search, $options: 'i' } },
+        { clientName: { $regex: search, $options: 'i' } },
+        { clientEmail: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const total = await Quotation.countDocuments(query);
+    const quotations = await Quotation.find(query)
+      .sort('-createdAt')
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.status(200).json({
+      quotations,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalQuotations: total,
+    });
   } catch (err) {
     console.error('listQuotations error:', err);
     next(err);

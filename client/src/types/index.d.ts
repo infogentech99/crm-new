@@ -35,7 +35,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
-  // Add other user properties if needed from the backend response
+  phone?: string;
 }
 
 export interface Lead {
@@ -43,7 +43,7 @@ export interface Lead {
   name: string;
   email: string;
   phone: string;
-  createdBy: string | User; // Can be user ID string or populated User object
+  createdBy: string | User;
   company?: string;
   jobTitle?: string;
   address?: string;
@@ -66,12 +66,124 @@ export interface Lead {
   updatedAt: string;
 }
 
+export interface Task {
+  _id: string;
+  title: string;
+  dueDate: string; // ISO date string
+  priority: 'High' | 'Medium' | 'Low';
+  assignee?: string | User; // User ID or populated User object
+  status: 'Pending' | 'Completed' | 'In Progress';
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Transaction {
+  _id: string;
+  type: 'Credit' | 'Debit';
+  amount: number;
+  date: string; // ISO date string
+  description: string;
+  relatedInvoice?: string; // Optional: ID of related invoice
+  relatedBill?: string; // Optional: ID of related bill
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Meeting {
+  _id: string;
+  title: string;
+  date: string; // Combined date and time, ISO string
+  duration: string; // e.g., "30 Min"
+  status: 'Scheduled' | 'Completed' | 'Cancelled';
+  participants?: (string | User | Contact | Lead)[]; // Array of IDs or populated objects
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Bill {
+  _id: string;
+  billNumber: string;
+  vendorName: string;
+  amount: number;
+  status: 'Pending' | 'Paid' | 'Due' | 'Overdue';
+  issueDate: string; // ISO date string
+  dueDate: string; // ISO date string
+  items?: QuotationItem[]; // Optional items, reusing QuotationItem
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Deal {
+  _id: string;
+  dealName: string;
+  amount: number;
+  stage: 'Prospecting' | 'Qualification' | 'Proposal' | 'Negotiation' | 'Closed Won' | 'Closed Lost';
+  closeDate: string; // ISO date string
+  contactPerson?: string | Contact | Lead; // Can be Contact/Lead ID or populated object
+  company?: string;
+  createdBy: string | User;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Invoice {
+  _id: string;
+  invoiceNumber: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone?: string; // Added for contact column
+  items: QuotationItem[]; // Reusing QuotationItem for consistency
+  totalAmount: number;
+  paidAmount?: number; // Added for due amount calculation
+  status: 'Pending' | 'Paid' | 'Overdue' | 'Cancelled';
+  issueDate: string; // ISO date string
+  dueDate: string; // ISO date string
+  relatedQuotation?: string; // Optional: ID of the related quotation
+  createdBy: string | User; // User ID or populated User object
+  createdAt: string;
+  updatedAt: string;
+  // Add the populated user and totals objects
+  user: User; // Assuming the populated user will conform to the User interface
+  totals: {
+    taxable: number;
+    igst: number;
+    total: number;
+  };
+}
+
 export interface Contact {
   _id: string;
   name: string;
   email: string;
   phone?: string;
   company?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QuotationItem {
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface Quotation {
+  _id: string;
+  quotationNumber: string;
+  clientName: string;
+  clientEmail: string;
+  items: QuotationItem[];
+  totalAmount: number;
+  status: 'Draft' | 'Sent' | 'Approved' | 'Rejected' | 'Expired';
+  issueDate: string; // ISO date string
+  validUntil: string; // ISO date string
+  createdBy: string | User; // User ID or populated User object
   createdAt: string;
   updatedAt: string;
 }
