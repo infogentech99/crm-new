@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
    <div className="flex justify-between h-screen bg-gray-100">
   {/* Sidebar */}
-  <div className="w-64 h-full bg-gray-800 text-white">
+  <div className="min-w-64 h-full bg-gray-800 text-white">
     <Sidebar />
   </div>
 

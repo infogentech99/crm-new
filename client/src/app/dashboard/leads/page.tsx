@@ -7,7 +7,6 @@ import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import CreateLeadButton from '@components/Common/CreateLeadButton';
 import { manageLeadsConfig } from '@config/manageLeadsConfig';
-import Modal from '@components/Common/Modal';
 import { Lead } from '@customTypes/index';
 import LeadSummaryCards from '@components/Leads/LeadSummaryCards';
 import { Input } from '@components/ui/input';
@@ -20,7 +19,9 @@ import {
 } from '@components/ui/select';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
-import { RootState } from '@store/store'; 
+import { RootState } from '@store/store';
+import LeadForm from '@components/Leads/Leadform';
+import Modal from '@components/Common/Modal';
 
 const ManageLeadsPage: React.FC = () => {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -42,26 +43,34 @@ const ManageLeadsPage: React.FC = () => {
     setSelectedLead(null);
   };
 
-  const handleEditLead = useCallback((lead: Lead) => {
-    alert(`Edit lead: ${lead.name}`);
-    // Implement actual edit logic here
-  }, []);
+// In `handleEditLead`:
+const handleEditLead = useCallback((lead: Lead) => {
+  setSelectedLead(lead);
+  setIsModalOpen(true);
+}, []);
 
-  const handleDeleteLead = useCallback((lead: Lead) => {
-    alert(`Delete lead: ${lead.name}`);
-    // Implement actual delete logic here
-  }, []);
+const handleCreateLead = () => {
+  setSelectedLead(null);
+  setIsModalOpen(true);
+};
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['leads', page, limit, search, statusFilter],
-    queryFn: () => getLeads(page, limit, search, statusFilter),
-  });
+const handleDeleteLead = useCallback((lead: Lead) => {
+  alert(`Delete lead: ${lead.name}`);
+  // Implement actual delete logic here
+}, []);
 
-  const leads = data?.leads || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
+const { data, isLoading, isError, error } = useQuery({
+  queryKey: ['leads', page, limit, search, statusFilter],
+  queryFn: () => getLeads(page, limit, search, statusFilter),
+});
 
-  const config = manageLeadsConfig(handleViewLead, handleEditLead, handleDeleteLead, userRole, currentPage, limit); // Pass userRole, currentPage, and limit
+const leads = data?.leads || [];
+const totalPages = data?.totalPages || 1;
+const currentPage = data?.currentPage || 1;
+// Pass userRole, currentPage, and limit
+
+const config = manageLeadsConfig(handleViewLead, handleEditLead, handleDeleteLead, userRole, currentPage, limit);
+config.createLeadButtonAction = handleCreateLead;
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -169,7 +178,7 @@ const ManageLeadsPage: React.FC = () => {
                   >
                     {i + 1}
                   </PaginationLink>
-              </PaginationItem>
+                </PaginationItem>
               ))}
               <PaginationItem>
                 <PaginationNext
@@ -182,19 +191,14 @@ const ManageLeadsPage: React.FC = () => {
           </Pagination>
         </div>
 
-        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-          {selectedLead && (
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Lead Details</h2>
-              <p>Name: {selectedLead.name}</p>
-              <p>Email: {selectedLead.email}</p>
-              <p>Phone: {selectedLead.phone}</p>
-              <p>Company: {selectedLead.company}</p>
-              <p>Status: {selectedLead.status}</p>
-              {/* Add more lead details as needed */}
-            </div>
-          )}
-        </Modal>
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} widthClass="max-w-3xl">
+  <LeadForm
+    initialData={selectedLead || undefined}
+    mode={selectedLead ? "edit" : "create"}
+    onClose={handleCloseModal}
+  />
+</Modal>
+
       </div>
     </DashboardLayout>
   );
