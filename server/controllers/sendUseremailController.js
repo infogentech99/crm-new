@@ -1,31 +1,61 @@
-import nodemailer from "nodemailer";
+import { IncomingForm } from 'formidable';
+import nodemailer from 'nodemailer';
 
-export default async function SendUserEmail(req, res) {
-  const { to, subject, body } = req.body;
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
-  if (!to || !subject || !body) {
-    return res.status(400).json({ error: "Missing fields" });
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "example@gmail.com",  // Replace with your company email
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
+  const form = new IncomingForm({ multiples: true });
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error('Form parse error:', err);
+      return res.status(500).json({ error: 'Form parsing failed' });
+    }
 
-    await transporter.sendMail({
-      from: "example@gmail.com", // Replace with your company email
-      to,
-      subject,
-      html: `<p>${body.replace(/\n/g, "<br>")}</p>`,
-    });
+    const toField = Array.isArray(fields.to) ? fields.to.join(',') : fields.to;
+    const subjectField = Array.isArray(fields.subject) ? fields.subject[0] : fields.subject;
+    const bodyField = Array.isArray(fields.body) ? fields.body[0] : fields.body;
 
-    res.status(200).json({ message: "Email sent successfully" });
-  } catch (error) {
-    console.error("Email error:", error);
-    res.status(500).json({ error: "Failed to send email" });
-  }
+    const fileList = Array.isArray(files.attachments)
+      ? files.attachments
+      : files.attachments
+        ? [files.attachments]
+        : [];
+
+    const attachments = fileList.map((file) => ({
+      filename: file.originalFilename,
+      path: file.filepath,
+      contentType: file.mimetype,
+    }));
+
+    try {
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: "infogentech99@gmail.com", 
+          pass: process.env.GMAIL_APP_PASSWORD,
+        },
+      });
+
+      await transporter.sendMail({
+        from: "infogentech99@gmail.com",
+        to: toField,
+        subject: subjectField,
+        html: bodyField,
+        attachments,
+      });
+
+      res.status(200).json({ message: 'Email sent successfully' });
+    } catch (err) {
+      console.error('Email send error:', err);
+      res.status(500).json({ error: 'Failed to send email' });
+    }
+  });
 }

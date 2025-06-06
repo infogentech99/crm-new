@@ -1,4 +1,4 @@
-// File: components/Leads/LeadForm.tsx
+
 "use client";
 
 import { useEffect } from "react";
@@ -8,13 +8,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLead, updateLead } from "@services/leadService";
-import { X } from "lucide-react";
 import {
 Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from "@components/ui/form";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Lead } from "@customTypes/index";
+import { RxCross2 } from "react-icons/rx";
 
 const schema = z.object({
   name: z.string().min(2),
@@ -118,10 +118,10 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
         </h2>
         <button
           onClick={onClose}
-          className="text-gray-500 hover:text-red-500 rounded-full p-1"
+          className="text-gray-200 rounded-full p-1 text-2xl leading-none hover:text-gray-500 cursor-pointer"
           aria-label="Close"
         >
-          <X className="w-5 h-5" />
+          <RxCross2 />
         </button>
       </div>
       <Form {...form}>
