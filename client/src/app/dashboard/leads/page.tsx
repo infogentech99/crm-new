@@ -31,10 +31,12 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import LeadForm from '@components/Leads/Leadform';
 import Modal from '@components/Common/Modal';
+import { useRouter } from 'next/navigation'; 
+
 
 const ManageLeadsPage: React.FC = () => {
   const queryClient = useQueryClient();
-
+  const router = useRouter();
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -57,10 +59,12 @@ const ManageLeadsPage: React.FC = () => {
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
 
-  const handleViewLead = useCallback((lead: Lead) => {
-    setSelectedLead(lead);
-    setIsModalOpen(true);
-  }, []);
+const handleViewLead = useCallback((lead: Lead) => {
+  setSelectedLead(lead);
+   if (lead?._id) {
+    router.push(`/dashboard/leads/${lead._id}`)
+  }
+ }, [router]);
 
   const handleEditLead = useCallback((lead: Lead) => {
     setSelectedLead(lead);
