@@ -67,10 +67,10 @@ const ManageLeadsPage: React.FC = () => {
     setIsModalOpen(true);
   }, []);
 
-  const handleCreateLead = () => {
-    setSelectedLead(null);
-    setIsModalOpen(true);
-  };
+ const handleCreateLead = () => {
+  setSelectedLead(null);
+  setIsModalOpen(true);
+};
 
   const handleDeleteLead = useCallback((lead: Lead) => {
     setLeadToDelete(lead);
@@ -152,7 +152,7 @@ const ManageLeadsPage: React.FC = () => {
           <h1 className="text-2xl font-semibold text-gray-800">
             {config.pageTitle}
           </h1>
-          <CreateLeadButton onClick={config.createLeadButtonAction} />
+        <CreateLeadButton onClick={handleCreateLead} />
         </div>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
