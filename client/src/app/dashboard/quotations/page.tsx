@@ -42,12 +42,12 @@ const ManageQuotationsPage: React.FC = () => {
 
   const handleEditQuotation = useCallback((quotation: Quotation) => {
     alert(`Edit quotation: ${quotation.quotationNumber}`);
-    // Implement actual edit logic here
+  
   }, []);
 
   const handleDeleteQuotation = useCallback((quotation: Quotation) => {
     alert(`Delete quotation: ${quotation.quotationNumber}`);
-    // Implement actual delete logic here
+   
   }, []);
 
   const { data, isLoading, isError, error } = useQuery({
@@ -69,12 +69,12 @@ const ManageQuotationsPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); // Reset to first page on search
+    setPage(1); 
   };
 
   const handleLimitChange = (value: string) => {
     setLimit(Number(value));
-    setPage(1); // Reset to first page on limit change
+    setPage(1); 
   };
 
   return (

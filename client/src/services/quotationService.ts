@@ -1,4 +1,4 @@
-import { Quotation } from '@customTypes/index';
+import { Quotation, QuotationItem } from '@customTypes/index';
 
 const API_URL = '/api/quotations';
 
@@ -40,30 +40,37 @@ export const getQuotationById = async (id: string): Promise<Quotation> => {
   return response.json();
 };
 
+
 export const createQuotation = async (
-  quotationData: Omit<Quotation, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>
-): Promise<Quotation> => {
-  try {
-    const response = await fetch(`${API_URL}/genrate`, {
-      method: 'POST',
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(quotationData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to create quotation');
-    }
-
-    return response.json();
-  } catch (err) {
-    console.error('Create Quotation Error:', err);
-    throw err;
+  quotationData: {
+    _id: string;
+    gstin: string;
+    items: QuotationItem[];
+    totals: {
+      taxable: number;
+      igst: number;
+      total: number;
+    };
   }
+): Promise<any> => {
+  const response = await fetch(`${API_URL}/genrate`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(quotationData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to create quotation');
+  }
+
+  return response.json();
 };
+
+
 
 
 export const updateQuotation = async (id: string, quotationData: Partial<Quotation>): Promise<Quotation> => {
