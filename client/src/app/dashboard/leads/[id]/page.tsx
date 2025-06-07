@@ -12,6 +12,8 @@ import { toast } from 'sonner';
 import LeadNotes from '@components/Leads/LeadNotes';
 import PipelineStepper from '@components/ui/PipelineStepper';
 import { LeadStatus } from '@customTypes/index';
+import LeadDetailsShimmer from '@components/ui/LeadDetailsShimmer';
+import QuotationForm from '@components/Quotation/QuotationForm';
 
 export default function LeadDetailsPage() {
     const { id } = useParams();
@@ -21,7 +23,8 @@ export default function LeadDetailsPage() {
     const [lead, setLead] = useState<any>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedLead, setSelectedLead] = useState<any>(null);
-  
+    const [isQuotationOpen, setIsQuotationOpen] = useState(false);
+
     useEffect(() => {
         const fetchLead = async () => {
             if (!id) return;
@@ -53,8 +56,7 @@ export default function LeadDetailsPage() {
         }
     };
 
-    if (loading) return <div className="p-8">loading</div>;
-
+    if (loading) return <LeadDetailsShimmer />;
     return (
         <DashboardLayout>
             <div className="w-full px-8 py-6 bg-white shadow-sm rounded-md">
@@ -126,9 +128,8 @@ export default function LeadDetailsPage() {
             </div>
             <PipelineStepper
                 currentStatus={lead.status}
-                onStatusChange={(status: string) => {
-                    handleStatusChange(status as LeadStatus);
-                }}
+                onStatusChange={(status: string) => handleStatusChange(status as LeadStatus)}
+                onCreateQuotation={() => setIsQuotationOpen(true)}
             />
 
             <LeadNotes
@@ -152,6 +153,16 @@ export default function LeadDetailsPage() {
                         setIsModalOpen(false);
                         setSelectedLead(null);
                     }}
+                />
+            </Modal>
+            <Modal
+                isOpen={isQuotationOpen}
+                onClose={() => setIsQuotationOpen(false)}
+                widthClass="max-w-5xl"
+            >
+                <QuotationForm
+                    mode="Create"
+                    leadData={lead}
                 />
             </Modal>
             <EmailComposer
