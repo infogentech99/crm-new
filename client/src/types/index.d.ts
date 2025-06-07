@@ -203,3 +203,10 @@ export type LeadStatus =
   | 'invoice_accepted'
   | 'processing_payments'
   | 'completed';
+  
+interface QuotationItem {
+  description: string;
+  quantity: number;
+  price: number;
+  hsn: string;
+}

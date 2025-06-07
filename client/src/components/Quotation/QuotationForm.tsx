@@ -1,22 +1,18 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Input } from '@components/ui/input';
 import { Button } from '@components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { createQuotation, updateQuotation } from '@services/quotationService';
+import { createQuotation } from '@services/quotationService';
 import dayjs from 'dayjs';
-
-interface QuotationItem {
-  description: string;
-  quantity: number;
-  price: number;
-  hsn: string;
-}
+import { QuotationItem } from '@customTypes/index';
+import { RxCross2 } from 'react-icons/rx';
 
 interface Props {
   leadData: {
+    _id: string;
     date: string;
     name: string;
     email: string;
@@ -26,101 +22,114 @@ interface Props {
     items?: QuotationItem[];
   };
   mode: 'Create' | 'Edit';
-  onCancel?: () => void;
+  onClose: () => void; 
 }
 
-export default function QuotationForm({ leadData, mode, onCancel }: Props) {
+export default function QuotationForm({ leadData, mode, onClose }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const quotationId = searchParams.get('id');
 
   const [items, setItems] = useState<QuotationItem[]>(
-    leadData.items?.length ? leadData.items : [{ description: '', quantity: 1, price: 0, hsn: '' }]
+    leadData.items?.length
+      ? leadData.items
+      : [
+        {
+          name: '',
+          description: '',
+          quantity: 1,
+          price: 0,
+          unitPrice: 0,
+          hsn: '',
+          total: 0,
+        },
+      ]
   );
   const [gstin, setGstin] = useState(leadData.gstin || '');
   const [submitting, setSubmitting] = useState(false);
 
   const handleItemChange = (index: number, field: keyof QuotationItem, value: string | number) => {
     const updated = [...items];
-    updated[index][field] =
-      field === 'description' || field === 'hsn'
-        ? String(value)
-        : parseFloat(String(value)) || 0;
+    updated[index] = {
+      ...updated[index],
+      [field]:
+        typeof value === 'string' && (field === 'description' || field === 'hsn' || field === 'name')
+          ? value
+          : parseFloat(value as string) || 0,
+    };
     setItems(updated);
   };
 
   const handleAddItem = () => {
-    setItems([...items, { description: '', quantity: 1, price: 0, hsn: '' }]);
+    setItems([
+      ...items,
+      {
+        name: '',
+        description: '',
+        quantity: 1,
+        price: 0,
+        unitPrice: 0,
+        hsn: '',
+        total: 0,
+      },
+    ]);
   };
 
   const handleRemoveItem = (index: number) => {
-    const updated = items.filter((_, i) => i !== index);
-    setItems(updated);
+    setItems(items.filter((_, i) => i !== index));
   };
 
-  const taxable = items.reduce((acc, item) => acc + item.quantity * item.price, 0);
-  const igst = taxable * 0.18;
-  const total = taxable + igst;
+  const taxable = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+  const igst = +(taxable * 0.18).toFixed(2);
+  const total = +(taxable + igst).toFixed(2);
 
-const handleSubmit = async () => {
-  setSubmitting(true);
-  try {
-    const totals = {
-      taxable,
-      igst,
-      total
-    };
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      const payload = {
+        _id: leadData._id,
+        gstin,
+        items,
+        totals: {
+          taxable,
+          igst,
+          total,
+        },
+      };
 
-    const payload = {
-      _id: leadData._id,      
-      gstin,                  
-      items,                  
-      totals,                 
-    };
-
-    await createQuotation(payload); 
-    toast.success('Quotation created successfully!');
-    // router.push('/quotations');
-  } catch (err) {
-    console.error('Error creating quotation:', err);
-    toast.error('Something went wrong. Try again.');
-  } finally {
-    setSubmitting(false);
-  }
-};
-
+      await createQuotation(payload);
+      toast.success('Quotation created successfully!');
+      router.push('/dashboard/quotations');
+    } catch (err) {
+      console.error('Error creating quotation:', err);
+      toast.error('Something went wrong. Try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="p-6 bg-white shadow rounded-md w-full">
-      <h2 className="text-xl font-semibold mb-4">
-        {mode === 'Create' ? 'Create Quotation' : 'Update Quotation'}
-      </h2>
+    <div >
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-blue-600">
+          {mode === "Create" ? "Create Quotation" : "Update Quotation"}
+        </h2>
+        <button
+          onClick={onClose}
+          className="text-gray-200 rounded-full p-1 text-2xl leading-none hover:text-gray-500 cursor-pointer"
+          aria-label="Close"
+        >
+          <RxCross2 />
+        </button>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-        <div>
-          <label className="text-sm font-medium block mb-1">Date</label>
-           <Input value={dayjs().format('YYYY-MM-DD')} readOnly className="bg-gray-100" />
-        </div>
-        <div>
-          <label className="text-sm font-medium block mb-1">Company Name</label>
-          <Input value={leadData.name} readOnly className="bg-gray-100" />
-        </div>
-        <div>
-          <label className="text-sm font-medium block mb-1">GSTIN</label>
-          <Input value={gstin} onChange={(e) => setGstin(e.target.value)} />
-        </div>
-        <div className="col-span-2">
-          <label className="text-sm font-medium block mb-1">Company Address</label>
-          <Input value={leadData.address} readOnly className="bg-gray-100" />
-        </div>
-        <div>
-          <label className="text-sm font-medium block mb-1">Email</label>
-          <Input value={leadData.email} readOnly className="bg-gray-100" />
-        </div>
-        <div>
-          <label className="text-sm font-medium block mb-1">Phone No</label>
-          <Input value={leadData.phone} readOnly className="bg-gray-100" />
-        </div>
+        <InputGroup label="Date" value={dayjs().format('YYYY-MM-DD')} readOnly />
+        <InputGroup label="Company Name" value={leadData.name} readOnly />
+        <InputGroup label="GSTIN" value={gstin} onChange={(e) => setGstin(e.target.value)} />
+        <InputGroup label="Company Address" value={leadData.address} readOnly className="col-span-2" />
+        <InputGroup label="Email" value={leadData.email} readOnly />
+        <InputGroup label="Phone No" value={leadData.phone} readOnly />
       </div>
 
       <table className="w-full mt-6 text-sm border rounded-md overflow-hidden">
@@ -138,48 +147,29 @@ const handleSubmit = async () => {
           {items.map((item, idx) => (
             <tr key={idx} className="border-t">
               <td className="p-2">
-                <Input
-                  value={item.description}
-                  onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
-                />
+                <Input value={item.description} onChange={(e) => handleItemChange(idx, 'description', e.target.value)} />
               </td>
               <td className="p-2">
-                <Input
-                  type="number"
-                  min={1}
-                  value={item.quantity}
-                  onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)}
-                />
+                <Input type="number" min={1} value={item.quantity} onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)} />
               </td>
               <td className="p-2">
-                <Input
-                  type="number"
-                  value={item.price}
-                  onChange={(e) => handleItemChange(idx, 'price', e.target.value)}
-                />
+                <Input type="number" value={item.price} onChange={(e) => handleItemChange(idx, 'price', e.target.value)} />
               </td>
               <td className="p-2">
-                <Input
-                  value={item.hsn}
-                  onChange={(e) => handleItemChange(idx, 'hsn', e.target.value)}
-                />
+                <Input value={item.hsn} onChange={(e) => handleItemChange(idx, 'hsn', e.target.value)} />
               </td>
-              <td className="p-2 text-right text-gray-800 font-semibold">
+              <td className="p-2 text-right font-semibold text-gray-800">
                 ₹{(item.quantity * item.price).toLocaleString('en-IN')}
               </td>
               <td className="p-2 text-center">
-                <button onClick={() => handleRemoveItem(idx)} className="text-red-500 hover:underline">
-                  ×
-                </button>
+                <button onClick={() => handleRemoveItem(idx)} className="text-red-500 hover:underline">×</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <Button variant="outline" className="mt-4" onClick={handleAddItem}>
-        + Add Item
-      </Button>
+      <Button variant="outline" className="mt-4" onClick={handleAddItem}>+ Add Item</Button>
 
       <div className="flex justify-end mt-6 text-sm">
         <div className="space-y-1 text-right">
@@ -189,12 +179,39 @@ const handleSubmit = async () => {
         </div>
       </div>
 
-      <div className="flex justify-end gap-4 mt-8">
-        <Button variant="outline" onClick={onCancel || (() => {})}>Cancel</Button>
+      <div className="col-span-2 mt-6 flex justify-end gap-3">
+        <Button
+          type="button"
+          onClick={onClose}
+          className="bg-gray-100 text-gray-800 hover:bg-gray-200"
+        >
+          Cancel
+        </Button>
         <Button onClick={handleSubmit} disabled={submitting}>
-          {submitting ? 'Saving...' : mode === 'Create' ? 'Create Quotation' : 'Update Quotation'}
+          {submitting ? "Saving..." : mode === "Create" ? "Create Quotation" : "Update Quotation"}
         </Button>
       </div>
+    </div>
+  );
+}
+
+function InputGroup({
+  label,
+  value,
+  onChange,
+  readOnly = false,
+  className = '',
+}: {
+  label: string;
+  value: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  readOnly?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <label className="text-sm font-medium block mb-1">{label}</label>
+      <Input value={value} onChange={onChange} readOnly={readOnly} className={readOnly ? 'bg-gray-100' : ''} />
     </div>
   );
 }

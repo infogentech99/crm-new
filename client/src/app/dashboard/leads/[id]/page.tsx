@@ -163,6 +163,9 @@ export default function LeadDetailsPage() {
                 <QuotationForm
                     mode="Create"
                     leadData={lead}
+                    onClose={() => {
+                        setIsQuotationOpen(false);
+                    }}
                 />
             </Modal>
             <EmailComposer
