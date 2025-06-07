@@ -4,6 +4,7 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { CheckCircle, FileText, ReceiptText } from 'lucide-react';
 import { Button } from '@components/ui/button';
+import { LeadStatus } from '@customTypes/index';
 
 const PIPELINE_STEPS = [
   { value: 'new', label: 'New', icon: FileText },
@@ -18,9 +19,10 @@ const PIPELINE_STEPS = [
 interface PipelineStepperProps {
   currentStatus: string;
   onStatusChange: (status: string) => void;
+  onCreateQuotation?: () => void; 
 }
 
-export default function PipelineStepper({ currentStatus, onStatusChange }: PipelineStepperProps) {
+export default function PipelineStepper({ currentStatus, onStatusChange, onCreateQuotation }: PipelineStepperProps) {
   const getStatus = (stepValue: string) => {
     const activeIndex = PIPELINE_STEPS.findIndex(s => s.value === currentStatus);
     const currentIndex = PIPELINE_STEPS.findIndex(s => s.value === stepValue);
@@ -52,7 +54,7 @@ export default function PipelineStepper({ currentStatus, onStatusChange }: Pipel
                 <Icon className="mx-auto mb-3 w-8 h-8" />
                 <div className="font-semibold text-base leading-tight mb-2">{step.label}</div>
                 {step.value === 'quotation_submitted' && currentStatus === 'quotation_submitted' && (
-                  <Button className="w-full mt-2 text-white bg-green-600 hover:bg-green-700 text-sm py-2">📄 Create Quotation</Button>
+                  <Button className="w-full mt-2 text-white bg-green-600 hover:bg-green-700 text-sm py-2"  onClick={onCreateQuotation}>📄 Create Quotation</Button>
                 )}
                 {step.value === 'invoice_issued' && currentStatus === 'invoice_issued' && (
                   <Button className="w-full mt-2 text-white bg-green-600 hover:bg-green-700 text-sm py-2">🧾 Create Invoice</Button>
