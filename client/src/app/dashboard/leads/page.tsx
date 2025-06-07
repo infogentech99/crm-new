@@ -31,7 +31,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import LeadForm from '@components/Leads/Leadform';
 import Modal from '@components/Common/Modal';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
 
 
 const ManageLeadsPage: React.FC = () => {
@@ -86,7 +86,6 @@ const handleViewLead = useCallback((lead: Lead) => {
     if (!leadToDelete) return;
 
     try {
-      // Use _id instead of id
       await deleteLead(leadToDelete._id);
       queryClient.invalidateQueries({ queryKey: ["leads"] });
     } catch (err) {
@@ -229,7 +228,7 @@ const handleViewLead = useCallback((lead: Lead) => {
             </PaginationContent>
           </Pagination>
         </div>
-   
+     
         <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
           <LeadForm
             initialData={selectedLead || undefined}
