@@ -191,3 +191,15 @@ export interface Quotation {
   createdAt: string;
   updatedAt: string;
 }
+
+export type LeadStatus =
+  | 'pending_approval'
+  | 'denied'
+  | 'approved'
+  | 'quotation_submitted'
+  | 'quotation_rejected'
+  | 'quotation_approved'
+  | 'invoice_issued'
+  | 'invoice_accepted'
+  | 'processing_payments'
+  | 'completed';
