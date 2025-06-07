@@ -95,16 +95,25 @@ export const updateLead = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden: not your lead' });
     }
 
-    Object.assign(lead, req.body);
+    const { notes, ...otherUpdates } = req.body;
+    Object.assign(lead, otherUpdates);
+    if (notes && Array.isArray(notes)) {
+      lead.notes = notes.map((note) => ({
+        message: note.message,
+        createdBy: note.createdBy || req.user._id,
+        createdAt: note.createdAt || new Date(),
+      }));
+    }
+
     await lead.save();
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
 
-// APPROVE Lead (restricted access)
 export const approveLead = async (req, res) => {
   try {
     const lead = await Lead.findByIdAndUpdate(
@@ -123,7 +132,6 @@ export const approveLead = async (req, res) => {
   }
 };
 
-// DENY Lead (restricted access)
 export const denyLead = async (req, res) => {
   try {
     const lead = await Lead.findByIdAndUpdate(
@@ -142,7 +150,6 @@ export const denyLead = async (req, res) => {
   }
 };
 
-// DELETE Lead (superadmin only)
 export const deleteLead = async (req, res) => {
   try {
     const lead = await Lead.findByIdAndDelete(req.params.id);

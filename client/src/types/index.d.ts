@@ -55,7 +55,11 @@ export interface Lead {
   linkedIn?: string;
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
-  notes?: string;
+    notes?: {
+    message?: string;
+    createdAt?: string;
+    createdBy?: string;
+  }[];
   status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
   gstin?: string;
   bestTimeToCall?: string;
