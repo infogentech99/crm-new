@@ -1,5 +1,5 @@
 import { Meeting } from '@customTypes/index';
-import { Trash2, Pencil } from 'lucide-react';
+import {Eye, Trash2, Pencil } from 'lucide-react';
 import React from 'react';
 
 export const manageMeetingsConfig = (
@@ -34,6 +34,9 @@ export const manageMeetingsConfig = (
       label: 'ACTIONS',
       render: (item: Meeting) => (
         <div className="flex items-center space-x-2">
+           <button className="text-gray-500 hover:text-gray-700 flex items-center" onClick={() => handleViewMeeting(item)}>
+            <Eye className="h-4 w-4" />
+          </button>
           <button className="text-blue-500 hover:text-blue-700 flex items-center" onClick={() => handleEditMeeting(item)}>
             <Pencil className="h-4 w-4" />
           </button>
