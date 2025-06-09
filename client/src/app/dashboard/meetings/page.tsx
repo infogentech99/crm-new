@@ -1,13 +1,16 @@
+// File: src/pages/meetings/ManageMeetingsPage.tsx
 "use client";
 
 import React, { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getMeetings } from '@services/meetingService';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { getMeetings, deleteMeeting } from '@services/meetingService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import AddMeetingButton from '@components/Common/AddMeetingButton';
 import { manageMeetingsConfig } from '@config/manageMeetingsConfig';
 import Modal from '@components/Common/Modal';
+import DeleteModal from '@components/Common/DeleteModal';
+import MeetingForm from '@components/Meetings/MeetingForm';
 import { Meeting } from '@customTypes/index';
 import { Input } from '@components/ui/input';
 import {
@@ -17,38 +20,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 
 const ManageMeetingsPage: React.FC = () => {
+  const queryClient = useQueryClient();
+  const userRole = useSelector((state: RootState) => state.user.role || '');
+
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
-
-  const userRole = useSelector((state: RootState) => state.user.role || '');
-
-  const handleViewMeeting = useCallback((meeting: Meeting) => {
-    setSelectedMeeting(meeting);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedMeeting(null);
-  };
-
-  const handleEditMeeting = useCallback((meeting: Meeting) => {
-    alert(`Edit meeting: ${meeting.title}`);
-    // Implement actual edit logic here
-  }, []);
-
-  const handleDeleteMeeting = useCallback((meeting: Meeting) => {
-    alert(`Delete meeting: ${meeting.title}`);
-    // Implement actual delete logic here
-  }, []);
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['meetings', page, limit, search],
@@ -59,30 +54,59 @@ const ManageMeetingsPage: React.FC = () => {
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
 
-  const config = manageMeetingsConfig(handleViewMeeting, handleEditMeeting, handleDeleteMeeting, userRole, currentPage, limit);
+  const handleCreateMeeting = () => {
+    setSelectedMeeting(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditMeeting = useCallback((meeting: Meeting) => {
+    setSelectedMeeting(meeting);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleDeleteMeeting = useCallback((meeting: Meeting) => {
+    setMeetingToDelete(meeting);
+    setIsDeleteOpen(true);
+  }, []);
+
+  const confirmDeleteMeeting = async () => {
+    if (!meetingToDelete) return;
+    await deleteMeeting(meetingToDelete._id);
+    queryClient.invalidateQueries(['meetings']);
+    setIsDeleteOpen(false);
+    setMeetingToDelete(null);
+  };
+
+  const config = manageMeetingsConfig(
+    () => {},
+    handleEditMeeting,
+    handleDeleteMeeting,
+    userRole,
+    currentPage,
+    limit
+  );
+  config.addMeetingButtonAction = handleCreateMeeting;
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
+    if (newPage >= 1 && newPage <= totalPages) setPage(newPage);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); // Reset to first page on search
+    setPage(1);
   };
 
   const handleLimitChange = (value: string) => {
     setLimit(Number(value));
-    setPage(1); // Reset to first page on limit change
+    setPage(1);
   };
 
   return (
     <DashboardLayout>
-      <div className="p-6 rounded-lg shadow-md bg-white">
+      <div className="p-6 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
-          <AddMeetingButton onClick={config.addMeetingButtonAction} />
+          <AddMeetingButton onClick={handleCreateMeeting} />
         </div>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
@@ -118,7 +142,7 @@ const ManageMeetingsPage: React.FC = () => {
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
+                  onClick={e => { e.preventDefault(); handlePageChange(currentPage - 1); }}
                   className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
                 />
               </PaginationItem>
@@ -126,17 +150,17 @@ const ManageMeetingsPage: React.FC = () => {
                 <PaginationItem key={i}>
                   <PaginationLink
                     href="#"
-                    onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(i + 1); }}
+                    onClick={e => { e.preventDefault(); handlePageChange(i + 1); }}
                     isActive={currentPage === i + 1}
                   >
                     {i + 1}
                   </PaginationLink>
-              </PaginationItem>
+                </PaginationItem>
               ))}
               <PaginationItem>
                 <PaginationNext
                   href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
+                  onClick={e => { e.preventDefault(); handlePageChange(currentPage + 1); }}
                   className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
                 />
               </PaginationItem>
@@ -144,18 +168,27 @@ const ManageMeetingsPage: React.FC = () => {
           </Pagination>
         </div>
 
-        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-          {selectedMeeting && (
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Meeting Details</h2>
-              <p>Title: {selectedMeeting.title}</p>
-              <p>Date & Time: {new Date(selectedMeeting.date).toLocaleString()}</p>
-              <p>Duration: {selectedMeeting.duration}</p>
-              <p>Status: {selectedMeeting.status}</p>
-              {/* Add more meeting details as needed */}
-            </div>
-          )}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          widthClass="max-w-lg"
+        >
+          <MeetingForm
+            initialData={selectedMeeting ?? undefined}
+            mode={selectedMeeting ? 'edit' : 'create'}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={() => { queryClient.invalidateQueries(['meetings']); setIsModalOpen(false); }}
+          />
         </Modal>
+
+        {meetingToDelete && (
+          <DeleteModal
+            isOpen={isDeleteOpen}
+            onClose={() => { setIsDeleteOpen(false); setMeetingToDelete(null); }}
+            onConfirm={confirmDeleteMeeting}
+            itemLabel={meetingToDelete.title}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
