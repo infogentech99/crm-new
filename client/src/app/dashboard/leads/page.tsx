@@ -1,4 +1,4 @@
-// File: src/pages/leads/ManageLeadsPage.tsx
+
 "use client";
 
 import React, { useCallback, useState } from 'react';
@@ -54,7 +54,6 @@ const ManageLeadsPage: React.FC = () => {
     queryKey: ["leads", page, limit, search, statusFilter],
     queryFn: () => getLeads(page, limit, search, statusFilter),
   });
-
   const leads = data?.leads || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
@@ -104,6 +103,7 @@ const handleViewLead = useCallback((lead: Lead) => {
     currentPage,
     limit
   );
+ 
   config.createLeadButtonAction = handleCreateLead;
 
   const handlePageChange = (newPage: number) => {

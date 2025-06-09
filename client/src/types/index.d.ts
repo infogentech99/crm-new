@@ -184,12 +184,13 @@ export interface Quotation {
   clientEmail: string;
   items: QuotationItem[];
   totalAmount: number;
-  status: 'Draft' | 'Sent' | 'Approved' | 'Rejected' | 'Expired';
   issueDate: string; // ISO date string
   validUntil: string; // ISO date string
-  createdBy: string | User; // User ID or populated User object
+  createdBy: string | User; 
   createdAt: string;
   updatedAt: string;
+  user: Lead;
+  totals:QuotationItem;
 }
 
 export type LeadStatus =
