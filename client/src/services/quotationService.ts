@@ -16,7 +16,7 @@ export const getQuotations = async (
   search: string = ''
 ): Promise<{ quotations: Quotation[]; totalPages: number; currentPage: number; totalQuotations: number }> => {
   const headers = getAuthHeaders();
-  let url = `${API_URL}?page=${page}&limit=${limit}`;
+  let url = `${API_URL}/?page=${page}&limit=${limit}`;
   if (search) {
     url += `&search=${search}`;
   }
@@ -70,20 +70,29 @@ export const createQuotation = async (
   return response.json();
 };
 
+interface QuotationUpdatePayload {
+  gstin?: string;
+  items: QuotationItem[];
+  totals: {
+    taxable: number;
+    igst: number;
+    total: number;
+  };
+}
 
-
-
-export const updateQuotation = async (id: string, quotationData: Partial<Quotation>): Promise<Quotation> => {
-  const response = await fetch(`${API_URL}/${id}`, {
+export const updateQuotation = async (id: string, data: QuotationUpdatePayload): Promise<any> => {
+  const res = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
-    body: JSON.stringify(quotationData),
+    body: JSON.stringify(data),
   });
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || `Failed to update quotation with ID ${id}`);
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Failed to update quotation');
   }
-  return response.json();
+
+  return res.json();
 };
 
 export const deleteQuotation = async (id: string): Promise<{ message: string }> => {

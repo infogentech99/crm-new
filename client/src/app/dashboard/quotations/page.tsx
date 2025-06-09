@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getQuotations } from '@services/quotationService';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getQuotations, deleteQuotation } from '@services/quotationService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import CreateQuotationButton from '@components/Common/CreateQuotationButton';
@@ -17,16 +17,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
+import {
+  Pagination, PaginationContent, PaginationItem, PaginationLink,
+  PaginationNext, PaginationPrevious
+} from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
+import QuotationForm from '@components/Quotation/QuotationForm';
+import DeleteModal from '@components/Common/DeleteModal';
 
 const ManageQuotationsPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [isQuotationOpen, setIsQuotationOpen] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
@@ -35,26 +44,34 @@ const ManageQuotationsPage: React.FC = () => {
     setIsModalOpen(true);
   }, []);
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedQuotation(null);
-  };
-
   const handleEditQuotation = useCallback((quotation: Quotation) => {
-    alert(`Edit quotation: ${quotation.quotationNumber}`);
-  
+    setSelectedQuotation(quotation);
+    setIsQuotationOpen(true);
   }, []);
 
   const handleDeleteQuotation = useCallback((quotation: Quotation) => {
-    alert(`Delete quotation: ${quotation.quotationNumber}`);
-   
+    setQuotationToDelete(quotation);
+    setIsDeleteModalOpen(true);
   }, []);
+
+  const handleConfirmDelete = async () => {
+    if (!quotationToDelete) return;
+
+    try {
+      await deleteQuotation(quotationToDelete._id);
+      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+    } catch (err) {
+      console.error("Failed to delete quotation:", err);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setQuotationToDelete(null);
+    }
+  };
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['quotations', page, limit, search],
     queryFn: () => getQuotations(page, limit, search),
   });
-
   const quotations = data?.quotations || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
@@ -69,12 +86,12 @@ const ManageQuotationsPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); 
+    setPage(1);
   };
 
   const handleLimitChange = (value: string) => {
     setLimit(Number(value));
-    setPage(1); 
+    setPage(1);
   };
 
   return (
@@ -82,7 +99,6 @@ const ManageQuotationsPage: React.FC = () => {
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
-          <CreateQuotationButton onClick={config.createQuotationButtonAction} />
         </div>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
@@ -131,7 +147,7 @@ const ManageQuotationsPage: React.FC = () => {
                   >
                     {i + 1}
                   </PaginationLink>
-              </PaginationItem>
+                </PaginationItem>
               ))}
               <PaginationItem>
                 <PaginationNext
@@ -144,33 +160,32 @@ const ManageQuotationsPage: React.FC = () => {
           </Pagination>
         </div>
 
-        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-          {selectedQuotation && (
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Quotation Details</h2>
-              <p>Quotation Number: {selectedQuotation.quotationNumber}</p>
-              <p>Client Name: {selectedQuotation.clientName}</p>
-              <p>Client Email: {selectedQuotation.clientEmail}</p>
-              <p>Total Amount: ${selectedQuotation.totalAmount.toFixed(2)}</p>
-              <p>Status: {selectedQuotation.status}</p>
-              <p>Issue Date: {new Date(selectedQuotation.issueDate).toLocaleDateString()}</p>
-              <p>Valid Until: {new Date(selectedQuotation.validUntil).toLocaleDateString()}</p>
-              {/* Display items */}
-              <h3 className="text-lg font-semibold mt-4 mb-2">Items:</h3>
-              {selectedQuotation.items.length > 0 ? (
-                <ul>
-                  {selectedQuotation.items.map((item, index) => (
-                    <li key={index} className="mb-1">
-                      {item.name} (x{item.quantity}) - ${item.unitPrice.toFixed(2)} each = ${item.total.toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No items in this quotation.</p>
-              )}
-            </div>
-          )}
+        <Modal
+          isOpen={isQuotationOpen}
+          onClose={() => setIsQuotationOpen(false)}
+          widthClass="max-w-5xl"
+        >
+          <QuotationForm
+            mode="Edit"
+            data={selectedQuotation}
+            onClose={() => {
+              setIsQuotationOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['quotations'] });
+            }}
+          />
         </Modal>
+
+        {quotationToDelete && (
+          <DeleteModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => {
+              setIsDeleteModalOpen(false);
+              setQuotationToDelete(null);
+            }}
+            onConfirm={handleConfirmDelete}
+            itemLabel={quotationToDelete?.quotationNumber || 'this quotation'}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

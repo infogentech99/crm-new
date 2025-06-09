@@ -3,38 +3,26 @@
 import React, { useState } from 'react';
 import { Input } from '@components/ui/input';
 import { Button } from '@components/ui/button';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { createQuotation } from '@services/quotationService';
+import { createQuotation, updateQuotation } from '@services/quotationService';
 import dayjs from 'dayjs';
 import { QuotationItem } from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
 
 interface Props {
-  leadData: {
-    _id: string;
-    date: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    gstin?: string;
-    items?: QuotationItem[];
-  };
+  data: any;
   mode: 'Create' | 'Edit';
-  onClose: () => void; 
+  onClose: () => void;
 }
 
-export default function QuotationForm({ leadData, mode, onClose }: Props) {
+export default function QuotationForm({ data, mode, onClose }: Props) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const quotationId = searchParams.get('id');
 
   const [items, setItems] = useState<QuotationItem[]>(
-    leadData.items?.length
-      ? leadData.items
-      : [
-        {
+    mode === 'Edit' && data?.items?.length
+      ? data.items
+      : [{
           name: '',
           description: '',
           quantity: 1,
@@ -42,37 +30,36 @@ export default function QuotationForm({ leadData, mode, onClose }: Props) {
           unitPrice: 0,
           hsn: '',
           total: 0,
-        },
-      ]
+        }]
   );
-  const [gstin, setGstin] = useState(leadData.gstin || '');
+
+  const [gstin, setGstin] = useState(
+    mode === 'Edit' ? data?.user?.gstin || '' : data?.gstin || ''
+  );
+
   const [submitting, setSubmitting] = useState(false);
 
   const handleItemChange = (index: number, field: keyof QuotationItem, value: string | number) => {
     const updated = [...items];
     updated[index] = {
       ...updated[index],
-      [field]:
-        typeof value === 'string' && (field === 'description' || field === 'hsn' || field === 'name')
-          ? value
-          : parseFloat(value as string) || 0,
+      [field]: typeof value === 'string' && ['description', 'hsn', 'name'].includes(field)
+        ? value
+        : parseFloat(value as string) || 0,
     };
     setItems(updated);
   };
 
   const handleAddItem = () => {
-    setItems([
-      ...items,
-      {
-        name: '',
-        description: '',
-        quantity: 1,
-        price: 0,
-        unitPrice: 0,
-        hsn: '',
-        total: 0,
-      },
-    ]);
+    setItems([...items, {
+      name: '',
+      description: '',
+      quantity: 1,
+      price: 0,
+      unitPrice: 0,
+      hsn: '',
+      total: 0,
+    }]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -87,7 +74,7 @@ export default function QuotationForm({ leadData, mode, onClose }: Props) {
     setSubmitting(true);
     try {
       const payload = {
-        _id: leadData._id,
+        _id: data?.user?._id || data?._id,
         gstin,
         items,
         totals: {
@@ -97,22 +84,31 @@ export default function QuotationForm({ leadData, mode, onClose }: Props) {
         },
       };
 
-      await createQuotation(payload);
-      toast.success('Quotation created successfully!');
+      if (mode === 'Create') {
+        await createQuotation(payload);
+        toast.success('Quotation created successfully!');
+      } else {
+        await updateQuotation(data._id, payload);
+        toast.success('Quotation updated successfully!');
+      }
+     
       router.push('/dashboard/quotations');
+      onClose();
     } catch (err) {
-      console.error('Error creating quotation:', err);
+      console.error('Error submitting quotation:', err);
       toast.error('Something went wrong. Try again.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const user = data?.user || data; // fallback to root if no nested user
+
   return (
-    <div >
+    <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-blue-600">
-          {mode === "Create" ? "Create Quotation" : "Update Quotation"}
+          {mode === 'Create' ? 'Create Quotation' : 'Update Quotation'}
         </h2>
         <button
           onClick={onClose}
@@ -124,12 +120,12 @@ export default function QuotationForm({ leadData, mode, onClose }: Props) {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-        <InputGroup label="Date" value={dayjs().format('YYYY-MM-DD')} readOnly />
-        <InputGroup label="Company Name" value={leadData.name} readOnly />
+        <InputGroup label="Date" value={dayjs(data?.date || new Date()).format('YYYY-MM-DD')} readOnly />
+        <InputGroup label="Company Name" value={user?.name || ''} readOnly />
         <InputGroup label="GSTIN" value={gstin} onChange={(e) => setGstin(e.target.value)} />
-        <InputGroup label="Company Address" value={leadData.address} readOnly className="col-span-2" />
-        <InputGroup label="Email" value={leadData.email} readOnly />
-        <InputGroup label="Phone No" value={leadData.phone} readOnly />
+        <InputGroup label="Company Address" value={user?.address || ''} readOnly className="col-span-2" />
+        <InputGroup label="Email" value={user?.email || ''} readOnly />
+        <InputGroup label="Phone No" value={user?.phone || ''} readOnly />
       </div>
 
       <table className="w-full mt-6 text-sm border rounded-md overflow-hidden">
@@ -180,15 +176,11 @@ export default function QuotationForm({ leadData, mode, onClose }: Props) {
       </div>
 
       <div className="col-span-2 mt-6 flex justify-end gap-3">
-        <Button
-          type="button"
-          onClick={onClose}
-          className="bg-gray-100 text-gray-800 hover:bg-gray-200"
-        >
+        <Button type="button" onClick={onClose} className="bg-gray-100 text-gray-800 hover:bg-gray-200">
           Cancel
         </Button>
         <Button onClick={handleSubmit} disabled={submitting}>
-          {submitting ? "Saving..." : mode === "Create" ? "Create Quotation" : "Update Quotation"}
+          {submitting ? 'Saving...' : mode === 'Create' ? 'Create Quotation' : 'Update Quotation'}
         </Button>
       </div>
     </div>

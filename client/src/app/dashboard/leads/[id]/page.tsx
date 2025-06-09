@@ -162,7 +162,7 @@ export default function LeadDetailsPage() {
             >
                 <QuotationForm
                     mode="Create"
-                    leadData={lead}
+                    data={lead}
                     onClose={() => {
                         setIsQuotationOpen(false);
                     }}
