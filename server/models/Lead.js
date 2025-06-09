@@ -20,7 +20,16 @@ const LeadSchema = new mongoose.Schema({
   linkedIn:  String,
   source:    { type: String, enum: ['Website','Referral','LinkedIn','Cold Call'], default: 'Website' },
   industry:  { type: String, enum: ['IT','Retail','Manufacturing','Other'], default: 'Other' },
-  notes:     String,
+  notes: [
+  {
+    message: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', 
+    }
+  }
+],
 
   status:    {
     type: String,

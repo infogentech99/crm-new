@@ -32,7 +32,7 @@ const Modal: React.FC<ModalProps> = ({
   return ReactDOM.createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={onClose}
+      
     >
       <div
         className={`bg-white rounded-lg shadow-xl w-full ${widthClass} mx-4 max-h-[90vh] overflow-y-auto`}
