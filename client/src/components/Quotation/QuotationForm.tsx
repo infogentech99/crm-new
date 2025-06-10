@@ -23,14 +23,14 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
     mode === 'Edit' && data?.items?.length
       ? data.items
       : [{
-          name: '',
-          description: '',
-          quantity: 1,
-          price: 0,
-          unitPrice: 0,
-          hsn: '',
-          total: 0,
-        }]
+        name: '',
+        description: '',
+        quantity: 1,
+        price: 0,
+        unitPrice: 0,
+        hsn: '',
+        total: 0,
+      }]
   );
 
   const [gstin, setGstin] = useState(
@@ -91,7 +91,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
         await updateQuotation(data._id, payload);
         toast.success('Quotation updated successfully!');
       }
-     
+
       router.push('/dashboard/quotations');
       onClose();
     } catch (err) {
@@ -102,7 +102,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
     }
   };
 
-  const user = data?.user || data; // fallback to root if no nested user
+  const user = data?.user || data;
 
   return (
     <div>
@@ -131,38 +131,59 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
       <table className="w-full mt-6 text-sm border rounded-md overflow-hidden">
         <thead className="bg-gray-100 text-gray-700">
           <tr>
-            <th className="p-2 text-left">Description</th>
-            <th className="p-2">Qty</th>
-            <th className="p-2">Price (₹)</th>
-            <th className="p-2">HSN</th>
-            <th className="p-2">Total (₹)</th>
-            <th className="p-2"></th>
+            <th className="p-2 text-left w-1/2">Description</th>
+            <th className="p-2 w-20 text-center">Qty</th>
+            <th className="p-2 w-28 text-center">Price (₹)</th>
+            <th className="p-2 w-28 text-center">HSN</th>
+            <th className="p-2 text-right w-32">Total (₹)</th>
+            <th className="p-2 w-12 text-center"></th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx} className="border-t">
-              <td className="p-2">
-                <Input value={item.description} onChange={(e) => handleItemChange(idx, 'description', e.target.value)} />
+              <td className="p-2 w-1/2">
+                <Input
+                  value={item.description}
+                  onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
+                />
               </td>
-              <td className="p-2">
-                <Input type="number" min={1} value={item.quantity} onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)} />
+              <td className="p-2 w-20 text-center">
+                <Input
+                  type="number"
+                  min={1}
+                  value={item.quantity}
+                  onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)}
+                />
               </td>
-              <td className="p-2">
-                <Input type="number" value={item.price} onChange={(e) => handleItemChange(idx, 'price', e.target.value)} />
+              <td className="p-2 w-28 text-center">
+                <Input
+                  type="number"
+                  value={item.price}
+                  onChange={(e) => handleItemChange(idx, 'price', e.target.value)}
+                />
               </td>
-              <td className="p-2">
-                <Input value={item.hsn} onChange={(e) => handleItemChange(idx, 'hsn', e.target.value)} />
+              <td className="p-2 w-28 text-center">
+                <Input
+                  value={item.hsn}
+                  onChange={(e) => handleItemChange(idx, 'hsn', e.target.value)}
+                />
               </td>
-              <td className="p-2 text-right font-semibold text-gray-800">
+              <td className="p-2 text-right w-32 font-semibold text-gray-800">
                 ₹{(item.quantity * item.price).toLocaleString('en-IN')}
               </td>
-              <td className="p-2 text-center">
-                <button onClick={() => handleRemoveItem(idx)} className="text-red-500 hover:underline">×</button>
+              <td className="p-2 text-center w-12">
+                <button
+                  onClick={() => handleRemoveItem(idx)}
+                  className="text-red-500 hover:underline cursor-pointer mt-2"
+                >
+                  <RxCross2 />
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
+
       </table>
 
       <Button variant="outline" className="mt-4" onClick={handleAddItem}>+ Add Item</Button>
