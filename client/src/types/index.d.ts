@@ -175,9 +175,12 @@ export interface QuotationItem {
   quantity: number;
   unitPrice: number;
   total: number;
+  price:number;
+  hsn : string
 }
 
 export interface Quotation {
+  data: any;
   _id: string;
   quotationNumber: string;
   clientName: string;
@@ -205,9 +208,3 @@ export type LeadStatus =
   | 'processing_payments'
   | 'completed';
   
-interface QuotationItem {
-  description: string;
-  quantity: number;
-  price: number;
-  hsn: string;
-}
