@@ -20,9 +20,10 @@ interface PipelineStepperProps {
   currentStatus: string;
   onStatusChange: (status: string) => void;
   onCreateQuotation?: () => void; 
+  onCreateInvoice?: () => void; 
 }
 
-export default function PipelineStepper({ currentStatus, onStatusChange, onCreateQuotation }: PipelineStepperProps) {
+export default function PipelineStepper({ currentStatus, onStatusChange, onCreateQuotation,onCreateInvoice }: PipelineStepperProps) {
   const getStatus = (stepValue: string) => {
     const activeIndex = PIPELINE_STEPS.findIndex(s => s.value === currentStatus);
     const currentIndex = PIPELINE_STEPS.findIndex(s => s.value === stepValue);
@@ -57,7 +58,7 @@ export default function PipelineStepper({ currentStatus, onStatusChange, onCreat
                   <Button className="w-full mt-2 text-white bg-green-600 hover:bg-green-700 text-sm py-2"  onClick={onCreateQuotation}>📄 Create Quotation</Button>
                 )}
                 {step.value === 'invoice_issued' && currentStatus === 'invoice_issued' && (
-                  <Button className="w-full mt-2 text-white bg-green-600 hover:bg-green-700 text-sm py-2">🧾 Create Invoice</Button>
+                  <Button className="w-full mt-2 text-white bg-green-600 hover:bg-green-700 text-sm py-2" onClick={onCreateInvoice}>🧾 Create Invoice</Button>
                 )}
               </div>
 

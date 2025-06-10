@@ -180,6 +180,15 @@ export interface QuotationItem {
   price:number;
   hsn : string
 }
+export interface InvoiceItem {
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  price:number;
+  hsn : string
+}
 
 export interface Quotation {
   data: any;
@@ -229,3 +238,5 @@ export interface FormData {
   position?: string;
   website?: string;
 }
+
+

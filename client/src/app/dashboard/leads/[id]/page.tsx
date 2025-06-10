@@ -14,6 +14,7 @@ import PipelineStepper from '@components/ui/PipelineStepper';
 import { LeadStatus } from '@customTypes/index';
 import LeadDetailsShimmer from '@components/ui/LeadDetailsShimmer';
 import QuotationForm from '@components/Quotation/QuotationForm';
+import InvoiceForm from '@components/invoice/InoviceForm';
 
 export default function LeadDetailsPage() {
     const { id } = useParams();
@@ -24,6 +25,7 @@ export default function LeadDetailsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedLead, setSelectedLead] = useState<any>(null);
     const [isQuotationOpen, setIsQuotationOpen] = useState(false);
+    const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
     useEffect(() => {
         const fetchLead = async () => {
@@ -130,6 +132,7 @@ export default function LeadDetailsPage() {
                 currentStatus={lead.status}
                 onStatusChange={(status: string) => handleStatusChange(status as LeadStatus)}
                 onCreateQuotation={() => setIsQuotationOpen(true)}
+                onCreateInvoice={() => setIsInvoiceOpen(true)}
             />
 
             <LeadNotes
@@ -148,7 +151,7 @@ export default function LeadDetailsPage() {
             >
                 <LeadForm
                     initialData={selectedLead || undefined}
-                    mode="edit"
+                    mode="Edit"
                     onClose={() => {
                         setIsModalOpen(false);
                         setSelectedLead(null);
@@ -165,6 +168,19 @@ export default function LeadDetailsPage() {
                     data={lead}
                     onClose={() => {
                         setIsQuotationOpen(false);
+                    }}
+                />
+            </Modal>
+             <Modal
+                isOpen={isInvoiceOpen}
+                onClose={() => setIsInvoiceOpen(false)}
+                widthClass="max-w-5xl"
+            >
+                <InvoiceForm
+                    mode="Create"
+                    data={lead}
+                    onClose={() => {
+                        setIsInvoiceOpen(false);
                     }}
                 />
             </Modal>
