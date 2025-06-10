@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@components/ui/button';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createQuotation, updateQuotation } from '@services/quotationService';
 import dayjs from 'dayjs';
-import { QuotationItem } from '@customTypes/index';
+import { Bill, QuotationItem } from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
 import { Input } from '@components/ui/input';
+import { getBills } from '@services/billService';
 
 interface Props {
   data: any;
@@ -18,28 +19,45 @@ interface Props {
 
 export default function QuotationForm({ data, mode, onClose }: Props) {
   const router = useRouter();
-
+  const [submitting, setSubmitting] = useState(false);
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [loadingBills, setLoadingBills] = useState(true);
+  const [billError, setBillError] = useState<string | null>(null);
   const [items, setItems] = useState<QuotationItem[]>(
     mode === 'Edit' && data?.items?.length
       ? data.items
       : [
-          {
-            name: '',
-            description: '',
-            quantity: 1,
-            price: 0,
-            unitPrice: 0,
-            hsn: '',
-            total: 0,
-          },
-        ]
+        {
+          name: '',
+          description: '',
+          quantity: 1,
+          price: 0,
+          unitPrice: 0,
+          hsn: '',
+          total: 0,
+        },
+      ]
   );
 
   const [gstin, setGstin] = useState(
     mode === 'Edit' ? data?.user?.gstin || '' : data?.gstin || ''
   );
 
-  const [submitting, setSubmitting] = useState(false);
+    useEffect(() => {
+    const fetchBills = async () => {
+      try {
+        const res = await getBills();
+        setBills(res.bills); 
+      } catch (err: any) {
+        console.error('Failed to fetch bills:', err);
+        setBillError(err.message || 'Failed to load bills');
+      } finally {
+        setLoadingBills(false);
+      }
+    };
+
+    fetchBills();
+  }, []);
 
   const handleItemChange = (
     index: number,

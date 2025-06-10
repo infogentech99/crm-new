@@ -1,18 +1,18 @@
 "use client";
 
 import React from 'react';
-import { cn } from "@lib/utils"; // Import cn
+import { cn } from "@lib/utils";
 
-interface DataTableProps<T extends { _id: string }> { // T must have an _id for keying
+interface DataTableProps<T extends { _id: string }> { 
   columns: {
     key: string;
     label: string;
-    render?: (item: T, index?: number) => React.ReactNode; // Optional rendering function for custom content
+    render?: (item: T, index?: number) => React.ReactNode; 
   }[];
   data: T[];
   isLoading: boolean;
   error: string | null;
-  className?: string; // Allow custom classNames
+  className?: string;
 }
 
 const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error, className }: DataTableProps<T> ) => {
@@ -40,7 +40,7 @@ const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error
   return (
     <div className={cn(
       "relative overflow-x-auto rounded-lg shadow-lg",
-      "bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-opacity-30 border-white", // Glassmorphism effect
+      "bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-opacity-30 border-white",
       className
     )}>
       <table className="min-w-full divide-y divide-gray-200">

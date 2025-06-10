@@ -30,10 +30,10 @@ export const manageBillsConfig = (
       render: (item: Bill) => (
         <div className="flex items-center space-x-2">
         
-          <button className="text-blue-500 hover:text-blue-700 flex items-center" onClick={() => handleEditBill(item)}>
+          <button className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer" onClick={() => handleEditBill(item)}>
             <Pencil className="h-4 w-4" />
           </button>
-          <button className="text-red-500 hover:text-red-700 flex items-center" onClick={() => handleDeleteBill(item)}>
+          <button className="text-red-500 hover:text-red-700 flex items-center cursor-pointer" onClick={() => handleDeleteBill(item)}>
             <Trash2 className="h-4 w-4" />
           </button>
         </div>

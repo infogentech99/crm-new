@@ -34,7 +34,7 @@ const ManageBillsPage: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
 
-   const userRole = useSelector((state: RootState) => state.user.role || '');
+  const userRole = useSelector((state: RootState) => state.user.role || '');
 
 
   const { data, isLoading, isError, error } = useQuery({
@@ -45,7 +45,7 @@ const ManageBillsPage: React.FC = () => {
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
 
-   
+
   const [billToDelete, setBillToDelete] = useState<Bill | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -60,7 +60,7 @@ const ManageBillsPage: React.FC = () => {
     setIsModalOpen(true);
   }, []);
 
-   const handleDeleteBill = useCallback((bill: Bill) => {
+  const handleDeleteBill = useCallback((bill: Bill) => {
     setBillToDelete(bill);
     setIsDeleteModalOpen(true);
   }, []);
@@ -68,25 +68,22 @@ const ManageBillsPage: React.FC = () => {
   const confirmDeleteBill = async () => {
     if (!billToDelete) return;
     await deleteBill(billToDelete._id);
-    queryClient.invalidateQueries(['bills']);
+    queryClient.invalidateQueries({ queryKey: ['bills'] });
     setIsDeleteModalOpen(false);
     setBillToDelete(null);
   };
 
-  // Table config
   const config = manageBillsConfig(
-    /* view */ () => {},
+    /* view */() => { },
     handleEditBill,
     handleDeleteBill,
     userRole,
     currentPage,
     limit
   );
-  // override create action
   config.createBillButtonAction = handleCreateBill;
 
-  // Controls
- const handlePageChange = (newPage: number) => {
+  const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
     }
@@ -95,16 +92,16 @@ const ManageBillsPage: React.FC = () => {
     setSearch(e.target.value);
     setPage(1);
   };
-   const handleLimitChange = (value: string) => {
+  const handleLimitChange = (value: string) => {
     setLimit(Number(value));
-    setPage(1); // Reset to first page on limit change
+    setPage(1);
   };
 
   return (
     <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
-         <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
+          <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
           <CreateBillButton onClick={handleCreateBill} />
         </div>
 
@@ -119,7 +116,7 @@ const ManageBillsPage: React.FC = () => {
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Limit" />
             </SelectTrigger>
-             <SelectContent>
+            <SelectContent>
               <SelectItem value="5">5</SelectItem>
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="20">20</SelectItem>
@@ -132,7 +129,7 @@ const ManageBillsPage: React.FC = () => {
           columns={config.tableColumns}
           data={bills}
           isLoading={isLoading}
-         error={isError ? error?.message || 'Unknown error' : null}
+          error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
@@ -140,12 +137,12 @@ const ManageBillsPage: React.FC = () => {
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
-                 href="#"
+                  href="#"
                   onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
- className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
                 />
               </PaginationItem>
-           {Array.from({ length: totalPages }, (_, i) => (
+              {Array.from({ length: totalPages }, (_, i) => (
                 <PaginationItem key={i}>
                   <PaginationLink
                     href="#"
@@ -159,15 +156,15 @@ const ManageBillsPage: React.FC = () => {
               <PaginationItem>
                 <PaginationNext
                   href="#"
-                 onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
+                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
                 />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
         </div>
 
-     
+
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -180,7 +177,7 @@ const ManageBillsPage: React.FC = () => {
           />
         </Modal>
 
-          {billToDelete && (
+        {billToDelete && (
           <DeleteModal
             isOpen={isDeleteModalOpen}
             onClose={() => { setIsDeleteModalOpen(false); setBillToDelete(null); }}
