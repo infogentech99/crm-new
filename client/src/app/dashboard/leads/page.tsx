@@ -128,7 +128,7 @@ const handleViewLead = useCallback((lead: Lead) => {
   };
 
   const statusOptions = [
-    { value: 'all', label: 'All Status' }, // Changed from '' to 'all'
+    { value: 'all', label: 'All Status' },
     { value: 'pending_approval', label: 'Pending Approval' },
     { value: 'denied', label: 'Denied' },
     { value: 'approved', label: 'Approved' },
@@ -232,7 +232,7 @@ const handleViewLead = useCallback((lead: Lead) => {
         <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
           <LeadForm
             initialData={selectedLead || undefined}
-            mode={selectedLead ? "edit" : "create"}
+            mode={selectedLead ? "Edit" : "Create"}
             onClose={() => { setIsModalOpen(false); setSelectedLead(null); }}
           />
         </Modal>

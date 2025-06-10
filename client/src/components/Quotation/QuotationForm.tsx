@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Input } from '@components/ui/input';
 import { Button } from '@components/ui/button';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -9,6 +8,7 @@ import { createQuotation, updateQuotation } from '@services/quotationService';
 import dayjs from 'dayjs';
 import { QuotationItem } from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
+import { Input } from '@components/ui/input';
 
 interface Props {
   data: any;
@@ -22,15 +22,17 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
   const [items, setItems] = useState<QuotationItem[]>(
     mode === 'Edit' && data?.items?.length
       ? data.items
-      : [{
-        name: '',
-        description: '',
-        quantity: 1,
-        price: 0,
-        unitPrice: 0,
-        hsn: '',
-        total: 0,
-      }]
+      : [
+          {
+            name: '',
+            description: '',
+            quantity: 1,
+            price: 0,
+            unitPrice: 0,
+            hsn: '',
+            total: 0,
+          },
+        ]
   );
 
   const [gstin, setGstin] = useState(
@@ -39,27 +41,35 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
 
   const [submitting, setSubmitting] = useState(false);
 
-  const handleItemChange = (index: number, field: keyof QuotationItem, value: string | number) => {
+  const handleItemChange = (
+    index: number,
+    field: keyof QuotationItem,
+    value: string | number
+  ) => {
     const updated = [...items];
     updated[index] = {
       ...updated[index],
-      [field]: typeof value === 'string' && ['description', 'hsn', 'name'].includes(field)
-        ? value
-        : parseFloat(value as string) || 0,
+      [field]:
+        typeof value === 'string' && ['description', 'hsn', 'name'].includes(field)
+          ? value
+          : parseFloat(value as string) || 0,
     };
     setItems(updated);
   };
 
   const handleAddItem = () => {
-    setItems([...items, {
-      name: '',
-      description: '',
-      quantity: 1,
-      price: 0,
-      unitPrice: 0,
-      hsn: '',
-      total: 0,
-    }]);
+    setItems([
+      ...items,
+      {
+        name: '',
+        description: '',
+        quantity: 1,
+        price: 0,
+        unitPrice: 0,
+        hsn: '',
+        total: 0,
+      },
+    ]);
   };
 
   const handleRemoveItem = (index: number) => {
@@ -120,12 +130,60 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-        <InputGroup label="Date" value={dayjs(data?.date || new Date()).format('YYYY-MM-DD')} readOnly />
-        <InputGroup label="Company Name" value={user?.name || ''} readOnly />
-        <InputGroup label="GSTIN" value={gstin} onChange={(e) => setGstin(e.target.value)} />
-        <InputGroup label="Company Address" value={user?.address || ''} readOnly className="col-span-2" />
-        <InputGroup label="Email" value={user?.email || ''} readOnly />
-        <InputGroup label="Phone No" value={user?.phone || ''} readOnly />
+        <div>
+          <label className="text-sm font-medium block mb-1">Date</label>
+          <Input
+            type="text"
+            value={dayjs(data?.date || new Date()).format('YYYY-MM-DD')}
+            readOnly
+            className="w-full border px-3 py-2 rounded bg-gray-100"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium block mb-1">Company Name</label>
+          <Input
+            type="text"
+            value={user?.name || ''}
+            readOnly
+            className="w-full border px-3 py-2 rounded bg-gray-100"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium block mb-1">GSTIN</label>
+          <Input
+            type="text"
+            value={gstin}
+            onChange={(e) => setGstin(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          />
+        </div>
+        <div className="col-span-2">
+          <label className="text-sm font-medium block mb-1">Company Address</label>
+          <Input
+            type="text"
+            value={user?.address || ''}
+            readOnly
+            className="w-full border px-3 py-2 rounded bg-gray-100"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium block mb-1">Email</label>
+          <Input
+            type="email"
+            value={user?.email || ''}
+            readOnly
+            className="w-full border px-3 py-2 rounded bg-gray-100"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium block mb-1">Phone No</label>
+          <Input
+            type="text"
+            value={user?.phone || ''}
+            readOnly
+            className="w-full border px-3 py-2 rounded bg-gray-100"
+          />
+        </div>
       </div>
 
       <table className="w-full mt-6 text-sm border rounded-md overflow-hidden">
@@ -144,8 +202,10 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
             <tr key={idx} className="border-t">
               <td className="p-2 w-1/2">
                 <Input
+                  type="text"
                   value={item.description}
                   onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
+                  className="w-full border px-2 py-1 rounded"
                 />
               </td>
               <td className="p-2 w-20 text-center">
@@ -154,6 +214,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
                   min={1}
                   value={item.quantity}
                   onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)}
+                  className="w-full border px-2 py-1 rounded text-center"
                 />
               </td>
               <td className="p-2 w-28 text-center">
@@ -161,12 +222,15 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
                   type="number"
                   value={item.price}
                   onChange={(e) => handleItemChange(idx, 'price', e.target.value)}
+                  className="w-full border px-2 py-1 rounded text-center"
                 />
               </td>
               <td className="p-2 w-28 text-center">
                 <Input
+                  type="text"
                   value={item.hsn}
                   onChange={(e) => handleItemChange(idx, 'hsn', e.target.value)}
+                  className="w-full border px-2 py-1 rounded text-center"
                 />
               </td>
               <td className="p-2 text-right w-32 font-semibold text-gray-800">
@@ -183,7 +247,6 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
             </tr>
           ))}
         </tbody>
-
       </table>
 
       <Button variant="outline" className="mt-4" onClick={handleAddItem}>+ Add Item</Button>
@@ -204,27 +267,6 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           {submitting ? 'Saving...' : mode === 'Create' ? 'Create Quotation' : 'Update Quotation'}
         </Button>
       </div>
-    </div>
-  );
-}
-
-function InputGroup({
-  label,
-  value,
-  onChange,
-  readOnly = false,
-  className = '',
-}: {
-  label: string;
-  value: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  readOnly?: boolean;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      <label className="text-sm font-medium block mb-1">{label}</label>
-      <Input value={value} onChange={onChange} readOnly={readOnly} className={readOnly ? 'bg-gray-100' : ''} />
     </div>
   );
 }

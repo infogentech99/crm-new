@@ -113,12 +113,14 @@ export interface Bill {
   vendorName: string;
   amount: number;
   status: 'Pending' | 'Paid' | 'Due' | 'Overdue';
-  issueDate: string; // ISO date string
-  dueDate: string; // ISO date string
-  items?: QuotationItem[]; // Optional items, reusing QuotationItem
+  issueDate: string;
+  dueDate: string;
+  items?: QuotationItem[]; 
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  description: string;
+  hsnCode: string;
 }
 
 export interface Deal {
@@ -208,3 +210,22 @@ export type LeadStatus =
   | 'processing_payments'
   | 'completed';
   
+export interface FormData {
+  name: string;
+  phone: string;
+  email: string;
+  company: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  source: string;
+  industry: string;
+  status: string;
+  callResponse: string;
+  description?: string;
+  remark?: string;
+  position?: string;
+  website?: string;
+}

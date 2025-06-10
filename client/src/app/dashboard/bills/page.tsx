@@ -50,7 +50,7 @@ const ManageBillsPage: React.FC = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
 
-  // Open in “view” or “edit” mode:
+
   const handleCreateBill = () => {
     setSelectedBill(null);
     setIsModalOpen(true);
@@ -65,7 +65,6 @@ const ManageBillsPage: React.FC = () => {
     setIsDeleteModalOpen(true);
   }, []);
 
-  // Confirm deletion
   const confirmDeleteBill = async () => {
     if (!billToDelete) return;
     await deleteBill(billToDelete._id);
@@ -175,8 +174,8 @@ const ManageBillsPage: React.FC = () => {
           widthClass="max-w-lg"
         >
           <BillForm
-            initialData={selectedBill ?? undefined}
-            mode={selectedBill ? "edit" : "create"}
+            data={selectedBill ?? undefined}
+            mode={selectedBill ? "Edit" : "Create"}
             onClose={() => setIsModalOpen(false)}
           />
         </Modal>
