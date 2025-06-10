@@ -25,24 +25,26 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import QuotationForm from '@components/Quotation/QuotationForm';
 import DeleteModal from '@components/Common/DeleteModal';
+import { useRouter } from 'next/navigation';
 
 const ManageQuotationsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedQuotation, setSelectedQuotation] = useState<Quotation | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [isQuotationOpen, setIsQuotationOpen] = useState(false);
-
+  const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
   const handleViewQuotation = useCallback((quotation: Quotation) => {
-    setSelectedQuotation(quotation);
-    setIsModalOpen(true);
-  }, []);
+      setSelectedQuotation(quotation);
+   if (quotation?._id) {
+    router.push(`/dashboard/quotations/${quotation._id}`)
+  }
+  }, [router]);
 
   const handleEditQuotation = useCallback((quotation: Quotation) => {
     setSelectedQuotation(quotation);

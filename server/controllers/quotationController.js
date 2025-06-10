@@ -75,12 +75,16 @@ export const getAllQuotations = async (req, res) => {
 export const getQuotationById = async (req, res) => {
   try {
     const quotation = await Quotation.findById(req.params.id).populate('user items');
-    if (!quotation) return res.status(404).json({ error: 'Quotation not found' });
+    if (!quotation) {
+      return res.status(404).json({ error: 'Quotation not found' });
+    }
     res.json({ data: quotation });
   } catch (err) {
+    console.error("Error in getQuotationById:", err);
     res.status(500).json({ error: 'Failed to fetch quotation' });
   }
 };
+
 
 export const updateQuotation = async (req, res) => {
   try {
