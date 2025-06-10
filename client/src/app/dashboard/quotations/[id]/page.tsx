@@ -10,6 +10,7 @@ import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { QuotationItem } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
+import dayjs from "dayjs";
 export default function Page() {
     const params = useParams();
     const id = params?.id as string;
@@ -60,7 +61,7 @@ export default function Page() {
                         price: item.price,
                         hsn: item.hsn,
                     })),
-                    invoiceDate: new Date(quotation.date || quotation.createdAt).toLocaleDateString("en-IN"),
+                    invoiceDate: dayjs(quotation.date || quotation.createdAt).format("DD/MM/YYYY"),
                     totals: {
                         taxable: quotation.totals?.taxable || 0,
                         igst: quotation.totals?.igst || 0,
@@ -252,12 +253,20 @@ export default function Page() {
                     </div>
 
                     <div className="flex justify-end mt-6">
-                        <Button className="btn btn-warning mx-2" onClick={sendPDFEmail}>
+                        <Button
+                            className="mx-2 !bg-yellow-500 !hover:bg-yellow-600 !text-white px-4 py-2 rounded focus:outline-none !active:bg-yellow-500"
+                            onClick={sendPDFEmail}
+                        >
+
                             {sending ? <span className="loader mr-2"></span> : null}
                             {sending ? "Sending..." : "Send Email"}
                         </Button>
 
-                        <Button className="btn btn-primary" onClick={downloadPDF}>
+                        <Button
+                            className="!bg-blue-600 !hover:bg-blue-700 !text-white px-4 py-2 rounded focus:outline-none !active:bg-blue-600"
+                            onClick={downloadPDF}
+                        >
+
                             {downloading ? <span className="loader mr-2"></span> : null}
                             {downloading ? "Downloading..." : "Download PDF"}
                         </Button>
