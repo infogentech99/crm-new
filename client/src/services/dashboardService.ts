@@ -55,7 +55,7 @@ export const fetchRecentActivities = async (): Promise<RecentActivity[]> => {
     return leadsData.leads.map((lead: Lead) => ({
       id: lead._id,
       type: 'Lead',
-      description: `New lead: ${lead.name} from ${lead.company}`,
+      description: `New lead: ${lead.name} from ${lead.companyName}`,
       date: new Date(lead.createdAt).toLocaleDateString(),
     }));
   }

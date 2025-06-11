@@ -27,7 +27,7 @@ const ManageContactsPage: React.FC = () => {
   }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['allLeadsForContacts', search], 
+    queryKey: ['allLeadsForContacts', search],
     queryFn: () => getLeads(1, 10000, search),
     enabled: isMounted, // Only fetch data if mounted
   });
