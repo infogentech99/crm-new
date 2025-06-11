@@ -13,7 +13,7 @@ export const manageDealsConfig = (
   const baseColumns = [
     { key: '_id', label: 'S.NO', render: (item: Deal, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'dealName', label: 'DEAL NAME' },
-    { key: 'amount', label: 'AMOUNT', render: (item: Deal) => <span>${item.amount.toFixed(2)}</span> },
+    { key: 'amount', label: 'AMOUNT', render: (item: Deal) => <span>₹{item.amount.toFixed(2)}</span> },
     { key: 'stage', label: 'STAGE' },
     { key: 'closeDate', label: 'CLOSE DATE', render: (item: Deal) => <span>{new Date(item.closeDate).toLocaleDateString()}</span> },
     { key: 'company', label: 'COMPANY' },

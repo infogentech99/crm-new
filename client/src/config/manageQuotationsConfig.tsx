@@ -37,7 +37,7 @@ export const manageQuotationsConfig = (
       key: 'totalAmount',
       label: 'TOTAL AMOUNT',
       render: (item: Quotation) => (
-        <span>${Number(item.totals?.total || 0).toFixed(2)}</span>
+        <span>₹{Number(item.totals?.total || 0).toFixed(2)}</span>
       ),
     },
     {

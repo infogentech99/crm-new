@@ -12,7 +12,7 @@ export const manageTransactionsConfig = (
   const baseColumns = [
     { key: '_id', label: 'S.NO', render: (item: Transaction, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'type', label: 'TYPE' },
-    { key: 'amount', label: 'AMOUNT', render: (item: Transaction) => <span>${item.amount.toFixed(2)}</span> },
+    { key: 'amount', label: 'AMOUNT', render: (item: Transaction) => <span>₹{item.amount.toFixed(2)}</span> },
     { key: 'date', label: 'DATE', render: (item: Transaction) => <span>{new Date(item.date).toLocaleDateString()}</span> },
     { key: 'description', label: 'DESCRIPTION' },
     { key: 'relatedInvoice', label: 'RELATED INVOICE', render: (item: Transaction) => <span>{item.relatedInvoice || 'N/A'}</span> },

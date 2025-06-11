@@ -22,7 +22,7 @@ export const manageBillsConfig = (
          label: 'HSN CODE',
          render: (item: Bill) => <span>{item.hsnCode}</span>,
        },
-    { key: 'amount', label: 'AMOUNT', render: (item: Bill) => <span>${item.amount.toFixed(2)}</span> },
+    { key: 'amount', label: 'AMOUNT', render: (item: Bill) => <span>₹{item.amount.toFixed(2)}</span> },
    
     {
       key: 'actions',
