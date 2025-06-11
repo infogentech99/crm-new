@@ -5,7 +5,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getQuotations, deleteQuotation } from '@services/quotationService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import CreateQuotationButton from '@components/Common/CreateQuotationButton';
 import { manageQuotationsConfig } from '@config/manageQuotationsConfig';
 import Modal from '@components/Common/Modal';
 import { Quotation } from '@customTypes/index';

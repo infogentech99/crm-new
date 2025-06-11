@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getInvoices } from '@services/invoiceService';
+import { useQuery,useQueryClient } from '@tanstack/react-query';
+import { deleteInvoice, getInvoices } from '@services/invoiceService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import CreateInvoiceButton from '@components/Common/CreateInvoiceButton';
@@ -20,36 +20,53 @@ import {
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
+import { useRouter } from 'next/navigation';
+import InvoiceForm from '@components/invoice/InoviceForm';
+import DeleteModal from '@components/Common/DeleteModal';
 
 const ManageInvoicesPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
-
+  const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
   const handleViewInvoice = useCallback((invoice: Invoice) => {
-    setSelectedInvoice(invoice);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedInvoice(null);
-  };
+     setSelectedInvoice(invoice);
+   if (invoice?._id) {
+    router.push(`/dashboard/invoice/${invoice._id}`)
+   }
+  }, [router]);
 
   const handleEditInvoice = useCallback((invoice: Invoice) => {
-    alert(`Edit invoice: ${invoice.invoiceNumber}`);
-    // Implement actual edit logic here
+      setSelectedInvoice(invoice);
+      setIsInvoiceOpen(true);
   }, []);
 
   const handleDeleteInvoice = useCallback((invoice: Invoice) => {
-    alert(`Delete invoice: ${invoice.invoiceNumber}`);
-    // Implement actual delete logic here
+   setInvoiceToDelete(invoice);
+   setIsDeleteModalOpen(true);
+     
   }, []);
+  const handleConfirmDelete = async () => {
+    if (!invoiceToDelete) return;
 
+    try {
+      await deleteInvoice(invoiceToDelete._id);
+      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+    } catch (err) {
+      console.error("Failed to delete quotation:", err);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setInvoiceToDelete(null);
+    }
+  };
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['invoices', page, limit, search],
     queryFn: () => getInvoices(page, limit, search),
@@ -69,12 +86,12 @@ const ManageInvoicesPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); // Reset to first page on search
+    setPage(1); 
   };
 
   const handleLimitChange = (value: string) => {
     setLimit(Number(value));
-    setPage(1); // Reset to first page on limit change
+    setPage(1);
   };
 
   return (
@@ -144,34 +161,31 @@ const ManageInvoicesPage: React.FC = () => {
           </Pagination>
         </div>
 
-        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-          {selectedInvoice && (
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Invoice Details</h2>
-              <p>Invoice Number: {selectedInvoice.invoiceNumber}</p>
-              <p>Client Name: {selectedInvoice.clientName}</p>
-              <p>Client Email: {selectedInvoice.clientEmail}</p>
-              <p>Total Amount: ${selectedInvoice.totalAmount.toFixed(2)}</p>
-              <p>Status: {selectedInvoice.status}</p>
-              <p>Issue Date: {new Date(selectedInvoice.issueDate).toLocaleDateString()}</p>
-              <p>Due Date: {new Date(selectedInvoice.dueDate).toLocaleDateString()}</p>
-              {selectedInvoice.relatedQuotation && <p>Related Quotation: {selectedInvoice.relatedQuotation}</p>}
-              {/* Display items */}
-              <h3 className="text-lg font-semibold mt-4 mb-2">Items:</h3>
-              {selectedInvoice.items.length > 0 ? (
-                <ul>
-                  {selectedInvoice.items.map((item, index) => (
-                    <li key={index} className="mb-1">
-                      {item.name} (x{item.quantity}) - ${item.unitPrice.toFixed(2)} each = ${item.total.toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No items in this invoice.</p>
-              )}
-            </div>
-          )}
+           <Modal
+          isOpen={isInvoiceOpen}
+          onClose={() => setIsInvoiceOpen(false)}
+          widthClass="max-w-5xl"
+        >
+          <InvoiceForm
+            mode="Edit"
+            data={selectedInvoice}
+            onClose={() => {
+              setIsInvoiceOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            }}
+          />
         </Modal>
+          {invoiceToDelete && (
+                  <DeleteModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => {
+                      setIsDeleteModalOpen(false);
+                      setInvoiceToDelete(null);
+                    }}
+                    onConfirm={handleConfirmDelete}
+                    itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}
+                  />
+                )}
       </div>
     </DashboardLayout>
   );

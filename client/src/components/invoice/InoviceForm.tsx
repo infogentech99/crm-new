@@ -19,6 +19,7 @@ interface Props {
 }
 
 export default function InvoiceForm({ data, mode, onClose }: Props) {
+  console.log(data,"paras")
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
