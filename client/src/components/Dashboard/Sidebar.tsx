@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { removeToken } from "@store/slices/tokenSlice";
 import { removeUser } from "@store/slices/userSlice";
 
@@ -93,6 +93,7 @@ const sidebarItems: SidebarItem[] = [
 export default function Sidebar() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
 
   const handleLogout = () => {
@@ -108,7 +109,9 @@ export default function Sidebar() {
         {sidebarItems.map((item) => (
           <Link href={item.href} key={item.id}>
             <div
-              className="relative  py-4 space-y-2 flex justify-center items-center p-2 cursor-pointer hover:bg-gray-700 rounded"
+              className={`relative py-4 space-y-2 flex justify-center items-center p-2 cursor-pointer rounded ${
+                pathname === item.href ? "bg-gray-700" : "hover:bg-gray-600"
+              }`}
               onMouseEnter={() => setHoveredItemId(item.id)}
               onMouseLeave={() => setHoveredItemId(null)}
             >
