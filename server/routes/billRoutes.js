@@ -4,10 +4,10 @@ import { protect, authorize } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', protect, authorize(['superadmin','admin', 'manager', 'employee']), genrate);
-router.get('/', protect, authorize(['superadmin','admin', 'manager', 'employee']), getAllBills); 
-router.get('/:id', protect, authorize(['superadmin','admin', 'manager', 'employee']), getBillById); 
-router.put('/:id', protect, authorize(['superadmin','admin', 'manager']), updateBill);
-router.delete('/:id', protect, authorize(['superadmin','admin', 'manager']), deleteBill); 
+router.post('/', protect, authorize(['superadmin','admin', 'salesperson']), genrate);
+router.get('/', protect, authorize(['superadmin','admin', 'salesperson']), getAllBills); 
+router.get('/:id', protect, authorize(['superadmin','admin', 'salesperson']), getBillById); 
+router.put('/:id', protect, authorize(['superadmin','admin']), updateBill);
+router.delete('/:id', protect, authorize(['superadmin','admin']), deleteBill); 
 
 export default router;
