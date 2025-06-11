@@ -27,11 +27,12 @@ import {
   ChartNoAxesCombined,
 } from "lucide-react";
 
-interface SidebarItem {
-  id: string;
+interface NavItemProps {
   href: string;
   icon: React.ReactNode;
   label: string;
+  isActive: boolean;
+  onClick?: () => void;
 }
 
 const sidebarItems: SidebarItem[] = [
@@ -104,6 +105,7 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 export default function Sidebar() {
+  const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
@@ -148,8 +150,6 @@ export default function Sidebar() {
         <div
           className="relative mt-auto flex justify-center items-center py-4 cursor-pointer hover:bg-red-700 rounded mb-4"
           onClick={handleLogout}
-          onMouseEnter={() => setHoveredItemId("logout")}
-          onMouseLeave={() => setHoveredItemId(null)}
         >
           <LogOut size={24} />
           {hoveredItemId === "logout" && (
@@ -159,6 +159,194 @@ export default function Sidebar() {
           )}
         </div>
       </div>
+
+      {/* Slide‐out panel for CRM */}
+      {hoveredSection === "crm" && (
+        <div
+          className="absolute left-16 top-0 h-screen w-56 bg-gray-700 text-gray-100 p-4 border-l border-gray-600"
+          onMouseEnter={() => setHoveredSection("crm")}
+          onMouseLeave={() => setHoveredSection(null)}
+        >
+          <h2 className="text-lg font-semibold text-white mb-4">CRM</h2>
+
+          <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">
+            GENERAL
+          </h3>
+          <ul className="mb-4 space-y-1">
+            <NavItem
+              href="/dashboard"
+              icon={<LayoutDashboard size={20} />}
+              label="Dashboard"
+              isActive={pathname === "/dashboard"}
+              onClick={() => setHoveredSection(null)}
+            />
+          </ul>
+
+          <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">
+            MANAGEMENT
+          </h3>
+          <ul className="space-y-1">
+            <NavItem
+              href="/dashboard/users"
+              icon={<Users size={20} />}
+              label="Manage Users"
+              isActive={pathname === "/dashboard/users"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/dashboard/leads"
+              icon={<ClipboardList size={20} />}
+              label="All Leads"
+              isActive={pathname === "/dashboard/leads"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/dashboard/contacts"
+              icon={<MessageSquare size={20} />}
+              label="Contacts"
+              isActive={pathname === "/dashboard/contacts"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/dashboard/quotations"
+              icon={<FileText size={20} />}
+              label="Quotations"
+              isActive={pathname === "/dashboard/quotations"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/dashboard/invoices"
+              icon={<Receipt size={20} />}
+              label="Invoices"
+              isActive={pathname === "/dashboard/invoices"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/dashboard/bills"
+              icon={<ListChecks size={20} />}
+              label="Deals Bill"
+              isActive={pathname === "/dashboard/bills"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/dashboard/transactions"
+              icon={<Repeat size={20} />}
+              label="Transactions"
+              isActive={pathname === "/dashboard/transactions"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/dashboard/meetings"
+              icon={<Calendar size={20} />}
+              label="Meetings"
+              isActive={pathname === "/dashboard/meetings"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/dashboard/tasks"
+              icon={<ListChecks size={20} />}
+              label="Task Assigning"
+              isActive={pathname === "/dashboard/tasks"}
+              onClick={() => setHoveredSection(null)}
+            />
+          </ul>
+        </div>
+      )}
+
+      {/* Slide‐out panel for Sales Hub */}
+      {hoveredSection === "sales" && (
+        <div
+          className="absolute left-16 top-0 h-screen w-56 bg-gray-700 text-gray-100 p-4 border-l border-gray-600"
+          onMouseEnter={() => setHoveredSection("sales")}
+          onMouseLeave={() => setHoveredSection(null)}
+        >
+          <h2 className="text-lg font-semibold text-white mb-4">Sales Hub</h2>
+
+          <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">
+            OVERVIEW
+          </h3>
+          <ul className="mb-4 space-y-1">
+            <NavItem
+              href="/sales/overview"
+              icon={<ClipboardList size={20} />}
+              label="Overview"
+              isActive={pathname === "/sales/overview"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/sales/pipeline"
+              icon={<Repeat size={20} />}
+              label="Pipeline"
+              isActive={pathname === "/sales/pipeline"}
+              onClick={() => setHoveredSection(null)}
+            />
+          </ul>
+
+          <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">
+            REPORTS
+          </h3>
+          <ul className="space-y-1">
+            <NavItem
+              href="/sales/reports"
+              icon={<FileText size={20} />}
+              label="Reports"
+              isActive={pathname === "/sales/reports"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/sales/analytics"
+              icon={<LayoutDashboard size={20} />}
+              label="Analytics"
+              isActive={pathname === "/sales/analytics"}
+              onClick={() => setHoveredSection(null)}
+            />
+          </ul>
+        </div>
+      )}
+
+      {/* Slide‐out panel for Services */}
+      {hoveredSection === "service" && (
+        <div
+          className="absolute left-16 top-0 h-screen w-56 bg-gray-700 text-gray-100 p-4 border-l border-gray-600"
+          onMouseEnter={() => setHoveredSection("service")}
+          onMouseLeave={() => setHoveredSection(null)}
+        >
+          <h2 className="text-lg font-semibold text-white mb-4">Services</h2>
+
+          <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">
+            SUPPORT
+          </h3>
+          <ul className="mb-4 space-y-1">
+            <NavItem
+              href="/service/tickets"
+              icon={<MessageSquare size={20} />}
+              label="Tickets"
+              isActive={pathname === "/service/tickets"}
+              onClick={() => setHoveredSection(null)}
+            />
+            <NavItem
+              href="/service/knowledge"
+              icon={<FileText size={20} />}
+              label="Knowledge Base"
+              isActive={pathname === "/service/knowledge"}
+              onClick={() => setHoveredSection(null)}
+            />
+          </ul>
+
+          <h3 className="text-xs font-semibold uppercase text-gray-400 mb-2">
+            SETTINGS
+          </h3>
+          <ul className="space-y-1">
+            <NavItem
+              href="/service/settings"
+              icon={<LayoutDashboard size={20} />}
+              label="Config"
+              isActive={pathname === "/service/settings"}
+              onClick={() => setHoveredSection(null)}
+            />
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
