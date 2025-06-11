@@ -13,7 +13,7 @@ export const manageInvoicesConfig = (
 ) => {
   const baseColumns = [
     { key: '_id', label: 'S.NO', render: (item: Invoice, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
-    { key: 'issueDate', label: 'CREATED DATE', render: (item: Invoice) => <span>{dayjs(item.updatedAt).format('DD/MM/YYYY hh:mm A')}</span> },
+    { key: 'issueDate', label: 'CREATED DATE', render: (item: Invoice) => <span>{dayjs(item.createdAt).format('DD/MM/YYYY hh:mm A')}</span> },
      {
           key: 'updatedDate',
           label: 'UPDATED DATE',

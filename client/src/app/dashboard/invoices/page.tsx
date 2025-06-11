@@ -39,7 +39,7 @@ const ManageInvoicesPage: React.FC = () => {
   const handleViewInvoice = useCallback((invoice: Invoice) => {
      setSelectedInvoice(invoice);
    if (invoice?._id) {
-    router.push(`/dashboard/invoice/${invoice._id}`)
+    router.push(`/dashboard/invoices/${invoice._id}`)
    }
   }, [router]);
 
@@ -179,6 +179,7 @@ const ManageInvoicesPage: React.FC = () => {
                     onClose={() => {
                       setIsDeleteModalOpen(false);
                       setInvoiceToDelete(null);
+                      queryClient.invalidateQueries({ queryKey: ['invoices'] });
                     }}
                     onConfirm={handleConfirmDelete}
                     itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}
