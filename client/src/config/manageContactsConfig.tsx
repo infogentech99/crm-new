@@ -3,6 +3,10 @@ import { Contact } from '@customTypes/index';
 import React from 'react';
 
 export const manageContactsConfig = (
+  handleViewContact: (contact: Contact) => void,
+  handleEditContact: (contact: Contact) => void,
+  handleDeleteContact: (contact: Contact) => void,
+  userRole: string,
   currentPage: number,
   limit: number
 ) => {

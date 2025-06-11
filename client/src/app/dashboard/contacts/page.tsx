@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { getContacts } from '@services/contactService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { manageContactsConfig } from '@config/manageContactsConfig'
@@ -17,6 +18,8 @@ import { PaginationComponent } from '@components/ui/pagination';
 import { getLeads } from '@services/leadService';
 
 const ManageContactsPage: React.FC = () => {
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
@@ -61,7 +64,7 @@ const ManageContactsPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); 
+    setPage(1); // Reset to first page on search
   };
 
   const handleLimitChange = (value: string) => {
@@ -87,6 +90,7 @@ const ManageContactsPage: React.FC = () => {
             onChange={handleSearchChange}
             className="max-w-sm"
           />
+          {/* Removed status filter select */}
           <Select onValueChange={handleLimitChange} value={String(limit)}>
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Limit" />
@@ -114,6 +118,19 @@ const ManageContactsPage: React.FC = () => {
             onPageChange={handlePageChange}
           />
         </div>
+
+        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+          {selectedContact && (
+            <div className="p-4">
+              <h2 className="text-xl font-semibold mb-2">Contact Details</h2>
+              <p>Name: {selectedContact.name}</p>
+              <p>Email: {selectedContact.email}</p>
+              <p>Phone: {selectedContact.phone}</p>
+              <p>Company: {selectedContact.company}</p>
+              {/* Add more contact details as needed */}
+            </div>
+          )}
+        </Modal>
       </div>
     </DashboardLayout>
   );
