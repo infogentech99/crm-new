@@ -54,7 +54,7 @@ export const getAllInvoices = async (req, res) => {
 
     const total = await Invoice.countDocuments(query);
     const invoices = await Invoice.find(query)
-      .populate({ path: 'user', select: 'name phone' })
+      .populate('user')
       .populate('items') 
       .populate('transactions')
       .sort('-createdAt')
@@ -75,7 +75,7 @@ export const getAllInvoices = async (req, res) => {
 
 export const getInvoiceById = async (req, res) => {
   try {
-    const invoice = await Invoice.findById(req.params.id).populate({ path: 'user', select: 'name phone' }).populate('items');
+    const invoice = await Invoice.findById(req.params.id).populate('user').populate('items');
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
     res.json({ data: invoice });
   } catch (err) {

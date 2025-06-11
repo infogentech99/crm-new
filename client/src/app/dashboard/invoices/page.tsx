@@ -5,7 +5,6 @@ import { useQuery,useQueryClient } from '@tanstack/react-query';
 import { deleteInvoice, getInvoices } from '@services/invoiceService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import CreateInvoiceButton from '@components/Common/CreateInvoiceButton';
 import { manageInvoicesConfig } from '@config/manageInvoicesConfig';
 import Modal from '@components/Common/Modal';
 import { Invoice } from '@customTypes/index';
@@ -99,7 +98,6 @@ const ManageInvoicesPage: React.FC = () => {
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
-          <CreateInvoiceButton onClick={config.createInvoiceButtonAction} />
         </div>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
