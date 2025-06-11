@@ -1,11 +1,11 @@
 import Item from '../models/Item.js';
-import Invoice from '../models/NewInvoice.js';
+import Invoice from '../models/Invoice.js';
 import Lead from '../models/Lead.js';
 
 export const genrate = async (req, res) => {
   try {
     const { _id, totals, items ,gstin} = req.body;
-
+     console.log(_id, "get id")
     if (!_id || !totals || !items) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -47,16 +47,16 @@ export const getAllInvoices = async (req, res) => {
     if (search) {
       query.$or = [
         { invoiceNumber: { $regex: search, $options: 'i' } },
-        { clientName: { $regex: search, 'i': true } }, // Case-insensitive search
-        { clientEmail: { $regex: search, 'i': true } }, // Case-insensitive search
+        { clientName: { $regex: search, 'i': true } },
+        { clientEmail: { $regex: search, 'i': true } }, 
       ];
     }
 
     const total = await Invoice.countDocuments(query);
     const invoices = await Invoice.find(query)
-      .populate({ path: 'user', select: 'name phone' }) // Populate user with name and phone
-      .populate('items') // Assuming 'items' field exists and needs population
-      .populate('transactions') // Assuming 'transactions' field exists and needs population
+      .populate('user')
+      .populate('items') 
+      .populate('transactions')
       .sort('-createdAt')
       .skip((page - 1) * limit)
       .limit(limit);
@@ -75,7 +75,7 @@ export const getAllInvoices = async (req, res) => {
 
 export const getInvoiceById = async (req, res) => {
   try {
-    const invoice = await Invoice.findById(req.params.id).populate({ path: 'user', select: 'name phone' }).populate('items');
+    const invoice = await Invoice.findById(req.params.id).populate('user').populate('items');
     if (!invoice) return res.status(404).json({ error: 'Invoice not found' });
     res.json({ data: invoice });
   } catch (err) {

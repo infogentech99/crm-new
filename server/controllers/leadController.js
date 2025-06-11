@@ -1,5 +1,5 @@
 import Lead from '../models/Lead.js';
-import Invoice from '../models/NewInvoice.js';
+import Invoice from '../models/Invoice.js';
 
 export const createLead = async (req, res) => {
   try {

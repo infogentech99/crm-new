@@ -1,4 +1,4 @@
-// File: src/pages/leads/ManageLeadsPage.tsx
+
 "use client";
 
 import React, { useCallback, useState } from 'react';
@@ -54,7 +54,6 @@ const ManageLeadsPage: React.FC = () => {
     queryKey: ["leads", page, limit, search, statusFilter],
     queryFn: () => getLeads(page, limit, search, statusFilter),
   });
-
   const leads = data?.leads || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
@@ -104,6 +103,7 @@ const handleViewLead = useCallback((lead: Lead) => {
     currentPage,
     limit
   );
+ 
   config.createLeadButtonAction = handleCreateLead;
 
   const handlePageChange = (newPage: number) => {
@@ -128,7 +128,7 @@ const handleViewLead = useCallback((lead: Lead) => {
   };
 
   const statusOptions = [
-    { value: 'all', label: 'All Status' }, // Changed from '' to 'all'
+    { value: 'all', label: 'All Status' },
     { value: 'pending_approval', label: 'Pending Approval' },
     { value: 'denied', label: 'Denied' },
     { value: 'approved', label: 'Approved' },
@@ -232,7 +232,7 @@ const handleViewLead = useCallback((lead: Lead) => {
         <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
           <LeadForm
             initialData={selectedLead || undefined}
-            mode={selectedLead ? "edit" : "create"}
+            mode={selectedLead ? "Edit" : "Create"}
             onClose={() => { setIsModalOpen(false); setSelectedLead(null); }}
           />
         </Modal>

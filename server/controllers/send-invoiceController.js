@@ -1,61 +1,71 @@
-import nodemailer from "nodemailer";
+import { IncomingForm } from 'formidable';
+import nodemailer from 'nodemailer';
 
-export default async function downloadEmail(req, res) {
-  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+export const config = {
+  api: {
+    bodyParser: false, 
+  },
+};
 
-  const { pdfBase64, customerEmail, invoiceId ,clientName } = req.body;
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
- 
+  const form = new IncomingForm();
 
-  if (!pdfBase64 || !customerEmail) {
-    return res.status(400).json({ error: "Missing PDF or email" });
-  }
+  form.parse(req, async (err, fields) => {
+    if (err) {
+      console.error('Form parse error:', err);
+      return res.status(400).json({ error: 'Failed to parse form data' });
+    }
 
-  try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "example@gmail.com", // Replace company email
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
+    const pdfBase64 = Array.isArray(fields.pdfBase64) ? fields.pdfBase64[0] : fields.pdfBase64;
+    const customerEmail = Array.isArray(fields.customerEmail) ? fields.customerEmail[0] : fields.customerEmail;
+    const invoiceId = Array.isArray(fields.invoiceId) ? fields.invoiceId[0] : fields.invoiceId;
+    const clientName = Array.isArray(fields.clientName) ? fields.clientName[0] : fields.clientName;
 
-    await transporter.sendMail({
-      from: `example@gmail.com`, // Replace company email
-      to: customerEmail,
-      subject: `Invoice - ${invoiceId}`,
-      html: `<p style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
-  Dear ${clientName || "Customer"},
-</p>
+    if (!pdfBase64 || !customerEmail || !invoiceId) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-<p style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
-  Please find your invoice attached with this email. If you have any questions or require further assistance, feel free to get in touch with us.
-</p>
-
-<p style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
-  Thank you for choosing <strong>InfoGenTech Softwares LLP</strong>.
-</p>
-
-<p style="font-family: Arial, sans-serif; font-size: 14px; color: #333; margin-top: 20px;">
-  Best regards,<br/>
-  <strong>InfoGenTech Team</strong><br/>
-  <a href="https://infogentech.com" style="color: #0d6efd; text-decoration: none;">www.infogentech.com</a><br/>
-  Email: <a href="mailto:example@infogentech.com" style="color: #0d6efd;">example@infogentech.com</a><br/>
-  Phone: +91 000000000000
-</p>
-`,
-      attachments: [
-        {
-          filename: `invoice-${invoiceId}.pdf`,
-          content: pdfBase64.split("base64,")[1],
-          encoding: "base64",
+    try {  
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'ibby1561@gmail.com',
+          pass: process.env.GMAIL_APP_PASSWORD, 
         },
-      ],
-    });
+      });
 
-    res.status(200).json({ message: "Email sent" });
-  } catch (err) {
-    console.error("Email error:", err);
-    res.status(500).json({ error: "Email send failed" });
-  }
+     
+      await transporter.sendMail({
+        from: 'ibby1561@gmail.com', 
+        to: customerEmail,
+        subject: `Invoice - ${invoiceId}`,
+        html: `
+          <p style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+            Dear ${clientName || 'Customer'},
+          </p>
+          <p style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+            Please find your invoice attached. Thank you for choosing <strong>InfoGenTech Softwares LLP</strong>.
+          </p>
+          <p style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+            Regards,<br/>InfoGenTech Team<br/>
+            <a href="https://infogentech.com" style="color: #0d6efd;">www.infogentech.com</a>
+          </p>
+        `,
+        attachments: [
+          {
+            filename: `invoice-${invoiceId}.pdf`,
+            content: pdfBase64.split('base64,')[1],
+            encoding: 'base64',
+          },
+        ],
+      });
+
+      res.status(200).json({ message: 'Email sent successfully' });
+    } catch (error) {
+      console.error('Email error:', error);
+      res.status(500).json({ error: 'Email sending failed' });
+    }
+  });
 }

@@ -4,13 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@components/ui/button';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { createQuotation, updateQuotation } from '@services/quotationService';
 import dayjs from 'dayjs';
-import { Bill, QuotationItem } from '@customTypes/index';
+import { Bill, InvoiceItem} from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
 import { Input } from '@components/ui/input';
 import { getBills } from '@services/billService';
 import CreatableSelect from 'react-select/creatable';
+import { createInvoice, updateInvoice } from '@services/invoiceService';
 
 interface Props {
   data: any;
@@ -18,14 +18,14 @@ interface Props {
   onClose: () => void;
 }
 
-export default function QuotationForm({ data, mode, onClose }: Props) {
-  console.log(data, "pasdasd")
+export default function InvoiceForm({ data, mode, onClose }: Props) {
+  console.log(data,"paras")
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
   const [loadingBills, setLoadingBills] = useState(true);
   const [billError, setBillError] = useState<string | null>(null);
-  const [items, setItems] = useState<QuotationItem[]>(
+  const [items, setItems] = useState<InvoiceItem[]>(
     mode === 'Edit' && data?.items?.length
       ? data.items
       : [
@@ -92,7 +92,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
 
   const handleItemChange = (
     index: number,
-    field: keyof QuotationItem,
+    field: keyof InvoiceItem,
     value: string | number
   ) => {
     const updated = [...items];
@@ -148,17 +148,17 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
       };
 
       if (mode === 'Create') {
-        await createQuotation(payload);
-        toast.success('Quotation created successfully!');
+        await createInvoice(payload);
+        toast.success('Invoice created successfully!');
       } else {
-        await updateQuotation(data._id, payload);
-        toast.success('Quotation updated successfully!');
+        await updateInvoice(data._id, payload);
+        toast.success('Invoice updated successfully!');
       }
 
-      router.push('/dashboard/quotations');
+      router.push('/dashboard/invoices');
       onClose();
     } catch (err) {
-      console.error('Error submitting quotation:', err);
+      console.error('Error submitting invoice:', err);
       toast.error('Something went wrong. Try again.');
     } finally {
       setSubmitting(false);
@@ -171,7 +171,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-blue-600">
-          {mode === 'Create' ? 'Create Quotation' : 'Update Quotation'}
+          {mode === 'Create' ? 'Create Invoice' : 'Update Invoice'}
         </h2>
         <button
           onClick={onClose}
@@ -359,8 +359,8 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           {submitting
             ? 'Saving...'
             : mode === 'Create'
-            ? 'Create Quotation'
-            : 'Update Quotation'}
+            ? 'Create Invoice'
+            : 'Update Invoice'}
         </Button>
       </div>
     </div>

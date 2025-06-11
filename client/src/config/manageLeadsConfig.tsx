@@ -1,4 +1,5 @@
 import { Lead, User } from '@customTypes/index';
+import dayjs from 'dayjs';
 import { Eye, Trash2, Pencil } from 'lucide-react';
 import React from 'react';
 
@@ -21,7 +22,7 @@ export const manageLeadsConfig = (
         if (typeof item.createdBy === 'object' && item.createdBy !== null) {
           return <span>{(item.createdBy as User).name}</span>;
         }
-        return <span>{item.createdBy}</span>;
+        return <span>{dayjs(item.createdAt).format('DD/MM/YYYY hh:mm A')}</span>;
       },
     },
     {

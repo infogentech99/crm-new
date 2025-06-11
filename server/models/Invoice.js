@@ -18,7 +18,7 @@ const InvoiceSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-InvoiceSchema.pre('save', async function (next) {
+ InvoiceSchema.pre('save', async function (next) {
   const invoice = this;
   if (invoice.isNew) {
     const counter = await Counter.findByIdAndUpdate(
@@ -32,7 +32,7 @@ InvoiceSchema.pre('save', async function (next) {
   next();
 });
 
-const Invoice = mongoose.model('NewInvoice', InvoiceSchema);
+const Invoice = mongoose.model('Invoice', InvoiceSchema);
 export default Invoice;
 
 

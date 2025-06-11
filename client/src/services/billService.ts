@@ -41,6 +41,7 @@ export const getBillById = async (id: string): Promise<Bill> => {
 };
 
 export const createBill = async (billData: Omit<Bill, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<Bill> => {
+ 
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: getAuthHeaders(),

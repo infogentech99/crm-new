@@ -39,9 +39,35 @@ export const genrate = async (req, res) => {
 
 export const getAllQuotations = async (req, res) => {
   try {
-    const quotations = await Quotation.find({}).populate('user').populate('items').sort('-createdAt');
-    res.json(quotations);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    const query = search
+      ? {
+          $or: [
+            { quotationNumber: { $regex: search, $options: 'i' } },
+            { clientName: { $regex: search, $options: 'i' } },
+          ],
+        }
+      : {};
+
+    const totalQuotations = await Quotation.countDocuments(query);
+    const quotations = await Quotation.find(query)
+      .populate('user')
+      .populate('items')
+      .sort('-createdAt')
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({
+      quotations,
+      currentPage: page,
+      totalPages: Math.ceil(totalQuotations / limit),
+      totalQuotations,
+    });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Failed to fetch quotations' });
   }
 };
@@ -49,12 +75,16 @@ export const getAllQuotations = async (req, res) => {
 export const getQuotationById = async (req, res) => {
   try {
     const quotation = await Quotation.findById(req.params.id).populate('user items');
-    if (!quotation) return res.status(404).json({ error: 'Quotation not found' });
+    if (!quotation) {
+      return res.status(404).json({ error: 'Quotation not found' });
+    }
     res.json({ data: quotation });
   } catch (err) {
+    console.error("Error in getQuotationById:", err);
     res.status(500).json({ error: 'Failed to fetch quotation' });
   }
 };
+
 
 export const updateQuotation = async (req, res) => {
   try {

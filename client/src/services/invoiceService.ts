@@ -1,4 +1,4 @@
-import { Invoice } from '@customTypes/index';
+import { Invoice, InvoiceItem, QuotationItem } from '@customTypes/index';
 
 const API_URL = '/api/invoice'; // Assuming a /api/invoice endpoint based on server/index.js
 
@@ -40,18 +40,36 @@ export const getInvoiceById = async (id: string): Promise<Invoice> => {
   return response.json();
 };
 
-export const createInvoice = async (invoiceData: Omit<Invoice, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<Invoice> => {
-  const response = await fetch(API_URL, {
+export const createInvoice = async (
+  invoiceData: {
+    _id: string;
+    gstin: string;
+    items: InvoiceItem[];
+    totals: {
+      taxable: number;
+      igst: number;
+      total: number;
+    };
+  }
+): Promise<any> => {
+  const response = await fetch(`${API_URL}/genrate`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(invoiceData),
   });
+
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.message || 'Failed to create invoice');
   }
+
   return response.json();
 };
+
+
 
 export const updateInvoice = async (id: string, invoiceData: Partial<Invoice>): Promise<Invoice> => {
   const response = await fetch(`${API_URL}/${id}`, {

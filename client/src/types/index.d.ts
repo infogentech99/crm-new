@@ -113,12 +113,14 @@ export interface Bill {
   vendorName: string;
   amount: number;
   status: 'Pending' | 'Paid' | 'Due' | 'Overdue';
-  issueDate: string; // ISO date string
-  dueDate: string; // ISO date string
-  items?: QuotationItem[]; // Optional items, reusing QuotationItem
+  issueDate: string;
+  dueDate: string;
+  items?: QuotationItem[]; 
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  description: string;
+  hsnCode: string;
 }
 
 export interface Deal {
@@ -175,21 +177,34 @@ export interface QuotationItem {
   quantity: number;
   unitPrice: number;
   total: number;
+  price:number;
+  hsn : string
+}
+export interface InvoiceItem {
+  name: string;
+  description?: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  price:number;
+  hsn : string
 }
 
 export interface Quotation {
+  data: any;
   _id: string;
   quotationNumber: string;
   clientName: string;
   clientEmail: string;
   items: QuotationItem[];
   totalAmount: number;
-  status: 'Draft' | 'Sent' | 'Approved' | 'Rejected' | 'Expired';
   issueDate: string; // ISO date string
   validUntil: string; // ISO date string
-  createdBy: string | User; // User ID or populated User object
+  createdBy: string | User; 
   createdAt: string;
   updatedAt: string;
+  user: Lead;
+  totals:QuotationItem;
 }
 
 export type LeadStatus =
@@ -203,3 +218,25 @@ export type LeadStatus =
   | 'invoice_accepted'
   | 'processing_payments'
   | 'completed';
+  
+export interface FormData {
+  name: string;
+  phone: string;
+  email: string;
+  company: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  source: string;
+  industry: string;
+  status: string;
+  callResponse: string;
+  description?: string;
+  remark?: string;
+  position?: string;
+  website?: string;
+}
+
+

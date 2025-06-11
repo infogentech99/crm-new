@@ -1,5 +1,5 @@
 import Transaction from '../models/Transaction.js';
-import Invoice     from '../models/NewInvoice.js';  
+import Invoice     from '../models/Invoice.js';  
 
 export const createTransaction = async (req, res, next) => {
   try {

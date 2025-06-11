@@ -1,4 +1,4 @@
-import { Quotation } from '@customTypes/index';
+import { Quotation, QuotationItem } from '@customTypes/index';
 
 const API_URL = '/api/quotations';
 
@@ -16,7 +16,7 @@ export const getQuotations = async (
   search: string = ''
 ): Promise<{ quotations: Quotation[]; totalPages: number; currentPage: number; totalQuotations: number }> => {
   const headers = getAuthHeaders();
-  let url = `${API_URL}?page=${page}&limit=${limit}`;
+  let url = `${API_URL}/?page=${page}&limit=${limit}`;
   if (search) {
     url += `&search=${search}`;
   }
@@ -40,43 +40,59 @@ export const getQuotationById = async (id: string): Promise<Quotation> => {
   return response.json();
 };
 
+
 export const createQuotation = async (
-  quotationData: Omit<Quotation, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>
-): Promise<Quotation> => {
-  try {
-    const response = await fetch(`${API_URL}/genrate`, {
-      method: 'POST',
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(quotationData),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to create quotation');
-    }
-
-    return response.json();
-  } catch (err) {
-    console.error('Create Quotation Error:', err);
-    throw err;
+  quotationData: {
+    _id: string;
+    gstin: string;
+    items: QuotationItem[];
+    totals: {
+      taxable: number;
+      igst: number;
+      total: number;
+    };
   }
-};
-
-
-export const updateQuotation = async (id: string, quotationData: Partial<Quotation>): Promise<Quotation> => {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
+): Promise<any> => {
+  const response = await fetch(`${API_URL}/genrate`, {
+    method: 'POST',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(quotationData),
   });
+
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || `Failed to update quotation with ID ${id}`);
+    throw new Error(errorData.message || 'Failed to create quotation');
   }
+
   return response.json();
+};
+
+interface QuotationUpdatePayload {
+  gstin?: string;
+  items: QuotationItem[];
+  totals: {
+    taxable: number;
+    igst: number;
+    total: number;
+  };
+}
+
+export const updateQuotation = async (id: string, data: QuotationUpdatePayload): Promise<any> => {
+  const res = await fetch(`${API_URL}/${id}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || 'Failed to update quotation');
+  }
+
+  return res.json();
 };
 
 export const deleteQuotation = async (id: string): Promise<{ message: string }> => {

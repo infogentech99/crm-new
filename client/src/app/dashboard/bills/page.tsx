@@ -34,7 +34,8 @@ const ManageBillsPage: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
 
-   const userRole = useSelector((state: RootState) => state.user.role || '');
+
+  const userRole = useSelector((state: RootState) => state.user.role || '');
 
 
   const { data, isLoading, isError, error } = useQuery({
@@ -45,12 +46,12 @@ const ManageBillsPage: React.FC = () => {
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
 
-   
+
   const [billToDelete, setBillToDelete] = useState<Bill | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
 
-  // Open in “view” or “edit” mode:
+
   const handleCreateBill = () => {
     setSelectedBill(null);
     setIsModalOpen(true);
@@ -60,30 +61,30 @@ const ManageBillsPage: React.FC = () => {
     setIsModalOpen(true);
   }, []);
 
-   const handleDeleteBill = useCallback((bill: Bill) => {
+  const handleDeleteBill = useCallback((bill: Bill) => {
     setBillToDelete(bill);
     setIsDeleteModalOpen(true);
   }, []);
 
-  // Confirm deletion
   const confirmDeleteBill = async () => {
     if (!billToDelete) return;
     await deleteBill(billToDelete._id);
-    queryClient.invalidateQueries(['bills']);
+    queryClient.invalidateQueries({ queryKey: ['bills'] });
     setIsDeleteModalOpen(false);
     setBillToDelete(null);
   };
 
-  // Table config
   const config = manageBillsConfig(
-    /* view */ () => {},
+    /* view */() => { },
+
     handleEditBill,
     handleDeleteBill,
     userRole,
     currentPage,
     limit
   );
-  // override create action
+
+
   config.createBillButtonAction = handleCreateBill;
 
   // Controls
@@ -96,16 +97,20 @@ const ManageBillsPage: React.FC = () => {
     setSearch(e.target.value);
     setPage(1);
   };
-   const handleLimitChange = (value: string) => {
+
+  const handleLimitChange = (value: string) => {
+
     setLimit(Number(value));
-    setPage(1); // Reset to first page on limit change
+    setPage(1);
   };
 
   return (
     <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
-         <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
+
+          <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
+
           <CreateBillButton onClick={handleCreateBill} />
         </div>
 
@@ -168,20 +173,24 @@ const ManageBillsPage: React.FC = () => {
           </Pagination>
         </div>
 
-     
+
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           widthClass="max-w-lg"
         >
           <BillForm
-            initialData={selectedBill ?? undefined}
-            mode={selectedBill ? "edit" : "create"}
+
+            data={selectedBill ?? undefined}
+            mode={selectedBill ? "Edit" : "Create"}
+
             onClose={() => setIsModalOpen(false)}
           />
         </Modal>
 
-          {billToDelete && (
+
+        {billToDelete && (
+
           <DeleteModal
             isOpen={isDeleteModalOpen}
             onClose={() => { setIsDeleteModalOpen(false); setBillToDelete(null); }}

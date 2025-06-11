@@ -9,4 +9,12 @@ export async function sendUserEmail(formData: FormData): Promise<{ message: stri
 }
 
 
+export async function createEmail(formData: FormData): Promise<{ message: string }> {
+  const res = await fetch('/api/send-invoice', {
+    method: 'POST',
+    body: formData,
+  });
 
+  if (!res.ok) throw new Error('Failed to send email');
+  return await res.json();
+}
