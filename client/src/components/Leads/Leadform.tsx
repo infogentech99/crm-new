@@ -26,6 +26,7 @@ interface LeadFormProps {
 }
 
 const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
+  console.log(initialData,"pasdsa")
   const form = useForm<FormData>({
     defaultValues: {
       name: "",
@@ -57,10 +58,12 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
+    
     mutationFn: (data: FormData) =>
       mode === "Edit" && initialData?._id
         ? updateLead(initialData._id, data)
         : createLead(data),
+        
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       toast.success(`Lead ${mode === "Edit" ? "updated" : "created"} successfully`);

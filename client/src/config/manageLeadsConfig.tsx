@@ -56,13 +56,13 @@ export const manageLeadsConfig = (
       label: 'ACTIONS',
       render: (item: Lead) => (
         <div className="flex items-center space-x-2">
-          <button className="text-gray-500 hover:text-gray-700 flex items-center" onClick={() => handleViewLead(item)}>
+          <button className="text-gray-500 hover:text-gray-700 flex items-center cursor-pointer" onClick={() => handleViewLead(item)}>
             <Eye className="h-4 w-4" />
           </button>
-          <button className="text-blue-500 hover:text-blue-700 flex items-center" onClick={() => handleEditLead(item)}>
+          <button className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer" onClick={() => handleEditLead(item)}>
             <Pencil className="h-4 w-4" />
           </button>
-          <button className="text-red-500 hover:text-red-700 flex items-center" onClick={() => handleDeleteLead(item)}>
+          <button className="text-red-500 hover:text-red-700 flex items-center cursor-pointer" onClick={() => handleDeleteLead(item)}>
             <Trash2 className="h-4 w-4" />
           </button>
         </div>

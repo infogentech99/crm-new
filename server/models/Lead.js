@@ -11,6 +11,8 @@ const LeadSchema = new mongoose.Schema({
   },
   company:   String,
   jobTitle:  String,
+  description: String,
+  position:  String,
   address:   String,
   city:      String,
   state:     String,
