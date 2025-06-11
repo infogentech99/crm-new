@@ -22,7 +22,9 @@ export const manageBillsConfig = (
          label: 'HSN CODE',
          render: (item: Bill) => <span>{item.hsnCode}</span>,
        },
+
     { key: 'amount', label: 'AMOUNT', render: (item: Bill) => <span>₹{item.amount.toFixed(2)}</span> },
+
    
     {
       key: 'actions',
@@ -30,7 +32,9 @@ export const manageBillsConfig = (
       render: (item: Bill) => (
         <div className="flex items-center space-x-2">
         
+
           <button className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer" onClick={() => handleEditBill(item)}>
+
             <Pencil className="h-4 w-4" />
           </button>
           <button className="text-red-500 hover:text-red-700 flex items-center cursor-pointer" onClick={() => handleDeleteBill(item)}>
