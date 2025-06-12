@@ -21,7 +21,6 @@ import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { User } from "@customTypes/index";
 
-// “create” requires all four fields; “edit” makes password optional
 const createSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Invalid email address."),

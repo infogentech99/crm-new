@@ -92,6 +92,9 @@ export interface Transaction {
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  user: User;
+  invoice: Invoice,
+  transactionDate: string
 }
 
 export interface Meeting {

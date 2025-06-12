@@ -1,14 +1,10 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, {  useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getContacts } from '@services/contactService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import CreateContactButton from '@components/Common/CreateContactButton';
-import { manageContactsConfig } from '@config/manageContactsConfig';
-import Modal from '@components/Common/Modal';
-import { Contact } from '@customTypes/index';
+import { manageContactsConfig } from '@config/manageContactsConfig'
 import { Input } from '@components/ui/input';
 import {
   Select,
@@ -18,50 +14,24 @@ import {
   SelectValue,
 } from '@components/ui/select';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
-import { useSelector } from 'react-redux';
-import { RootState } from '@store/store';
+import { getLeads } from '@services/leadService';
 
 const ManageContactsPage: React.FC = () => {
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
-  // Removed statusFilter as contacts typically don't have complex statuses like leads
-
-  const userRole = useSelector((state: RootState) => state.user.role || '');
-
-  const handleViewContact = useCallback((contact: Contact) => {
-    setSelectedContact(contact);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedContact(null);
-  };
-
-  const handleEditContact = useCallback((contact: Contact) => {
-    alert(`Edit contact: ${contact.name}`);
-    // Implement actual edit logic here
-  }, []);
-
-  const handleDeleteContact = useCallback((contact: Contact) => {
-    alert(`Delete contact: ${contact.name}`);
-    // Implement actual delete logic here
-  }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['contacts', page, limit, search], // Removed statusFilter from queryKey
-    queryFn: () => getContacts(page, limit, search), // Removed statusFilter from queryFn
+    queryKey: ['contacts', page, limit, search],
+    queryFn: () => getLeads(page, limit, search),
   });
 
-
-  const contacts = data?.contacts || [];
+console.log(data,"pasdsad")
+  const contacts = data?.leads || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
 
-  const config = manageContactsConfig(handleViewContact, handleEditContact, handleDeleteContact, userRole, currentPage, limit); // Pass userRole, currentPage, and limit
+  const config = manageContactsConfig( currentPage, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -71,12 +41,12 @@ const ManageContactsPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); // Reset to first page on search
+    setPage(1); 
   };
 
   const handleLimitChange = (value: string) => {
     setLimit(Number(value));
-    setPage(1); // Reset to first page on limit change
+    setPage(1);
   };
 
 
@@ -84,8 +54,7 @@ const ManageContactsPage: React.FC = () => {
     <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
-          <CreateContactButton onClick={config.createContactButtonAction} />
+          <h1 className="text-2xl font-semibold text-gray-800">All contacts</h1>
         </div>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
@@ -95,7 +64,6 @@ const ManageContactsPage: React.FC = () => {
             onChange={handleSearchChange}
             className="max-w-sm"
           />
-          {/* Removed status filter select */}
           <Select onValueChange={handleLimitChange} value={String(limit)}>
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Limit" />
@@ -147,19 +115,6 @@ const ManageContactsPage: React.FC = () => {
             </PaginationContent>
           </Pagination>
         </div>
-
-        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-          {selectedContact && (
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Contact Details</h2>
-              <p>Name: {selectedContact.name}</p>
-              <p>Email: {selectedContact.email}</p>
-              <p>Phone: {selectedContact.phone}</p>
-              <p>Company: {selectedContact.company}</p>
-              {/* Add more contact details as needed */}
-            </div>
-          )}
-        </Modal>
       </div>
     </DashboardLayout>
   );

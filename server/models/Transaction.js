@@ -9,7 +9,7 @@ const TransactionSchema = new mongoose.Schema(
     },
     invoice: {
       type: String,
-      ref: 'NewInvoice',
+      ref: 'Invoice',
       required: true
     },
     amount: {

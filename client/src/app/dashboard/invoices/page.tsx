@@ -185,6 +185,7 @@ const ManageInvoicesPage: React.FC = () => {
             onClose={() => {
               setIsTransactionModalOpen(false);
               queryClient.invalidateQueries({ queryKey: ['invoices'] });
+              router.push('/dashboard/transactions');
             }}
           />
         )}
