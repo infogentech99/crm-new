@@ -86,12 +86,10 @@ export default function LeadDetailsPage() {
                         <p><strong>Name:</strong> {lead?.name || '-'}</p>
                         <p><strong>Email:</strong> {lead?.email || '-'}</p>
                         <p><strong>Phone:</strong> {lead?.phone || '-'}</p>
-                        <p><strong>Job Title:</strong> {lead?.jobTitle || '-'}</p>
+                        <p><strong>Position:</strong> {lead?.position || '-'}</p>
                         <p><strong>Company:</strong> {lead?.company || '-'}</p>
                         <p><strong>Industry:</strong> {lead?.industry || '-'}</p>
-                        <p><strong>City:</strong> {lead?.city || '-'}</p>
                         <p><strong>State:</strong> {lead?.state || '-'}</p>
-                        <p><strong>Country:</strong> {lead?.country || '-'}</p>
                         <p><strong>Zip Code:</strong> {lead?.zipCode || '-'}</p>
                         <p>
                             <strong>Website:</strong>{' '}
@@ -122,7 +120,6 @@ export default function LeadDetailsPage() {
                         <p><strong>Call Response:</strong> {lead?.callResponse || '-'}</p>
                         <p><strong>Address:</strong> {lead?.address || '-'}</p>
                         <p><strong>Remark:</strong> {lead?.remark || '-'}</p>
-                        <p><strong>Added By:</strong> {lead?.createdBy?.name || '-'}</p>
                         <p><strong>Added At:</strong> {lead?.createdAt ? dayjs(lead.createdAt).format('DD MMM YYYY, hh:mm A') : '-'}</p>
                         <p><strong>Updated At:</strong> {lead?.updatedAt ? dayjs(lead.updatedAt).format('DD MMM YYYY, hh:mm A') : '-'}</p>
                     </div>

@@ -103,49 +103,51 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
           {["name","phone","email","company","address","city","state","zipCode","country","source","industry","status","callResponse","description","remark","position","website"].map((field) => (
-  <FormField
-    key={field}
-    control={form.control}
-    name={field as keyof FormData}
-    render={({ field: f }) => (
-      <FormItem>
-        <FormLabel className="capitalize">{field.replace(/([A-Z])/g, ' $1')}</FormLabel>
-        <FormControl>
-          {(field === "source" || field === "industry" || field === "status" || field === "callResponse") ? (
-            <Select
-              value={f.value}
-              onValueChange={f.onChange}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={`Select ${field}`} />
-              </SelectTrigger>
-              <SelectContent>
-                {field === "source" &&
-                  ["LinkedIn", "Website", "Referral", "Cold Call", "Other"].map(val => (
-                    <SelectItem key={val} value={val}>{val}</SelectItem>
-                  ))}
-                {field === "industry" &&
-                  ["IT", "Retail", "Manufacturing", "Other"].map(val => (
-                    <SelectItem key={val} value={val}>{val}</SelectItem>
-                  ))}
-                {field === "status" &&
-                  ["pending_approval", "denied", "approved", "quotation_submitted", "quotation_rejected", "quotation_approved", "invoice_issued", "invoice_accepted", "completed", "processing_payments", "new", "contacted", "qualified", "lost"].map(val => (
-                    <SelectItem key={val} value={val}>{val}</SelectItem>
-                  ))}
-                {field === "callResponse" &&
-                  ["Picked", "Not Response", "Talk to later"].map(val => (
-                    <SelectItem key={val} value={val}>{val}</SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <Input type="text" {...f} />
-          )}
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
+ <FormField
+  key={field}
+  control={form.control}
+  name={field as keyof FormData}
+  render={({ field: f }) => (
+    <FormItem>
+      <FormLabel className="capitalize">{field.replace(/([A-Z])/g, ' $1')}</FormLabel>
+      <FormControl>
+        {(field === "source" || field === "industry" || field === "status" || field === "callResponse") ? (
+          <Select
+            key={f.value}
+            value={f.value}
+            onValueChange={f.onChange}
+          >
+            <SelectTrigger>
+              <SelectValue>{f.value || `Select ${field}`}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {field === "source" &&
+                ["LinkedIn", "Website", "Referral", "Cold Call", "Other"].map(val => (
+                  <SelectItem key={val} value={val}>{val}</SelectItem>
+                ))}
+              {field === "industry" &&
+                ["IT", "Retail", "Manufacturing", "Other"].map(val => (
+                  <SelectItem key={val} value={val}>{val}</SelectItem>
+                ))}
+              {field === "status" &&
+                ["pending_approval", "denied", "approved", "quotation_submitted", "quotation_rejected", "quotation_approved", "invoice_issued", "invoice_accepted", "completed", "processing_payments", "new", "contacted", "qualified", "lost"].map(val => (
+                  <SelectItem key={val} value={val}>{val}</SelectItem>
+                ))}
+              {field === "callResponse" &&
+                ["Picked", "Not Response", "Talk to later"].map(val => (
+                  <SelectItem key={val} value={val}>{val}</SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Input type="text" {...f} />
+        )}
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+ 
 ))}
 
           <div className="col-span-2 mt-4 flex justify-end gap-3">

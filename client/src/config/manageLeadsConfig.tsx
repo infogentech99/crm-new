@@ -1,3 +1,4 @@
+import BadgeDot from '@components/BadgeDot';
 import { Lead, User } from '@customTypes/index';
 import dayjs from 'dayjs';
 import { Eye, Trash2, Pencil } from 'lucide-react';
@@ -7,9 +8,9 @@ export const manageLeadsConfig = (
   handleViewLead: (lead: Lead) => void,
   handleEditLead: (lead: Lead) => void,
   handleDeleteLead: (lead: Lead) => void,
-  userRole: string, // Add userRole parameter
-  currentPage: number, // Add currentPage parameter
-  limit: number // Add limit parameter
+  userRole: string,
+  currentPage: number,
+  limit: number
 ) => {
   const baseColumns = [
     { key: '_id', label: 'S.NO', render: (item: Lead, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
@@ -28,29 +29,16 @@ export const manageLeadsConfig = (
     {
       key: 'callResponse',
       label: 'CALL RESPONSE',
-      render: (item: Lead) => (
-        <div className="flex items-center">
-          <span>{item.callResponse}</span>
-          {item.callResponse === 'Picked' && <span className="ml-2 h-2 w-2 rounded-full bg-green-500"></span>}
-          {item.callResponse === 'Not Response' && <span className="ml-2 h-2 w-2 rounded-full bg-red-500"></span>}
-          {item.callResponse === 'Talk to later' && <span className="ml-2 h-2 w-2 rounded-full bg-yellow-500"></span>}
-        </div>
-      ),
+      render: (item: Lead) => <BadgeDot label={item.callResponse || '-'} type="callResponse" />,
     },
     { key: 'remark', label: 'REMARK', render: (item: Lead) => <span>{item.remark || '-'}</span> },
     {
       key: 'status',
       label: 'STATUS',
-      render: (item: Lead) => (
-        <div className="flex items-center">
-          <span>{item.status}</span>
-          {item.status === 'approved' && <span className="ml-2 h-2 w-2 rounded-full bg-green-500"></span>}
-          {item.status === 'denied' && <span className="ml-2 h-2 w-2 rounded-full bg-red-500"></span>}
-          {item.status === 'pending_approval' && <span className="ml-2 h-2 w-2 rounded-full bg-yellow-500"></span>}
-          {/* Add more status colors as needed */}
-        </div>
-      ),
+      render: (item: Lead) => <BadgeDot label={item.status || '-'} type="status" />,
     },
+
+
     {
       key: 'actions',
       label: 'ACTIONS',
@@ -72,16 +60,15 @@ export const manageLeadsConfig = (
 
   let filteredColumns = [...baseColumns];
 
-  // Conditionally add email and phone based on user role
   if (userRole === 'superadmin' || userRole === 'admin') {
     const emailColumn = { key: 'email', label: 'EMAIL' };
     const phoneColumn = { key: 'phone', label: 'PHONE' };
 
     filteredColumns = [
-      ...baseColumns.slice(0, 2), // Elements before index 2
-      emailColumn,
+      ...baseColumns.slice(0, 2), 
+         emailColumn,
       phoneColumn,
-      ...baseColumns.slice(2), // Elements from index 2 onwards
+      ...baseColumns.slice(2), 
     ];
   }
 
