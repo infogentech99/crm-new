@@ -79,7 +79,6 @@ export const getLead = async (req, res) => {
   }
 };
 
-// UPDATE Lead (similar permission logic as above)
 export const updateLead = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id);
@@ -95,7 +94,7 @@ export const updateLead = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden: not your lead' });
     }
 
-    const { notes, ...otherUpdates } = req.body;
+    const { notes, projects, ...otherUpdates } = req.body;
     Object.assign(lead, otherUpdates);
     if (notes && Array.isArray(notes)) {
       lead.notes = notes.map((note) => ({
@@ -104,15 +103,18 @@ export const updateLead = async (req, res) => {
         createdAt: note.createdAt || new Date(),
       }));
     }
+    if (projects && Array.isArray(projects)) {
+      lead.projects = [...(lead.projects || []), ...projects];
+    }
 
     await lead.save();
-
     res.status(200).json(lead);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export const approveLead = async (req, res) => {
   try {
@@ -188,7 +190,7 @@ export const uploadQuotation = async (req, res) => {
 export const getLeadHistory = async (req, res) => {
   try {
     console.log('Fetching lead history for ID:', req.params.id);
-    const lead = await Invoice.find({ user: req.params.id }).populate('items').populate('transactions'); 
+    const lead = await Invoice.find({ user: req.params.id }).populate('items').populate('transactions');
     if (!lead) {
       return res.status(404).json({ message: 'Lead not found' });
     }

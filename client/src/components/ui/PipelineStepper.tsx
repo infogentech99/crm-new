@@ -1,6 +1,4 @@
-'use client';
 
-import { useState } from 'react';
 import clsx from 'clsx';
 import { CheckCircle, FileText, ReceiptText } from 'lucide-react';
 import { Button } from '@components/ui/button';

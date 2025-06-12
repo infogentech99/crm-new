@@ -16,7 +16,7 @@ import LeadDetailsShimmer from '@components/ui/LeadDetailsShimmer';
 import QuotationForm from '@components/Quotation/QuotationForm';
 import InvoiceForm from '@components/invoice/InoviceForm';
 import AddProjectModal from '@components/AddProjectModal';
-
+import ProjectSelector from '@components/Leads/ProjectSelector'
 export default function LeadDetailsPage() {
     const { id } = useParams();
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -28,7 +28,7 @@ export default function LeadDetailsPage() {
     const [isQuotationOpen, setIsQuotationOpen] = useState(false);
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-
+    const [selectedProject, setSelectedProject] = useState(0);
     useEffect(() => {
         const fetchLead = async () => {
             if (!id) return;
@@ -116,7 +116,9 @@ export default function LeadDetailsPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <p><strong>Lead Status:</strong> {lead?.status || '-'}</p>
+                        <p><strong>Current Project:</strong> {lead.projects?.[selectedProject]?.title || '-'}</p>
+                        <p><strong>Project Status:</strong> {lead.projects?.[selectedProject]?.status || '-'}</p>
+
                         <p><strong>Source:</strong> {lead?.source || '-'}</p>
                         <p><strong>Best Time To Call:</strong> {lead?.bestTimeToCall || '-'}</p>
                         <p><strong>Call Response:</strong> {lead?.callResponse || '-'}</p>
@@ -127,6 +129,14 @@ export default function LeadDetailsPage() {
                     </div>
                 </div>
             </div>
+            <ProjectSelector
+                projects={lead.projects || []}
+                selectedProjectIndex={selectedProject}
+                onSelect={(index: any) => {
+                    setSelectedProject(index);
+                    handleStatusChange(lead.projects[index].status);
+                }}
+            />
             <PipelineStepper
                 currentStatus={lead.status}
                 onStatusChange={(status: string) => handleStatusChange(status as LeadStatus)}
@@ -188,6 +198,7 @@ export default function LeadDetailsPage() {
                     }}
                 />
             </Modal>
+
             <EmailComposer
                 toEmail={lead.email}
                 isOpen={isEmailModalOpen}
