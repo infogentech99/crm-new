@@ -9,7 +9,13 @@ const getAuthHeaders = () => {
     ...(token && { Authorization: `Bearer ${token}` }),
   };
 };
-
+export interface TransactionInput {
+  amount: number;
+  method: string;
+  transactionId: string;
+  invoiceId: string;
+  leadId: string;
+}
 export const getTransactions = async (
   page: number = 1,
   limit: number = 10,
@@ -40,16 +46,22 @@ export const getTransactionById = async (id: string): Promise<Transaction> => {
   return response.json();
 };
 
-export const createTransaction = async (transactionData: Omit<Transaction, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>): Promise<Transaction> => {
+
+
+export const createTransaction = async (
+  transactionData: TransactionInput
+): Promise<any> => {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(transactionData),
   });
+
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.message || 'Failed to create transaction');
   }
+
   return response.json();
 };
 

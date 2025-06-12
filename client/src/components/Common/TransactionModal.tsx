@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { createTransaction } from "@services/transactionService";
+import { createTransaction, TransactionInput } from "@services/transactionService";
 import { toast } from "sonner";
 import { RxCross2 } from "react-icons/rx";
 import { Input } from "@components/ui/input";
@@ -45,14 +45,14 @@ export default function TransactionModal({
       toast.error("Please select a payment method.");
       return;
     }
-
-    const payload = {
+    const payload: TransactionInput = {
       amount,
       method,
       transactionId,
       invoiceId: selectedInvoice._id,
       leadId: selectedInvoice.user,
     };
+
     try {
       setLoading(true);
       await createTransaction(payload);
@@ -113,7 +113,7 @@ export default function TransactionModal({
             <Button
               type="button"
               onClick={onClose}
-               className="bg-gray-100 text-gray-800 hover:bg-gray-200"
+              className="bg-gray-100 text-gray-800 hover:bg-gray-200"
             >
               Cancel
             </Button>
