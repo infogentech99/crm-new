@@ -16,7 +16,7 @@ export interface AuthResponse {
 export interface DashboardSummary {
   totalLeads: number;
   newContacts: number;
-  openDeals: string; 
+  openDeals: string;
   tasksDue: number;
   approvedQuotations: number;
   approvedInvoices: number;
@@ -55,7 +55,7 @@ export interface Lead {
   linkedIn?: string;
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
-    notes?: {
+  notes?: {
     message?: string;
     createdAt?: string;
     createdBy?: string;
@@ -115,7 +115,7 @@ export interface Bill {
   status: 'Pending' | 'Paid' | 'Due' | 'Overdue';
   issueDate: string;
   dueDate: string;
-  items?: QuotationItem[]; 
+  items?: QuotationItem[];
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
@@ -177,8 +177,8 @@ export interface QuotationItem {
   quantity: number;
   unitPrice: number;
   total: number;
-  price:number;
-  hsn : string
+  price: number;
+  hsn: string
 }
 export interface InvoiceItem {
   name: string;
@@ -186,8 +186,8 @@ export interface InvoiceItem {
   quantity: number;
   unitPrice: number;
   total: number;
-  price:number;
-  hsn : string
+  price: number;
+  hsn: string
 }
 
 export interface Quotation {
@@ -200,11 +200,11 @@ export interface Quotation {
   totalAmount: number;
   issueDate: string; // ISO date string
   validUntil: string; // ISO date string
-  createdBy: string | User; 
+  createdBy: string | User;
   createdAt: string;
   updatedAt: string;
   user: Lead;
-  totals:QuotationItem;
+  totals: QuotationItem;
 }
 
 export type LeadStatus =
@@ -218,7 +218,7 @@ export type LeadStatus =
   | 'invoice_accepted'
   | 'processing_payments'
   | 'completed';
-  
+
 export interface FormData {
   name: string;
   phone: string;
@@ -240,3 +240,10 @@ export interface FormData {
 }
 
 
+export interface Trasaction {
+  amount: number,
+  transactionId: string,
+  method: string,
+  invoiceId: string,
+  leadId: string,
+}

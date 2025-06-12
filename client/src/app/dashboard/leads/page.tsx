@@ -236,7 +236,6 @@ const handleViewLead = useCallback((lead: Lead) => {
             onClose={() => { setIsModalOpen(false); setSelectedLead(null); }}
           />
         </Modal>
-
         {leadToDelete && (
           <DeleteModal
             isOpen={isDeleteModalOpen}

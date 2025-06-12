@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useCallback, useState } from 'react';
-import { useQuery,useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteInvoice, getInvoices } from '@services/invoiceService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
@@ -9,6 +9,7 @@ import { manageInvoicesConfig } from '@config/manageInvoicesConfig';
 import Modal from '@components/Common/Modal';
 import { Invoice } from '@customTypes/index';
 import { Input } from '@components/ui/input';
+import TransactionModal from '@components/Common/TransactionModal';
 import {
   Select,
   SelectContent,
@@ -26,8 +27,9 @@ import DeleteModal from '@components/Common/DeleteModal';
 const ManageInvoicesPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
-   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -37,22 +39,26 @@ const ManageInvoicesPage: React.FC = () => {
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
   const handleViewInvoice = useCallback((invoice: Invoice) => {
-     setSelectedInvoice(invoice);
-   if (invoice?._id) {
-    router.push(`/dashboard/invoices/${invoice._id}`)
-   }
+    setSelectedInvoice(invoice);
+    if (invoice?._id) {
+      router.push(`/dashboard/invoices/${invoice._id}`)
+    }
   }, [router]);
 
   const handleEditInvoice = useCallback((invoice: Invoice) => {
-      setSelectedInvoice(invoice);
-      setIsInvoiceOpen(true);
+    setSelectedInvoice(invoice);
+    setIsInvoiceOpen(true);
   }, []);
 
   const handleDeleteInvoice = useCallback((invoice: Invoice) => {
-   setInvoiceToDelete(invoice);
-   setIsDeleteModalOpen(true);
-     
+    setInvoiceToDelete(invoice);
+    setIsDeleteModalOpen(true);
+
   }, []);
+  const handleOpenTransactionModal = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setIsTransactionModalOpen(true);
+  };
   const handleConfirmDelete = async () => {
     if (!invoiceToDelete) return;
 
@@ -75,7 +81,7 @@ const ManageInvoicesPage: React.FC = () => {
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
 
-  const config = manageInvoicesConfig(handleViewInvoice, handleEditInvoice, handleDeleteInvoice, userRole, currentPage, limit);
+  const config = manageInvoicesConfig(handleViewInvoice, handleEditInvoice, handleDeleteInvoice, handleOpenTransactionModal, userRole, currentPage, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -85,7 +91,7 @@ const ManageInvoicesPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); 
+    setPage(1);
   };
 
   const handleLimitChange = (value: string) => {
@@ -146,7 +152,7 @@ const ManageInvoicesPage: React.FC = () => {
                   >
                     {i + 1}
                   </PaginationLink>
-              </PaginationItem>
+                </PaginationItem>
               ))}
               <PaginationItem>
                 <PaginationNext
@@ -159,7 +165,7 @@ const ManageInvoicesPage: React.FC = () => {
           </Pagination>
         </div>
 
-           <Modal
+        <Modal
           isOpen={isInvoiceOpen}
           onClose={() => setIsInvoiceOpen(false)}
           widthClass="max-w-5xl"
@@ -173,18 +179,28 @@ const ManageInvoicesPage: React.FC = () => {
             }}
           />
         </Modal>
-          {invoiceToDelete && (
-                  <DeleteModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => {
-                      setIsDeleteModalOpen(false);
-                      setInvoiceToDelete(null);
-                      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-                    }}
-                    onConfirm={handleConfirmDelete}
-                    itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}
-                  />
-                )}
+        {isTransactionModalOpen && (
+          <TransactionModal
+            selectedInvoice={selectedInvoice}
+            onClose={() => {
+              setIsTransactionModalOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            }}
+          />
+        )}
+
+        {invoiceToDelete && (
+          <DeleteModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => {
+              setIsDeleteModalOpen(false);
+              setInvoiceToDelete(null);
+              queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            }}
+            onConfirm={handleConfirmDelete}
+            itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
