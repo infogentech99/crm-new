@@ -1,18 +1,20 @@
 import Transaction from '../models/Transaction.js';
-import Invoice     from '../models/Invoice.js';  
+import Invoice from '../models/Invoice.js';
+import Lead from '../models/Lead.js';
 
 export const createTransaction = async (req, res, next) => {
   try {
-    const { leadId, invoiceId, amount, method,transactionId } = req.body;
+    const { leadId, invoiceId, amount, method, transactionId } = req.body;
 
     if (!leadId || !invoiceId || amount == null || !method) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const invoice = await Invoice.findOne({ _id: invoiceId });
+    const invoice = await Invoice.findById(invoiceId);
     if (!invoice) {
       return res.status(404).json({ error: 'Invoice not found' });
     }
+
     const txn = await Transaction.create({
       user: leadId,
       invoice: invoiceId,
@@ -26,11 +28,24 @@ export const createTransaction = async (req, res, next) => {
     invoice.transactions.push(txn._id);
     await invoice.save();
 
+    await Lead.findByIdAndUpdate(leadId, {
+      $push: {
+        transactions: {
+          transaction: txn._id,
+          invoiceId: invoiceId,
+          date: new Date(),
+          amount,
+          method
+        }
+      }
+    });
+
     res.status(201).json(txn);
   } catch (err) {
     next(err);
   }
 };
+
 
 export const getTransactionsByInvoice = async (req, res, next) => {
   try {

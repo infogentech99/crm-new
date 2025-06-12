@@ -4,7 +4,6 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { CheckCircle, FileText, ReceiptText } from 'lucide-react';
 import { Button } from '@components/ui/button';
-import { LeadStatus } from '@customTypes/index';
 
 const PIPELINE_STEPS = [
   { value: 'new', label: 'New', icon: FileText },

@@ -48,6 +48,19 @@ const LeadSchema = new mongoose.Schema({
   callResponse:  { type: String, enum: ["Picked", "Not Response", "Talk to later"], default: 'Picked' },
   denialReason: String,
   remark: { type: String },
+  transactions: [
+  {
+    type: Object, 
+    default: []
+  }
+],
+projects: [
+  {
+    type: Object, 
+    default: []
+  }
+],
+
 }, { timestamps: true });
 
 const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);

@@ -15,6 +15,7 @@ import { LeadStatus } from '@customTypes/index';
 import LeadDetailsShimmer from '@components/ui/LeadDetailsShimmer';
 import QuotationForm from '@components/Quotation/QuotationForm';
 import InvoiceForm from '@components/invoice/InoviceForm';
+import AddProjectModal from '@components/AddProjectModal';
 
 export default function LeadDetailsPage() {
     const { id } = useParams();
@@ -26,6 +27,7 @@ export default function LeadDetailsPage() {
     const [selectedLead, setSelectedLead] = useState<any>(null);
     const [isQuotationOpen, setIsQuotationOpen] = useState(false);
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+    const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchLead = async () => {
@@ -61,10 +63,11 @@ export default function LeadDetailsPage() {
     if (loading) return <LeadDetailsShimmer />;
     return (
         <DashboardLayout>
-            <div className="w-full px-8 py-6 bg-white shadow-sm rounded-md">
+            <div className="w-full px-8 py-6 bg-white shadow-sm rounded-md mb-2">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold">Lead Details</h2>
                     <div className="space-x-2">
+                        <Button onClick={() => setIsProjectModalOpen(true)}>Add Project</Button>
                         <Button
                             onClick={() => setIsEmailModalOpen(true)}
                         >
@@ -90,7 +93,6 @@ export default function LeadDetailsPage() {
                         <p><strong>Company:</strong> {lead?.company || '-'}</p>
                         <p><strong>Industry:</strong> {lead?.industry || '-'}</p>
                         <p><strong>State:</strong> {lead?.state || '-'}</p>
-                        <p><strong>Zip Code:</strong> {lead?.zipCode || '-'}</p>
                         <p>
                             <strong>Website:</strong>{' '}
                             {lead?.website ? (
@@ -137,7 +139,12 @@ export default function LeadDetailsPage() {
                 notes={lead.notes || []}
                 onNotesUpdated={(updatedNotes) => setLead((prev: any) => ({ ...prev, notes: updatedNotes }))}
             />
-
+            <AddProjectModal
+                isOpen={isProjectModalOpen}
+                onClose={() => setIsProjectModalOpen(false)}
+                leadId={lead._id}
+                onProjectAdded={(updatedLead) => setLead(updatedLead)}
+            />
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => {
@@ -168,7 +175,7 @@ export default function LeadDetailsPage() {
                     }}
                 />
             </Modal>
-             <Modal
+            <Modal
                 isOpen={isInvoiceOpen}
                 onClose={() => setIsInvoiceOpen(false)}
                 widthClass="max-w-5xl"

@@ -68,6 +68,10 @@ export interface Lead {
   remark?: string;
   createdAt: string;
   updatedAt: string;
+   projects: {
+    title: string;
+    status: string;
+  }[];
 }
 
 export interface Task {
