@@ -19,7 +19,6 @@ interface Props {
 }
 
 export default function QuotationForm({ data, mode, onClose }: Props) {
-  console.log(data, "pasdasd")
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
@@ -277,7 +276,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
                     control: (base) => ({
                       ...base,
                       minHeight: '36px',
-                      fontSize: '0.875rem',
+                      fontSize: '0.85rem',
                     }),
                     menuPortal: (base) => ({
                       ...base,

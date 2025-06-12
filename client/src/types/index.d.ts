@@ -84,12 +84,11 @@ export interface Task {
 
 export interface Transaction {
   _id: string;
-  type: 'Credit' | 'Debit';
+  method: string
   amount: number;
-  date: string; // ISO date string
-  description: string;
-  relatedInvoice?: string; // Optional: ID of related invoice
-  relatedBill?: string; // Optional: ID of related bill
+  transactionId: string
+  invoiceId: string,
+  leadId: string,
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
@@ -237,13 +236,4 @@ export interface FormData {
   remark?: string;
   position?: string;
   website?: string;
-}
-
-
-export interface Trasaction {
-  amount: number,
-  transactionId: string,
-  method: string,
-  invoiceId: string,
-  leadId: string,
 }

@@ -12,7 +12,8 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@components/ui/select"; 
+} from "@components/ui/select";
+import { Button } from "@components/ui/button";
 
 export default function TransactionModal({
   selectedInvoice,
@@ -22,7 +23,7 @@ export default function TransactionModal({
   onClose: () => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const [method, setMethod] = useState(""); 
+  const [method, setMethod] = useState("");
 
   if (!selectedInvoice) return null;
 
@@ -45,14 +46,13 @@ export default function TransactionModal({
       return;
     }
 
-    const payload: Transaction = {
+    const payload = {
       amount,
       method,
       transactionId,
       invoiceId: selectedInvoice._id,
       leadId: selectedInvoice.user,
     };
-
     try {
       setLoading(true);
       await createTransaction(payload);
@@ -110,37 +110,46 @@ export default function TransactionModal({
           </Select>
 
           <div className="flex justify-end gap-2 pt-4">
-            <button
+            <Button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 rounded"
+               className="bg-gray-100 text-gray-800 hover:bg-gray-200"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+              className=""
             >
               {loading ? "Saving..." : "Save"}
-            </button>
+            </Button>
           </div>
         </form>
 
         {selectedInvoice.transactions?.length > 0 && (
           <div className="mt-6">
-            <h4 className="text-sm font-semibold mb-2">
-              Previous Transactions
-            </h4>
-            <ul className="text-sm space-y-1 max-h-40 overflow-y-auto">
-              {selectedInvoice.transactions.map((txn: any) => (
-                <li key={txn._id} className="flex justify-between border-b pb-1">
+            <h4 className="text-sm font-semibold mb-2">Previous Transactions</h4>
+
+            <div className="grid grid-cols-4 text-xs font-medium text-gray-500 px-2 pb-1 border-b">
+              <span>Date</span>
+              <span>Txn ID</span>
+              <span>Method</span>
+              <span className="text-right">Amount</span>
+            </div>
+
+            <ul className="text-sm max-h-40 overflow-y-auto divide-y">
+              {selectedInvoice.transactions.map((txn: Transaction) => (
+                <li key={txn._id} className="grid grid-cols-4 py-1 px-2 items-center">
                   <span>{new Date(txn.createdAt).toLocaleDateString()}</span>
-                  <span>₹{txn.amount}</span>
+                  <span className="truncate" title={txn.transactionId}>{txn.transactionId || '-'}</span>
+                  <span>{txn.method}</span>
+                  <span className="text-right">₹{txn.amount}</span>
                 </li>
               ))}
             </ul>
           </div>
+
         )}
       </div>
     </div>
