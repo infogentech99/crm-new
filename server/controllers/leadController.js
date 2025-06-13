@@ -103,10 +103,23 @@ export const updateLead = async (req, res) => {
         createdAt: note.createdAt || new Date(),
       }));
     }
-    if (projects && Array.isArray(projects)) {
-      lead.projects = [...(lead.projects || []), ...projects];
-    }
 
+    if (projects && Array.isArray(projects)) {
+      const existingProjects = lead.projects || [];
+      projects.forEach((newProject) => {
+        const index = existingProjects.findIndex(
+          (p) => p._id?.toString() === newProject._id?.toString()
+        );
+
+        if (index > -1) {
+          existingProjects[index] = { ...existingProjects[index], ...newProject };
+        } else {
+          existingProjects.push(newProject);
+        }
+      });
+
+      lead.projects = existingProjects;
+    }
     await lead.save();
     res.status(200).json(lead);
   } catch (err) {
@@ -114,6 +127,7 @@ export const updateLead = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 export const approveLead = async (req, res) => {

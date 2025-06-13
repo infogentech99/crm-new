@@ -36,9 +36,9 @@ export default function LeadDetailsPage() {
             try {
                 const data = await getLeadById(id as string);
                 setLead(data);
-                console.log(data, "updaeted")
+                console.log(data, "updated")
 
-            } catch (err: any) {
+            } catch (err:any) {
                 setError(err.message || 'Failed to fetch lead');
             } finally {
                 setLoading(false);
@@ -47,18 +47,30 @@ export default function LeadDetailsPage() {
         fetchLead();
     }, [id]);
 
-
     const handleStatusChange = async (newStatus: LeadStatus) => {
-        if (lead.status === newStatus) return;
+        if (lead.projects[selectedProject].status === newStatus) return;
 
         try {
-            const updatedLead = await updateLead(lead._id, { status: newStatus });
+            const updatedProjects = lead.projects.map((project:object, index: number) =>
+                index === selectedProject
+                    ? { ...project, status: newStatus }
+                    : project
+            );
+
+            const updatedLead = await updateLead(lead._id, {
+                projects: updatedProjects,
+            });
+
             setLead(updatedLead);
-            toast.success('Status updated successfully');
+            toast.success('Project status updated successfully');
         } catch (err: any) {
-            toast.error(err.message || 'Failed to update status');
+            toast.error(err.message || 'Failed to update project status');
         }
     };
+
+
+
+
 
     if (loading) return <LeadDetailsShimmer />;
     return (
@@ -118,7 +130,6 @@ export default function LeadDetailsPage() {
                     <div className="space-y-2">
                         <p><strong>Current Project:</strong> {lead.projects?.[selectedProject]?.title || '-'}</p>
                         <p><strong>Project Status:</strong> {lead.projects?.[selectedProject]?.status || '-'}</p>
-
                         <p><strong>Source:</strong> {lead?.source || '-'}</p>
                         <p><strong>Best Time To Call:</strong> {lead?.bestTimeToCall || '-'}</p>
                         <p><strong>Call Response:</strong> {lead?.callResponse || '-'}</p>
@@ -134,11 +145,10 @@ export default function LeadDetailsPage() {
                 selectedProjectIndex={selectedProject}
                 onSelect={(index: any) => {
                     setSelectedProject(index);
-                    handleStatusChange(lead.projects[index].status);
                 }}
             />
             <PipelineStepper
-                currentStatus={lead.status}
+                currentStatus={lead.projects?.[selectedProject]?.status || 'new'}
                 onStatusChange={(status: string) => handleStatusChange(status as LeadStatus)}
                 onCreateQuotation={() => setIsQuotationOpen(true)}
                 onCreateInvoice={() => setIsInvoiceOpen(true)}
@@ -193,6 +203,7 @@ export default function LeadDetailsPage() {
                 <InvoiceForm
                     mode="Create"
                     data={lead}
+                    projectId={lead?.projects?.[selectedProject]?._id || null}
                     onClose={() => {
                         setIsInvoiceOpen(false);
                     }}

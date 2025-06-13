@@ -24,7 +24,7 @@ const projectStatuses = [
   'invoice_issued',
   'invoice_accepted',
   'processing_payments',
-  'completed', 
+  'completed',
 ];
 
 export default function AddProjectModal({
@@ -52,13 +52,22 @@ export default function AddProjectModal({
 
     try {
       setLoading(true);
-      const payload: Partial<Lead> = {
-        projects: [{ title, status }],
+      const newProject = {
+        _id: Date.now().toString(), 
+        title,
+        status,
       };
+
+      const payload: Partial<Lead> = {
+        projects: [newProject],
+      };
+
       const updated = await updateLead(leadId, payload);
       toast.success('Project added successfully');
       onProjectAdded(updated);
       onClose();
+      setTitle('');
+      setStatus('new');
     } catch (err) {
       toast.error('Failed to save project');
       console.error(err);
