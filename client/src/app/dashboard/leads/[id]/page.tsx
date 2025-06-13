@@ -78,7 +78,7 @@ export default function LeadDetailsPage() {
         <DashboardLayout>
             <div className="w-full px-8 py-6 bg-white shadow-sm rounded-md mb-2">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold">Lead Details</h2>
+                    <h2 className="text-xl font-bold mb-4 text-gray-800">Lead Details</h2>
                     <div className="space-x-2">
                         <Button onClick={() => setIsProjectModalOpen(true)}>Add Project</Button>
                         <Button
@@ -141,7 +141,14 @@ export default function LeadDetailsPage() {
                     </div>
                 </div>
             </div>
-            <ProjectSelector
+            
+            <LeadNotes
+                leadId={lead._id}
+                notes={lead.notes || []}
+                onNotesUpdated={(updatedNotes) => setLead((prev: any) => ({ ...prev, notes: updatedNotes }))}
+            />
+            <div className='bg-white shadow-sm rounded-md my-6 p-4'>
+                <ProjectSelector
                 projects={lead.projects || []}
                 selectedProjectIndex={selectedProject}
                 onSelect={(index: any) => {
@@ -154,6 +161,7 @@ export default function LeadDetailsPage() {
                 onCreateQuotation={() => setIsQuotationOpen(true)}
                 onCreateInvoice={() => setIsInvoiceOpen(true)}
             />
+            </div>
             <TransactionList
                 transactions={
                     (lead.transactions || []).filter(
@@ -163,11 +171,7 @@ export default function LeadDetailsPage() {
                 }
                 projects={lead.projects}
             />
-            <LeadNotes
-                leadId={lead._id}
-                notes={lead.notes || []}
-                onNotesUpdated={(updatedNotes) => setLead((prev: any) => ({ ...prev, notes: updatedNotes }))}
-            />
+
             <AddProjectModal
                 isOpen={isProjectModalOpen}
                 onClose={() => setIsProjectModalOpen(false)}

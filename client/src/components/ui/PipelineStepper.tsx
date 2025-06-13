@@ -36,7 +36,7 @@ export default function PipelineStepper({
   };
 
   return (
-    <div className="w-full py-12 px-4 bg-white border rounded-xl shadow-sm overflow-x-auto">
+    <div className="w-full px-4 bg-white overflow-x-auto">
       <div className="relative flex items-start justify-between max-w-7xl mx-auto pt-8">
 
         {PIPELINE_STEPS.map((step, index) => {

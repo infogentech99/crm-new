@@ -33,10 +33,18 @@ export const manageLeadsConfig = (
     },
     { key: 'remark', label: 'REMARK', render: (item: Lead) => <span>{item.remark || '-'}</span> },
     {
-      key: 'status',
-      label: 'STATUS',
-      render: (item: Lead) => <BadgeDot label={item.status || '-'} type="status" />,
-    },
+  key: 'latestProject',
+  label: 'Latest Project',
+  render: (lead: Lead) => {
+    const lastProject = lead.projects?.[lead.projects.length - 1];
+    if (!lastProject) return <span className="text-gray-400 italic">No Project</span>;
+    return (
+      <div className="flex flex-col">
+        <span className="font-medium text-black">{lastProject.title}</span>
+        <BadgeDot label={lastProject.status || 'new'} type="status" />
+      </div>
+    );
+  }},
 
 
     {

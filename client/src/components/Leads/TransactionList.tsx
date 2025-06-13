@@ -31,7 +31,7 @@ export default function TransactionList({ transactions, projects }: Props) {
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">Project Transactions</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-800">Project Transactions</h2>
       <div className="flex justify-between font-semibold bg-gray-100 text-gray-700 px-4 py-3 rounded">
         <span className="flex-1">Invoice</span>
         <span className="flex-1">Txn ID</span>
