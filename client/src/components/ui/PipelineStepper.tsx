@@ -37,34 +37,33 @@ export default function PipelineStepper({
 
   return (
     <div className="w-full py-12 px-4 bg-white border rounded-xl shadow-sm overflow-x-auto">
-      <div className="flex items-center justify-between relative max-w-7xl mx-auto">
+      <div className="relative flex items-start justify-between max-w-7xl mx-auto pt-8">
 
         {PIPELINE_STEPS.map((step, index) => {
           const status = getStatus(step.value);
           const Icon = step.icon;
           const isLast = index === PIPELINE_STEPS.length - 1;
-          const nextStatus = !isLast ? getStatus(PIPELINE_STEPS[index + 1].value) : null;
+
+          const nextStepStatus = !isLast ? getStatus(PIPELINE_STEPS[index + 1].value) : null;
 
           return (
             <div key={step.value} className="relative flex flex-col items-center w-40 z-10">
-              {/* Connector line to next step */}
               {!isLast && (
                 <div
                   className={clsx(
-                    'absolute top-5 left-[50%] translate-x-0 h-[3px] w-full transition-all duration-300 z-0',
+                    'absolute top-5 left-[50%] h-[3px] w-[100%] transition-all duration-300 z-0',
                     {
-                      'bg-green-500': nextStatus === 'done' || nextStatus === 'active',
-                      'bg-gray-300': nextStatus === 'pending',
+                      'bg-green-500': nextStepStatus === 'done' || nextStepStatus === 'active',
+                      'bg-gray-300': nextStepStatus === 'pending',
                     }
                   )}
                 />
               )}
 
-              {/* Step Circle */}
               <div
                 onClick={() => onStatusChange(step.value)}
                 className={clsx(
-                  'w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all cursor-pointer z-10',
+                  'w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 cursor-pointer z-10',
                   {
                     'bg-green-500 text-white': status === 'done',
                     'bg-blue-600 text-white animate-pulse shadow-md shadow-blue-300': status === 'active',
@@ -74,35 +73,33 @@ export default function PipelineStepper({
               >
                 {status === 'done' ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
               </div>
-
-              {/* Step Label */}
               <span
-                className={clsx('text-sm font-medium text-center', {
+                className={clsx('text-sm font-medium text-center mt-1', {
                   'text-gray-800': status !== 'pending',
                   'text-gray-400': status === 'pending',
                 })}
               >
                 {step.label}
               </span>
-
-              {/* Quotation Button */}
-              {step.value === 'quotation_submitted' && currentStatus === 'quotation_submitted' && (
-                <Button
-                  className="mt-2 w-full text-xs bg-green-600 hover:bg-green-700 text-white"
-                  onClick={onCreateQuotation}
-                >
-                  📄 Create Quotation
-                </Button>
+              {(step.value === 'quotation_submitted' && currentStatus === 'quotation_submitted') && (
+                <div className="mt-2 w-full flex justify-center">
+                  <Button
+                    className="text-xs w-32 bg-green-600 hover:bg-green-700 text-white"
+                    onClick={onCreateQuotation}
+                  >
+                    📄 Create Quotation
+                  </Button>
+                </div>
               )}
-
-              {/* Invoice Button */}
-              {step.value === 'invoice_issued' && currentStatus === 'invoice_issued' && (
-                <Button
-                  className="mt-2 w-full text-xs bg-green-600 hover:bg-green-700 text-white"
-                  onClick={onCreateInvoice}
-                >
-                  🧾 Create Invoice
-                </Button>
+              {(step.value === 'invoice_issued' && currentStatus === 'invoice_issued') && (
+                <div className="mt-2 w-full flex justify-center">
+                  <Button
+                    className="text-xs w-32 bg-green-600 hover:bg-green-700 text-white"
+                    onClick={onCreateInvoice}
+                  >
+                    🧾 Create Invoice
+                  </Button>
+                </div>
               )}
             </div>
           );
@@ -111,3 +108,4 @@ export default function PipelineStepper({
     </div>
   );
 }
+
