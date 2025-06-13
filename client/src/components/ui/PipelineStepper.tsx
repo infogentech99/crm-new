@@ -1,74 +1,108 @@
+'use client';
 
 import clsx from 'clsx';
-import { CheckCircle, FileText, ReceiptText } from 'lucide-react';
+import { Check, CheckCircle, FileText, ReceiptText } from 'lucide-react';
 import { Button } from '@components/ui/button';
 
 const PIPELINE_STEPS = [
-  { value: 'new', label: 'New', icon: FileText },
-  { value: 'quotation_submitted', label: 'Quotation Issue', icon: FileText },
+  { value: 'new', label: 'New Lead', icon: FileText },
+  { value: 'quotation_submitted', label: 'Quotation Issued', icon: FileText },
   { value: 'quotation_approved', label: 'Quotation Approved', icon: FileText },
-  { value: 'invoice_issued', label: 'Invoice Issue', icon: ReceiptText },
+  { value: 'invoice_issued', label: 'Invoice Issued', icon: ReceiptText },
   { value: 'invoice_accepted', label: 'Invoice Accepted', icon: ReceiptText },
   { value: 'processing_payments', label: 'Processing Payments', icon: ReceiptText },
-  { value: 'completed', label: 'Completed', icon: CheckCircle },
+  { value: 'completed', label: 'Project Completed', icon: CheckCircle },
 ];
 
 interface PipelineStepperProps {
   currentStatus: string;
   onStatusChange: (status: string) => void;
-  onCreateQuotation?: () => void; 
-  onCreateInvoice?: () => void; 
+  onCreateQuotation?: () => void;
+  onCreateInvoice?: () => void;
 }
 
-export default function PipelineStepper({ currentStatus, onStatusChange, onCreateQuotation,onCreateInvoice }: PipelineStepperProps) {
+export default function PipelineStepper({
+  currentStatus,
+  onStatusChange,
+  onCreateQuotation,
+  onCreateInvoice,
+}: PipelineStepperProps) {
   const getStatus = (stepValue: string) => {
-    const activeIndex = PIPELINE_STEPS.findIndex(s => s.value === currentStatus);
-    const currentIndex = PIPELINE_STEPS.findIndex(s => s.value === stepValue);
+    const activeIndex = PIPELINE_STEPS.findIndex((s) => s.value === currentStatus);
+    const currentIndex = PIPELINE_STEPS.findIndex((s) => s.value === stepValue);
     if (currentIndex < activeIndex) return 'done';
     if (currentIndex === activeIndex) return 'active';
     return 'pending';
   };
 
   return (
-    <div className="flex flex-col items-center py-10 bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="flex flex-wrap justify-center gap-16 relative">
-        {PIPELINE_STEPS.map((step, i) => {
+    <div className="w-full py-12 px-4 bg-white border rounded-xl shadow-sm overflow-x-auto">
+      <div className="flex items-center justify-between relative max-w-7xl mx-auto">
+
+        {PIPELINE_STEPS.map((step, index) => {
           const status = getStatus(step.value);
           const Icon = step.icon;
+          const isLast = index === PIPELINE_STEPS.length - 1;
+          const nextStatus = !isLast ? getStatus(PIPELINE_STEPS[index + 1].value) : null;
 
           return (
-            <div key={step.value} className="relative flex flex-col items-center">
-              <div
-                onClick={() => onStatusChange(step.value)}
-                className={clsx(
-                  'w-60 p-6 rounded-2xl border-2 cursor-pointer shadow-xl transition-all text-center group hover:scale-105 hover:shadow-2xl',
-                  {
-                    'bg-gradient-to-br from-blue-600 to-blue-700 text-white border-blue-700': status === 'active',
-                    'bg-gray-50 text-gray-500 border-gray-300': status === 'pending',
-                    'bg-green-50 text-green-700 border-green-500': status === 'done',
-                  }
-                )}
-              >
-                <Icon className="mx-auto mb-3 w-8 h-8" />
-                <div className="font-semibold text-base leading-tight mb-2">{step.label}</div>
-                {step.value === 'quotation_submitted' && currentStatus === 'quotation_submitted' && (
-                  <Button className="w-full mt-2 text-white bg-green-600 hover:bg-green-700 text-sm py-2"  onClick={onCreateQuotation}>📄 Create Quotation</Button>
-                )}
-                {step.value === 'invoice_issued' && currentStatus === 'invoice_issued' && (
-                  <Button className="w-full mt-2 text-white bg-green-600 hover:bg-green-700 text-sm py-2" onClick={onCreateInvoice}>🧾 Create Invoice</Button>
-                )}
-              </div>
-
-              {i < PIPELINE_STEPS.length - 1 && (
+            <div key={step.value} className="relative flex flex-col items-center w-40 z-10">
+              {/* Connector line to next step */}
+              {!isLast && (
                 <div
                   className={clsx(
-                    'absolute right-[-65px] top-[50%] h-[2px] w-[60px] rounded-full shadow-sm transition-all duration-300',
+                    'absolute top-5 left-[50%] translate-x-0 h-[3px] w-full transition-all duration-300 z-0',
                     {
-                      'bg-blue-500': getStatus(PIPELINE_STEPS[i + 1].value) !== 'pending',
-                      'bg-gray-300': getStatus(PIPELINE_STEPS[i + 1].value) === 'pending',
+                      'bg-green-500': nextStatus === 'done' || nextStatus === 'active',
+                      'bg-gray-300': nextStatus === 'pending',
                     }
                   )}
                 />
+              )}
+
+              {/* Step Circle */}
+              <div
+                onClick={() => onStatusChange(step.value)}
+                className={clsx(
+                  'w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all cursor-pointer z-10',
+                  {
+                    'bg-green-500 text-white': status === 'done',
+                    'bg-blue-600 text-white animate-pulse shadow-md shadow-blue-300': status === 'active',
+                    'bg-gray-300 text-white': status === 'pending',
+                  }
+                )}
+              >
+                {status === 'done' ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+              </div>
+
+              {/* Step Label */}
+              <span
+                className={clsx('text-sm font-medium text-center', {
+                  'text-gray-800': status !== 'pending',
+                  'text-gray-400': status === 'pending',
+                })}
+              >
+                {step.label}
+              </span>
+
+              {/* Quotation Button */}
+              {step.value === 'quotation_submitted' && currentStatus === 'quotation_submitted' && (
+                <Button
+                  className="mt-2 w-full text-xs bg-green-600 hover:bg-green-700 text-white"
+                  onClick={onCreateQuotation}
+                >
+                  📄 Create Quotation
+                </Button>
+              )}
+
+              {/* Invoice Button */}
+              {step.value === 'invoice_issued' && currentStatus === 'invoice_issued' && (
+                <Button
+                  className="mt-2 w-full text-xs bg-green-600 hover:bg-green-700 text-white"
+                  onClick={onCreateInvoice}
+                >
+                  🧾 Create Invoice
+                </Button>
               )}
             </div>
           );
