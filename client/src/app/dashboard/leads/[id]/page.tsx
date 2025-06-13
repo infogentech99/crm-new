@@ -17,6 +17,7 @@ import QuotationForm from '@components/Quotation/QuotationForm';
 import InvoiceForm from '@components/invoice/InoviceForm';
 import AddProjectModal from '@components/AddProjectModal';
 import ProjectSelector from '@components/Leads/ProjectSelector'
+import TransactionList from '@components/Leads/TransactionList';
 export default function LeadDetailsPage() {
     const { id } = useParams();
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -38,7 +39,7 @@ export default function LeadDetailsPage() {
                 setLead(data);
                 console.log(data, "updated")
 
-            } catch (err:any) {
+            } catch (err: any) {
                 setError(err.message || 'Failed to fetch lead');
             } finally {
                 setLoading(false);
@@ -51,7 +52,7 @@ export default function LeadDetailsPage() {
         if (lead.projects[selectedProject].status === newStatus) return;
 
         try {
-            const updatedProjects = lead.projects.map((project:object, index: number) =>
+            const updatedProjects = lead.projects.map((project: object, index: number) =>
                 index === selectedProject
                     ? { ...project, status: newStatus }
                     : project
@@ -153,7 +154,15 @@ export default function LeadDetailsPage() {
                 onCreateQuotation={() => setIsQuotationOpen(true)}
                 onCreateInvoice={() => setIsInvoiceOpen(true)}
             />
-
+            <TransactionList
+                transactions={
+                    (lead.transactions || []).filter(
+                        (txn: any) =>
+                            txn.projectId === lead.projects?.[selectedProject]?._id
+                    )
+                }
+                projects={lead.projects}
+            />
             <LeadNotes
                 leadId={lead._id}
                 notes={lead.notes || []}

@@ -30,7 +30,7 @@ export const createTransaction = async (req, res, next) => {
     await Lead.findByIdAndUpdate(leadId, {
       $push: {
         transactions: {
-          transaction: txn._id,
+          transaction: txn.transactionId,
           invoiceId: invoiceId,
           date: new Date(),
           amount,
