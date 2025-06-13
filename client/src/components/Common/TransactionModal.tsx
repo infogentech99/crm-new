@@ -26,7 +26,6 @@ export default function TransactionModal({
   const [method, setMethod] = useState("");
 
   if (!selectedInvoice) return null;
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -51,6 +50,7 @@ export default function TransactionModal({
       transactionId,
       invoiceId: selectedInvoice._id,
       leadId: selectedInvoice.user,
+      projectId: selectedInvoice.projectId
     };
 
     try {

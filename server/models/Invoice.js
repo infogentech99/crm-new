@@ -16,6 +16,7 @@ const InvoiceSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  projectId: { type: String }, 
 }, { timestamps: true });
 
  InvoiceSchema.pre('save', async function (next) {

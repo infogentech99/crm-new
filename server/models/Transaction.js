@@ -19,6 +19,9 @@ const TransactionSchema = new mongoose.Schema(
     transactionId :{
       type: String,
     },
+     projectId :{
+      type: String,
+    },
     method: {
       type: String,
       enum: ['Cash', 'Card', 'UPI', 'Bank Transfer', 'Cheque', 'Other'],

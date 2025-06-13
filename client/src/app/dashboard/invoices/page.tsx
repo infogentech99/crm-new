@@ -76,7 +76,6 @@ const ManageInvoicesPage: React.FC = () => {
     queryKey: ['invoices', page, limit, search],
     queryFn: () => getInvoices(page, limit, search),
   });
-
   const invoices = data?.invoices || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
@@ -173,6 +172,7 @@ const ManageInvoicesPage: React.FC = () => {
           <InvoiceForm
             mode="Edit"
             data={selectedInvoice}
+            projectId=''
             onClose={() => {
               setIsInvoiceOpen(false);
               queryClient.invalidateQueries({ queryKey: ['invoices'] });

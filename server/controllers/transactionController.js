@@ -4,8 +4,7 @@ import Lead from '../models/Lead.js';
 
 export const createTransaction = async (req, res, next) => {
   try {
-    const { leadId, invoiceId, amount, method, transactionId } = req.body;
-
+    const { leadId, invoiceId, amount, method, transactionId, projectId } = req.body;
     if (!leadId || !invoiceId || amount == null || !method) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -21,8 +20,8 @@ export const createTransaction = async (req, res, next) => {
       amount,
       method,
       transactionId,
+      projectId
     });
-
     invoice.paidAmount = (invoice.paidAmount || 0) + amount;
     invoice.transactions = invoice.transactions || [];
     invoice.transactions.push(txn._id);
@@ -35,7 +34,8 @@ export const createTransaction = async (req, res, next) => {
           invoiceId: invoiceId,
           date: new Date(),
           amount,
-          method
+          method,
+          projectId
         }
       }
     });

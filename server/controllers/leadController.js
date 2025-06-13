@@ -14,7 +14,6 @@ export const createLead = async (req, res) => {
   }
 };
 
-// GET Leads (filtered based on roles, with search, status, and pagination)
 export const getLeads = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -57,7 +56,6 @@ export const getLeads = async (req, res) => {
   }
 };
 
-// GET Single Lead (only creator or superadmin can access)
 export const getLead = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id).populate('createdBy', 'name email role');

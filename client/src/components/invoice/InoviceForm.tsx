@@ -15,10 +15,11 @@ import { createInvoice, updateInvoice } from '@services/invoiceService';
 interface Props {
   data: any;
   mode: 'Create' | 'Edit';
+   projectId: string | null;
   onClose: () => void;
 }
 
-export default function InvoiceForm({ data, mode, onClose }: Props) {
+export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
   console.log(data,"paras")
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -140,6 +141,7 @@ export default function InvoiceForm({ data, mode, onClose }: Props) {
         _id: data?.user?._id || data?._id,
         gstin,
         items,
+        projectId,
         totals: {
           taxable,
           igst,

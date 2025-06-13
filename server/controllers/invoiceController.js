@@ -4,8 +4,7 @@ import Lead from '../models/Lead.js';
 
 export const genrate = async (req, res) => {
   try {
-    const { _id, totals, items ,gstin} = req.body;
-     console.log(_id, "get id")
+    const { _id, totals, items ,gstin, projectId} = req.body;
     if (!_id || !totals || !items) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -13,6 +12,7 @@ export const genrate = async (req, res) => {
     const invoice = await Invoice.create({
       user: _id,
       totals,
+      projectId,
     });
 
     const user = await Lead.findById(_id);

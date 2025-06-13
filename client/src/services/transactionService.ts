@@ -15,6 +15,7 @@ export interface TransactionInput {
   transactionId: string;
   invoiceId: string;
   leadId: string;
+  projectId:string
 }
 export const getTransactions = async (
   page: number = 1,
