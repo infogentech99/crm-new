@@ -34,13 +34,13 @@ export const manageMeetingsConfig = (
       label: 'ACTIONS',
       render: (item: Meeting) => (
         <div className="flex items-center space-x-2">
-           <button className="text-gray-500 hover:text-gray-700 flex items-center" onClick={() => handleViewMeeting(item)}>
+           <button className="text-gray-500 hover:text-gray-700 flex items-center cursor-pointer" onClick={() => handleViewMeeting(item)}>
             <Eye className="h-4 w-4" />
           </button>
-          <button className="text-blue-500 hover:text-blue-700 flex items-center" onClick={() => handleEditMeeting(item)}>
+          <button className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer" onClick={() => handleEditMeeting(item)}>
             <Pencil className="h-4 w-4" />
           </button>
-          <button className="text-red-500 hover:text-red-700 flex items-center" onClick={() => handleDeleteMeeting(item)}>
+          <button className="text-red-500 hover:text-red-700 flex items-center cursor-pointer" onClick={() => handleDeleteMeeting(item)}>
             <Trash2 className="h-4 w-4" />
           </button>
         </div>

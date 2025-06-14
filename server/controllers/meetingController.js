@@ -1,5 +1,4 @@
 import Meeting from '../models/Meeting.js';
-
 export const getAllMeetings = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;

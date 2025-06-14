@@ -1,242 +1,267 @@
-// File: src/components/Meetings/MeetingForm.tsx
 "use client";
 
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createMeeting, updateMeeting } from '@services/meetingService';
-import { X } from 'lucide-react';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@components/ui/form';
 import { Input } from '@components/ui/input';
 import { Button } from '@components/ui/button';
-import { Meeting } from '@customTypes/index';
+import MultiSelectDropdown, { OptionType } from '@components/Common/MultiSelectDropdown';
+import { fetchUsers } from '@services/userService';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from '@components/ui/select';
+import { RxCross2 } from 'react-icons/rx';
 
-// Define validation schema using Zod
-const schema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  date: z.string().min(1, 'Date & time is required'),
-  duration: z.number({ invalid_type_error: 'Duration must be a number' }).min(1, 'Duration must be at least 1 minute'),
-  location: z.string().optional(),
-  participants: z.string().optional(),
-  description: z.string().optional(),
-  status: z.enum(['scheduled', 'completed', 'cancelled']),
-});
-
-type FormData = z.infer<typeof schema>;
-
-interface MeetingFormProps {
-  initialData?: Meeting;
+interface Props {
+  data?: any;
+  mode: 'Create' | 'Edit';
   onClose: () => void;
-  mode: 'create' | 'edit';
 }
 
-const MeetingForm: React.FC<MeetingFormProps> = ({ initialData, onClose, mode }) => {
-  const form = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      title: '',
-      date: '',
-      duration: 30,
-      location: '',
-      participants: '',
-      description: '',
-      status: 'scheduled',
-    },
+export default function MeetingForm({ data, mode, onClose }: Props) {
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+
+  const [platform, setPlatform] = useState('google');
+  const [meetLinks, setMeetLinks] = useState({
+    google: data?.meetlink || '',
+    zoom: '',
+    microsoft: '',
   });
 
-  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState({
+    title: data?.title || '',
+    date: data?.date || '',
+    duration: data?.duration || 30,
+    platform: data?.platform || '',
+    meetlink: data?.meetlink || '',
+    participants: data?.participants?.join(', ') || '',
+    description: data?.description || '',
+    status: data?.status || 'scheduled'
+  });
 
- useEffect(() => {
-  if (initialData) {
-    const {
-      title,
-      date: rawDate,
-      duration,
-      location,
-      participants,
-      description,
-      status,
-    } = initialData;
+  const [users, setUsers] = useState<OptionType[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<OptionType[]>([]);
 
-    form.reset({
-      title: title || '',
-      date: rawDate
-        ? new Date(rawDate).toISOString().slice(0, 16)
-        : '',
-      duration: duration ?? 30,
-      location: location || '',
-      participants: Array.isArray(participants) && participants.length
-        ? participants.join(', ')
-        : '',
-      description: description || '',
-      status: status as 'scheduled' | 'completed' | 'cancelled',
-    });
-  }
-}, [initialData, form]);
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const response = await fetchUsers();
+        const formatted = response.users.map((user: any) => ({
+          label: `${user.name} (${user.email})`,
+          value: user.email,
+        }));
+        setUsers(formatted);
+        if (mode === 'Edit') {
+          const allParticipants = data?.participants || [];
+          const selected = formatted.filter((user) =>
+            allParticipants.includes(user.value)
+          );
+          setSelectedUsers(selected);
+          const manualEmails = allParticipants.filter(
+            (email: string) => !selected.find((u) => u.value === email)
+          );
+          const isoString = new Date(data.date).toISOString();
+          const localFormat = isoString.slice(0, 16);
+          setFormData((prev) => ({
+            ...prev,
+            date: localFormat,
+            participants: manualEmails.join(', '),
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to load users:', err);
+      }
+    };
+    loadUsers();
+  }, [mode, data]);
 
+  const handleSubmit = async () => {
 
-  const mutation = useMutation({
-    mutationFn: (data: FormData) => {
+    setSubmitting(true);
+    try {
+      const manualList = formData.participants
+        ? formData.participants.split(',').map((p: string) => p.trim())
+        : [];
+
+      const allParticipants = [
+        ...selectedUsers.map((u) => u.value),
+        ...manualList,
+      ].filter(Boolean);
+
       const payload = {
-        ...data,
-        date: new Date(data.date),
-        participants: data.participants
-          ? data.participants.split(',').map(p => p.trim())
-          : [],
+        ...formData,
+        platform: platform,
+        participants: allParticipants,
       };
-      return initialData && initialData._id
-        ? updateMeeting(initialData._id, payload)
-        : createMeeting(payload);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries(['meetings']);
-      toast.success(`Meeting ${mode === 'edit' ? 'updated' : 'created'} successfully`);
-      onClose();
-    },
-    onError: () => {
-      toast.error('Failed to save meeting. Please try again.');
-    },
-  });
 
-  const onSubmit = (values: FormData) => mutation.mutate(values);
+      if (mode === 'Create') {
+        console.log(payload, "meetlink")
+        await createMeeting(payload);
+        toast.success('Meeting created successfully!');
+      } else {
+        await updateMeeting(data._id, payload);
+        toast.success('Meeting updated successfully!');
+      }
+
+      router.push('/dashboard/meetings');
+      onClose();
+    } catch (err) {
+      console.error('Error submitting meeting:', err);
+      toast.error('Something went wrong. Try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleChange = (field: string, value: string | number) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
 
   return (
-    <div className="w-full max-w-3xl">
+    <div className="w-full max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-blue-600">
-          {mode === 'edit' ? 'Edit Meeting' : 'Create Meeting'}
+          {mode === 'Edit' ? 'Edit Meeting' : 'Create Meeting'}
         </h2>
-        <button onClick={onClose} aria-label="Close">
-          <X className="w-5 h-5 text-gray-500 hover:text-red-500" />
+        <button
+          onClick={onClose}
+          className="text-gray-200 rounded-full p-1 text-2xl leading-none hover:text-gray-500 cursor-pointer"
+          aria-label="Close"
+        >
+          <RxCross2 />
         </button>
       </div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Title<span className="text-red-500 ml-1">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="Meeting Title" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Date & Time<span className="text-red-500 ml-1">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input type="datetime-local" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="duration"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Duration (minutes)</FormLabel>
-                <FormControl>
-                  <Input type="number" min={1} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location</FormLabel>
-                <FormControl>
-                  <Input placeholder="Meeting Location" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="participants"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>Participants (comma-separated emails)</FormLabel>
-                <FormControl>
-                  <Input placeholder="alice@example.com, bob@example.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <textarea
-                    className="w-full border rounded-md px-2 py-1"
-                    rows={4}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                <FormControl>
-                   <select className="w-full border rounded-md px-2 py-1" {...field}>
-                    <option value="scheduled">Scheduled</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="col-span-2 mt-4 flex justify-end space-x-3">
-            <Button type="button" onClick={onClose} variant="outline">
-              Cancel
-            </Button>
-            <Button type="submit" disabled={mutation.isLoading}>
-              {mutation.isLoading ? 'Submitting...' : mode === 'edit' ? 'Update Meeting' : 'Create Meeting'}
-            </Button>
+
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="text-sm font-medium block mb-1">Title</label>
+            <Input type="text" value={formData.title} onChange={(e) => handleChange('title', e.target.value)} required />
           </div>
-        </form>
-      </Form>
+          <div>
+            <label className="text-sm font-medium block mb-1">Date & Time</label>
+            <Input type="datetime-local" value={formData.date} onChange={(e) => handleChange('date', e.target.value)} required />
+          </div>
+          <div>
+            <label className="text-sm font-medium block mb-1">Duration (minutes)</label>
+            <Input type="number" min={1} value={formData.duration} onChange={(e) => handleChange('duration', Number(e.target.value))} required />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="text-sm font-medium block mb-1">Meeting Platform</label>
+            <Select value={platform} onValueChange={(val) => {
+              setPlatform(val);
+
+              const defaultLinks = {
+                google: 'https://meet.google.com/landing',
+                zoom: 'https://app.zoom.us/wc/home?from=pwa',
+                microsoft: 'https://teams.live.com/free',
+                other: ''
+              };
+
+              const defaultLink = defaultLinks[val as keyof typeof defaultLinks];
+
+              setMeetLinks(prev => ({ ...prev, [val]: '' }));
+
+              handleChange('meetlink', val === 'other' ? '' : '');
+            }}>
+
+              <SelectTrigger>
+                <SelectValue placeholder="Select platform" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="google">Google Meet</SelectItem>
+                <SelectItem value="zoom">Zoom</SelectItem>
+                <SelectItem value="microsoft">Microsoft Teams</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className=" flex gap-2 items-end">
+            <div className="w-full">
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm font-medium">Meet Link</label>
+                {platform !== 'other' && (
+                  <button
+                    type="button"
+                    className="text-blue-600 underline text-sm text-nowrap cursor-pointer"
+                    onClick={() => {
+                      const directLinks = {
+                        google: 'https://meet.google.com/landing',
+                        zoom: 'https://app.zoom.us/wc/home?from=pwa',
+                        microsoft: 'https://teams.live.com/free',
+                      };
+
+                      const linkToOpen = directLinks[platform as keyof typeof directLinks];
+                      if (linkToOpen) {
+                        window.open(linkToOpen, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                  >
+                    {platform} Link
+                  </button>
+                )}
+
+              </div>
+              <Input
+                type="text"
+                value={formData.meetlink}
+                onChange={(e) => handleChange('meetlink', e.target.value)}
+                placeholder=""
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium block mb-1">Status</label>
+            <Select value={formData.status} onValueChange={(val) => handleChange('status', val)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="scheduled">Scheduled</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <label className="text-sm font-medium block mb-1">Participants (comma-separated emails)</label>
+            <Input type="text" value={formData.participants} onChange={(e) => handleChange('participants', e.target.value)} placeholder="alice@example.com, bob@example.com" />
+          </div>
+          <div>
+            <label className="text-sm font-medium block mb-1">Assign Team Members</label>
+            <MultiSelectDropdown options={users} selected={selectedUsers} setSelected={setSelectedUsers} placeholder="Select users" />
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium block mb-1">Description</label>
+          <textarea className="w-full border rounded-md px-2 py-1" rows={4} value={formData.description} onChange={(e) => handleChange('description', e.target.value)} />
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <Button type="button" onClick={onClose} variant="outline">
+            Cancel
+          </Button>
+          <Button type="submit" disabled={submitting}>
+            {submitting ? 'Submitting...' : mode === 'Edit' ? 'Update Meeting' : 'Create Meeting'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
-};
-
-export default MeetingForm;
+}

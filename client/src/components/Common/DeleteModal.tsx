@@ -38,9 +38,9 @@ export default function DeleteModal({
         </div>
         <div className="px-4 py-4">
           <p className="text-gray-700">
-            Are you sure you want to delete
+            Are you sure you want to delete &nbsp;
             <span className="font-semibold text-gray-900">
-              {itemLabel || "this item"}
+              { itemLabel || " this item"}
             </span>
             ?
           </p>

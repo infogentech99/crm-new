@@ -1,4 +1,4 @@
-// File: src/pages/meetings/ManageMeetingsPage.tsx
+
 "use client";
 
 import React, { useCallback, useState } from 'react';
@@ -30,6 +30,7 @@ import {
 } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
+import MeetingView from '@components/Meetings/MeetingView';
 
 const ManageMeetingsPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -43,21 +44,22 @@ const ManageMeetingsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [viewMeeting, setViewMeeting] = useState<Meeting | null>(null);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['meetings', page, limit, search],
     queryFn: () => getMeetings(page, limit, search),
   });
-
+  console.log(data, "praksd")
   const meetings = data?.meetings || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
 
-  const handleCreateMeeting = () => {
-    setSelectedMeeting(null);
-    setIsModalOpen(true);
-  };
+const handleViewMeeting = useCallback((meeting: Meeting) => {
+  setViewMeeting(meeting);
+  setIsViewModalOpen(true); 
+}, []);
 
   const handleEditMeeting = useCallback((meeting: Meeting) => {
     setSelectedMeeting(meeting);
@@ -72,13 +74,17 @@ const ManageMeetingsPage: React.FC = () => {
   const confirmDeleteMeeting = async () => {
     if (!meetingToDelete) return;
     await deleteMeeting(meetingToDelete._id);
-    queryClient.invalidateQueries(['meetings']);
+    queryClient.invalidateQueries({ queryKey: ['meetings'] });
     setIsDeleteOpen(false);
     setMeetingToDelete(null);
   };
+  const handleCreateMeeting = () => {
+    setSelectedMeeting(null);
+    setIsModalOpen(true);
+  };
 
   const config = manageMeetingsConfig(
-    () => {},
+    handleViewMeeting,
     handleEditMeeting,
     handleDeleteMeeting,
     userRole,
@@ -171,16 +177,37 @@ const ManageMeetingsPage: React.FC = () => {
         <Modal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          widthClass="max-w-lg"
+          widthClass="max-w-3xl"
         >
           <MeetingForm
-            initialData={selectedMeeting ?? undefined}
-            mode={selectedMeeting ? 'edit' : 'create'}
-            onClose={() => setIsModalOpen(false)}
-            onSuccess={() => { queryClient.invalidateQueries(['meetings']); setIsModalOpen(false); }}
-          />
-        </Modal>
+            data={selectedMeeting ?? undefined}
+            mode={selectedMeeting ? 'Edit' : 'Create'}
+            onClose={() => {
+              setIsModalOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['meetings'] });
+            }}
 
+          />
+
+        </Modal>
+        {viewMeeting && (
+          <Modal
+            isOpen={isViewModalOpen}
+            onClose={() => {
+              setIsViewModalOpen(false);
+              setViewMeeting(null);
+            }}
+            widthClass="max-w-3xl"
+          >
+            <MeetingView
+              data={viewMeeting}
+              onClose={() => {
+                setIsViewModalOpen(false);
+                setViewMeeting(null);
+              }}
+            />
+          </Modal>
+        )}
         {meetingToDelete && (
           <DeleteModal
             isOpen={isDeleteOpen}
