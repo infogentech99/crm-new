@@ -101,7 +101,6 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
       };
 
       if (mode === 'Create') {
-        console.log(payload, "meetlink")
         await createMeeting(payload);
         toast.success('Meeting created successfully!');
       } else {

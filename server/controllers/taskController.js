@@ -14,7 +14,6 @@ export const getAllTasks = async (req, res, next) => {
         { 'assignee.name': { $regex: search, $options: 'i' } }, // Assuming assignee is populated
       ];
     }
-
     const total = await Task.countDocuments(query);
     const tasks = await Task.find(query)
       .populate({ path: 'assignee', select: 'name email' }) // Populate assignee with name and email
