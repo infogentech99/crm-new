@@ -40,17 +40,22 @@ const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error
   return (
     <div className={cn(
       "relative overflow-x-auto rounded-lg shadow-lg",
-      "bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-opacity-30 border-white",
+      "bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg border border-opacity-30 border-white","px-0",
       className
     )}>
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 table-fixed">
         <thead className="bg-gray-50 bg-opacity-30">
           <tr>
-            {columns.map((column) => (
+            {columns.map((column, colIndex) => (
               <th
                 key={column.key}
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider"
+                className={cn(
+                  "py-3 text-xs font-bold text-gray-700 uppercase tracking-wider text-center",
+                  colIndex === 0 ? "pl-4 pr-6 w-[70px]" :
+                  colIndex === columns.length - 1 ? "pl-6 pr-4 w-[90px]" :
+                  "px-6"
+                )}
               >
                 {column.label}
               </th>
@@ -59,11 +64,16 @@ const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error
         </thead>
         <tbody className="divide-y divide-gray-200">
           {data.map((item, i) => (
-            <tr key={item._id} className="bg-white bg-opacity-50 hover:bg-opacity-70 transition-colors duration-200">
-              {columns.map((column) => (
+            <tr key={item._id} className="bg-white bg-opacity-50 hover:bg-opacity-70 transition-colors duration-200 text-center">
+              {columns.map((column, colIndex) => (
                 <td
                   key={`${item._id}-${column.key}`}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                  className={cn(
+                    "py-4 whitespace-nowrap text-sm text-gray-800",
+                    colIndex === 0 ? "pl-4 pr-6 w-[70px]" :
+                    colIndex === columns.length - 1 ? "pl-6 pr-4 w-[90px]" :
+                    "px-6"
+                  )}
                 >
                   {column.render ? column.render(item, i) : (item[column.key as keyof T] as React.ReactNode)}
                 </td>
