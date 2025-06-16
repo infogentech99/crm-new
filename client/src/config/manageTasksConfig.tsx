@@ -1,4 +1,5 @@
 import { Task } from '@customTypes/index';
+import BadgeDot from '@components/BadgeDot';
 import { Trash2, Pencil } from 'lucide-react';
 import React from 'react';
 
@@ -19,16 +20,7 @@ export const manageTasksConfig = (
     {
       key: 'status',
       label: 'STATUS',
-      render: (item: Task) => (
-        <div className="flex items-center">
-          <span>{item.status}</span>
-          <span
-            className={`ml-2 w-2 h-2 rounded-full ${
-              item.status === 'Completed' ? 'bg-green-500' : item.status === 'Pending' ? 'bg-yellow-500' : 'bg-blue-500' // Assuming In Progress is blue
-            }`}
-          ></span>
-        </div>
-      ),
+      render: (item: Task) => <BadgeDot label={item.status} type="status" />,
     },
     {
       key: 'actions',

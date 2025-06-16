@@ -16,18 +16,24 @@ const getColor = (type: BadgeDotProps['type'], label: string): string => {
     return 'bg-gray-400';
   }
 
-  if (type === 'status') {
+ if (type === 'status') {
     switch (normalized) {
       case 'approved':
       case 'completed':
+      case 'invoice_accepted':
         return 'bg-green-500';
 
       case 'denied':
+      case 'quotation_rejected':
+      case 'lost':
+      case 'cancelled': 
         return 'bg-red-500';
 
       case 'pending_approval':
+        case 'pending':
       case 'processing':
       case 'processing_payments':
+      case 'scheduled': 
         return 'bg-yellow-500';
 
       case 'quotation_submitted':
@@ -36,6 +42,14 @@ const getColor = (type: BadgeDotProps['type'], label: string): string => {
 
       case 'new':
         return 'bg-purple-500';
+
+      case 'contacted':
+      case 'qualified':
+        return 'bg-cyan-500';
+
+      case 'in progress':
+        return 'bg-blue-500';
+
 
       default:
         return 'bg-gray-400';

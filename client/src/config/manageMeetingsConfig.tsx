@@ -1,6 +1,7 @@
 import { Meeting } from '@customTypes/index';
 import {Eye, Trash2, Pencil } from 'lucide-react';
 import React from 'react';
+import BadgeDot from '@components/BadgeDot';
 
 export const manageMeetingsConfig = (
   handleViewMeeting: (meeting: Meeting) => void,
@@ -18,16 +19,7 @@ export const manageMeetingsConfig = (
     {
       key: 'status',
       label: 'STATUS',
-      render: (item: Meeting) => (
-        <div className="flex items-center">
-          <span>{item.status}</span>
-          <span
-            className={`ml-2 w-2 h-2 rounded-full ${
-              item.status === 'Completed' ? 'bg-green-500' : item.status === 'Scheduled' ? 'bg-yellow-500' : 'bg-red-500'
-            }`}
-          ></span>
-        </div>
-      ),
+        render: (item: Meeting) => <BadgeDot label={item.status} type="status" />,
     },
     {
       key: 'actions',
