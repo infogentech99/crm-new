@@ -44,7 +44,7 @@ export const createUser = async (req, res, next) => {
       return res.status(403).json({ message: 'Forbidden' });
     }
     const { name, email, password, role } = req.body;
-    if (!['admin','salesperson'].includes(role)) {
+    if (!['admin','salesperson','employee'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
     if (await User.findOne({ email })) {

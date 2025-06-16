@@ -25,7 +25,7 @@ const createSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   email: z.string().email("Invalid email address."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  role: z.enum(["admin", "salesperson"], {
+  role: z.enum(["admin", "salesperson", "employee"], {
     errorMap: () => ({ message: "Role must be admin or salesperson." }),
   }),
 });
@@ -209,6 +209,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, onClose, mode }) => {
                   >
                     <option value="admin">Admin</option>
                     <option value="salesperson">Salesperson</option>
+                    <option value="employee">Employee</option>
                   </select>
                 </FormControl>
                 <FormMessage />

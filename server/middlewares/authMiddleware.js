@@ -27,14 +27,14 @@ export const protect = async (req, res, next) => {
     console.error('Auth middleware error:', err);
     if (err.name === 'TokenExpiredError') {
       console.error(
-        `⏰ Token expired at ${err.expiredAt.toISOString()} — token was:`,
+        `Token expired at ${err.expiredAt.toISOString()} — token was:`,
         token
       );
       return res
         .status(401)
         .json({ message: 'Session expired. Please log in again.' });
     }
-    console.error('❌ Invalid token. Details:', err.message, 'Token:', token);
+    console.error('Invalid token. Details:', err.message, 'Token:', token);
     return res.status(401).json({ message: 'Token is not valid' });
   }
 };
