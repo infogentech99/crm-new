@@ -35,6 +35,7 @@ import { RootState } from '@store/store';
 import LeadForm from '@components/Leads/Leadform';
 import Modal from '@components/Common/Modal';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 
 const ManageLeadsPage: React.FC = () => {
@@ -104,33 +105,47 @@ const handleExport = async () => {
   try {
     const { leads: allLeads } = await getLeads(1, 9999, search, statusFilter);
     exportLeadsToCSV(allLeads);
+    toast.success('Exported leads successfully');
   } catch (err) {
     console.error("Export all failed:", err);
+    toast.error('Export failed');
   }
 };
 
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (ev) => {
-      const text = ev.target?.result as string;
-      const parsedLeads = parseLeadsCSV(text);
-      for (const leadData of parsedLeads) {
-        try {
-          await createLead(leadData as Lead);
-        } catch (err) {
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const text = ev.target?.result as string;
+    const parsedLeads = parseLeadsCSV(text);
+    let duplicateCount = 0;
+    let successCount = 0;
+    for (const leadData of parsedLeads) {
+      try {
+        await createLead(leadData as Lead);
+        successCount++;
+      } catch (err: any) {
+        const msg = err?.response?.data?.message || err.message;
+        if (msg.includes('E11000') || msg.includes('duplicate key')) {
+          duplicateCount++;
+        } else {
           console.error('Import error:', err);
         }
       }
-      queryClient.invalidateQueries({ queryKey: ['leads'] });
-    };
-    reader.readAsText(file);
+    }
+    queryClient.invalidateQueries({ queryKey: ['leads'] });
+    if (duplicateCount > 0) {
+      toast.error(`Skipped ${duplicateCount} duplicate email${duplicateCount > 1 ? 's' : ''}`);
+    } else {
+      toast.success(`Imported ${successCount} lead${successCount > 1 ? 's' : ''} successfully`);
+    }
   };
+  reader.readAsText(file);
+};
 
   const config = manageLeadsConfig(
     handleViewLead,
