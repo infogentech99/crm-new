@@ -1,17 +1,20 @@
 
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
-import { getLeads, deleteLead } from '@services/leadService';
+import { getLeads, deleteLead, createLead } from '@services/leadService';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import CreateLeadButton from '@components/Common/CreateLeadButton';
+import { exportLeadsToCSV } from '@utils/exportUtils';
+import { parseLeadsCSV } from '@utils/importUtils';
 import { manageLeadsConfig } from '@config/manageLeadsConfig';
 import { Lead } from '@customTypes/index';
 import DeleteModal from '@components/Common/DeleteModal';
 import LeadSummaryCards from '@components/Leads/LeadSummaryCards';
 import { Input } from '@components/ui/input';
+import { Button } from '@components/ui/button';
 import {
   Select,
   SelectContent,
@@ -37,6 +40,8 @@ import { useRouter } from 'next/navigation';
 const ManageLeadsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -70,18 +75,18 @@ const handleViewLead = useCallback((lead: Lead) => {
     setIsModalOpen(true);
   }, []);
 
- const handleCreateLead = () => {
-  setSelectedLead(null);
-  setIsModalOpen(true);
-};
+  const handleCreateLead = () => {
+    setSelectedLead(null);
+    setIsModalOpen(true);
+  };
 
   const handleDeleteLead = useCallback((lead: Lead) => {
     setLeadToDelete(lead);
     setIsDeleteModalOpen(true);
   }, []);
 
- 
-   const handleConfirmDelete = async () => {
+
+  const handleConfirmDelete = async () => {
     if (!leadToDelete) return;
 
     try {
@@ -95,6 +100,38 @@ const handleViewLead = useCallback((lead: Lead) => {
     }
   };
 
+const handleExport = async () => {
+  try {
+    const { leads: allLeads } = await getLeads(1, 9999, search, statusFilter);
+    exportLeadsToCSV(allLeads);
+  } catch (err) {
+    console.error("Export all failed:", err);
+  }
+};
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const text = ev.target?.result as string;
+      const parsedLeads = parseLeadsCSV(text);
+      for (const leadData of parsedLeads) {
+        try {
+          await createLead(leadData as Lead);
+        } catch (err) {
+          console.error('Import error:', err);
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+    };
+    reader.readAsText(file);
+  };
+
   const config = manageLeadsConfig(
     handleViewLead,
     handleEditLead,
@@ -103,14 +140,14 @@ const handleViewLead = useCallback((lead: Lead) => {
     currentPage,
     limit
   );
- 
+
   config.createLeadButtonAction = handleCreateLead;
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
+     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
     }
-  };
+    };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -152,11 +189,27 @@ const handleViewLead = useCallback((lead: Lead) => {
         <LeadSummaryCards />
 
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-semibold text-gray-800">
+           <h1 className="text-2xl font-semibold text-gray-800">
             {config.pageTitle}
           </h1>
-        <CreateLeadButton onClick={handleCreateLead} />
+         <div className="flex space-x-2">
+           <Button onClick={handleImportClick}>
+              Import CSV
+            </Button>
+            <Button  onClick={handleExport}>
+              Export CSV
+            </Button>
+            <CreateLeadButton onClick={handleCreateLead} />
+          </div>
         </div>
+
+        <input
+          type="file"
+          accept=".csv"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
 
         <div className="flex items-center justify-between mb-4 space-x-4">
           <Input
@@ -194,7 +247,7 @@ const handleViewLead = useCallback((lead: Lead) => {
           columns={config.tableColumns}
           data={leads}
           isLoading={isLoading}
-           error={isError ? error?.message || 'Unknown error' : null}
+          error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
@@ -228,22 +281,22 @@ const handleViewLead = useCallback((lead: Lead) => {
             </PaginationContent>
           </Pagination>
         </div>
-     
-        <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
+
+          <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
           <LeadForm
             initialData={selectedLead || undefined}
-            mode={selectedLead ? "Edit" : "Create"}
+             mode={selectedLead ? "Edit" : "Create"}
             onClose={() => { setIsModalOpen(false); setSelectedLead(null); }}
           />
         </Modal>
         {leadToDelete && (
-          <DeleteModal
+         <DeleteModal
             isOpen={isDeleteModalOpen}
             onClose={() => {
               setIsDeleteModalOpen(false);
               setLeadToDelete(null);
-            }}
-            onConfirm={handleConfirmDelete}
+            }}        
+                onConfirm={handleConfirmDelete}
             itemLabel={leadToDelete.name}
           />
         )}
