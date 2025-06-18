@@ -22,7 +22,6 @@ export const manageContactsConfig = (
   return {
     pageTitle: 'Manage Contacts',
     showCreateContactButton: true,
-    createContactButtonAction: () => alert('Create Contact functionality is under development.'),
     tableColumns: filteredColumns,
   };
 };
