@@ -80,6 +80,7 @@ export interface Lead {
   createdAt: string;
   updatedAt: string;
    projects: {
+    _id: string;
     title: string;
     status: string;
   }[];
@@ -186,6 +187,26 @@ export interface Contact {
   company?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+// Original Project interface (if needed elsewhere, otherwise remove)
+// export interface Project {
+//   _id: string;
+//   name: string;
+//   company?: string;
+//   industry?: string;
+//   createdBy: string | User;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
+// New interface for flattened project data in DataTable
+export interface FlattenedProject {
+  _id: string;
+  title: string;
+  status: string;
+  leadName: string;
+  industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other' | undefined;
 }
 
 export interface QuotationItem {

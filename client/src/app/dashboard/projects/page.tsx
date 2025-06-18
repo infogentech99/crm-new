@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import { manageProjectsConfig } from '@config/manageProjectsConfig';
 import { Input } from '@components/ui/input';
 import {
   Select,
@@ -14,8 +13,8 @@ import {
   SelectValue,
 } from '@components/ui/select';
 import { PaginationComponent } from '@components/ui/pagination';
-import { getProjects } from '@services/projectService';
-import CreateProjectButton from '@components/Common/CreateProjectButton';
+import { manageProjectsConfig } from '@src/config/manageProjectsConfig';
+import { getLeads } from '@services/leadService';
 
 const ManageProjectsPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -24,12 +23,23 @@ const ManageProjectsPage: React.FC = () => {
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['projects', page, limit, search],
-    queryFn: () => getProjects(page, limit, search),
+    queryFn: () => getLeads(page, limit, search),
   });
 
-  const projects = data?.projects || [];
+  const leads = data?.leads || [];
   const totalPages = data?.totalPages || 1;
   const currentPage = data?.currentPage || 1;
+
+  // Flatten leads data to extract projects and associate lead info
+  const projectsData = leads.flatMap(lead =>
+    lead.projects.map(project => ({
+      _id: project._id,
+      title: project.title,
+      status: project.status,
+      leadName: lead.name, 
+      industry: lead.industry, 
+    }))
+  );
 
   const config = manageProjectsConfig(currentPage, limit);
 
@@ -58,7 +68,6 @@ const ManageProjectsPage: React.FC = () => {
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">All Projects</h1>
-          <CreateProjectButton onProjectAdded={handleProjectAdded} />
         </div>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
@@ -83,7 +92,7 @@ const ManageProjectsPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={projects}
+          data={projectsData} 
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />

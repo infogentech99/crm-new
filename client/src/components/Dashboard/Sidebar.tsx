@@ -53,6 +53,12 @@ const sidebarItems: SidebarItem[] = [
     label: "Contacts",
   },
   {
+    id: "projects",
+    href: "/dashboard/projects",
+    icon: <ClipboardList size={24} />,
+    label: "Projects",
+  },
+  {
     id: "quotations",
     href: "/dashboard/quotations",
     icon: <FileText size={24} />,
