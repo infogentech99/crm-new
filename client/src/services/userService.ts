@@ -45,6 +45,18 @@ export const fetchUsers = async (
   return response.json();
 };
 
+
+export const fetchUserById = async (id: string): Promise<User> => {
+  const headers = getAuthHeaders();
+  const response = await fetch(`${API_URL}/${id}`, { headers });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || `Failed to fetch user ${id}`);
+  }
+  return response.json();
+};
+
+
 /**
  * Create a new user. Only superadmin may call.
  * @param userData - { name, email, role, password }
@@ -136,8 +148,10 @@ export const fetchUserActivities = async (
       activities.push({
         id: lead._id,
         type: "Lead",
-        description: `New lead: ${lead.name} from ${lead.company}`,
+       description: lead.description || '-',
         date: new Date(lead.createdAt).toLocaleDateString(),
+        name: lead.name,
+        company: lead.company,
       });
     });
   }
@@ -146,8 +160,11 @@ export const fetchUserActivities = async (
       activities.push({
         id: meeting._id,
         type: "Meeting",
-        description: `Meeting with ${meeting.client}`,
+         description: meeting.description || '-',
         date: new Date(meeting.date).toLocaleDateString(),
+        title: meeting.title,
+        time: meeting.date,
+        participants: meeting.participants,
       });
     });
   }
@@ -156,8 +173,11 @@ export const fetchUserActivities = async (
       activities.push({
         id: task._id,
         type: "Task",
-        description: `Task: ${task.description}`,
+         description: task.description || '-',
         date: new Date(task.dueDate).toLocaleDateString(),
+        title: task.title ,
+        assignee: task.assignee,
+        status: task.status,
       });
     });
   }

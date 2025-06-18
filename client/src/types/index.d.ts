@@ -25,10 +25,21 @@ export interface DashboardSummary {
 
 export interface RecentActivity {
   id: number;
-  type: string;
+  type: "Lead" | "Meeting" | "Task";
   description: string;
   date: string;
+  // Lead fields
+  name?: string;
+  company?: string;
+  // Meeting fields
+  title?: string;
+  time?: string;
+  participants?: string[];
+  // Task fields
+  assignee?: string;
+  status?: string;
 }
+
 
 export interface User {
   _id: string;

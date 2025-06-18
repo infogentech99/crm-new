@@ -6,7 +6,6 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   fetchUsers,
   deleteUser,
-  fetchUserActivities,
 } from "@services/userService";
 import DataTable from "@components/Common/DataTable";
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
@@ -33,13 +32,15 @@ import {
 } from "@components/ui/pagination";
 import { Button } from "@components/ui/button";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 import { RootState } from "@store/store";
-import { User, RecentActivity } from "@customTypes/index";
+import { User } from "@customTypes/index";
 
-type ModalMode = "view" | "edit" | "create";
+type ModalMode = "edit" | "create";
 
 export default function ManageUsersPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   // Filters
   const [search, setSearch] = useState("");
@@ -64,7 +65,6 @@ export default function ManageUsersPage() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["users", page, limit],
     queryFn: () => fetchUsers(page, limit),
-    keepPreviousData: true,
   });
   const users = data?.users || [];
   const totalPages = data?.pages || 1;
@@ -88,8 +88,7 @@ export default function ManageUsersPage() {
     setModalMode("edit");
   };
   const openView = (u: User) => {
-    setSelectedUser(u);
-    setModalMode("view");
+    router.push(`/dashboard/users/${u._id}`);
   };
   const openDelete = (u: User) => {
     setUserToDelete(u);
@@ -109,8 +108,8 @@ export default function ManageUsersPage() {
     setSelectedUser(null);
   };
 
-  // Table config
-  const config = manageUsersConfig(openView, openEdit, openDelete, openCreate, userRole, page, limit);
+   // Table config
+  const config = manageUsersConfig(openView, openEdit, openDelete, openCreate);
 
   // Pagination
   const changePage = (n: number) => {
@@ -126,51 +125,56 @@ export default function ManageUsersPage() {
           <CreateUserButton onClick={openCreate} />
         </div>
 
-        {/* Filters (moved directly below header) */}
-        <div className="flex items-center space-x-4">
-          <Input
-            className="max-w-sm"
-            placeholder="Search by name or email…"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-          />
-          <Select
-            value={roleFilter}
-            onValueChange={(val) => {
-              setRoleFilter(val as any);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="All Roles" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Roles</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="salesperson">Salesperson</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select
-            value={String(limit)}
-            onValueChange={(val) => {
-              setLimit(Number(val));
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Limit" />
-            </SelectTrigger>
-             <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+         {/* Filters (moved directly below header) */}
+      <div className="flex items-center justify-between mb-4">
+  {/* Left: search input */}
+  <Input
+    className="max-w-sm"
+    placeholder="Search by name or email…"
+    value={search}
+    onChange={(e) => {
+      setSearch(e.target.value);
+      setPage(1);
+    }}
+  />
+
+  {/* Right: both selects */}
+  <div className="flex items-center space-x-4">
+    <Select
+      value={roleFilter}
+      onValueChange={(val) => {
+        setRoleFilter(val as any);
+        setPage(1);
+      }}
+    >
+      <SelectTrigger className="w-[150px]">
+        <SelectValue placeholder="All Roles" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all">All Roles</SelectItem>
+        <SelectItem value="admin">Admin</SelectItem>
+        <SelectItem value="salesperson">Salesperson</SelectItem>
+      </SelectContent>
+    </Select>
+    <Select
+      value={String(limit)}
+      onValueChange={(val) => {
+        setLimit(Number(val));
+        setPage(1);
+      }}
+    >
+      <SelectTrigger className="w-[100px]">
+        <SelectValue placeholder="Limit" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="5">5</SelectItem>
+        <SelectItem value="10">10</SelectItem>
+        <SelectItem value="20">20</SelectItem>
+        <SelectItem value="50">50</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+</div>
 
         {/* DataTable */}
         <DataTable
@@ -187,7 +191,7 @@ export default function ManageUsersPage() {
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
-                  onClick={(e) => { e.preventDefault(); changePage(page - 1); }}
+                 onClick={(e) => { e.preventDefault(); changePage(page - 1); }}
                   className={page === 1 ? "opacity-50 pointer-events-none" : ""}
                 />
               </PaginationItem>
@@ -205,7 +209,7 @@ export default function ManageUsersPage() {
               <PaginationItem>
                 <PaginationNext
                   href="#"
-                  onClick={(e) => { e.preventDefault(); changePage(page + 1); }}
+                   onClick={(e) => { e.preventDefault(); changePage(page + 1); }}
                   className={page === totalPages ? "opacity-50 pointer-events-none" : ""}
                 />
               </PaginationItem>
@@ -213,21 +217,17 @@ export default function ManageUsersPage() {
           </Pagination>
         </div>
 
-        {/* CRUD Modal */}
-        {!!modalMode && (
+        {/* Edit / Create Modal */}
+        {(modalMode === "edit" || modalMode === "create") && (
           <Modal isOpen onClose={closeModal} widthClass="max-w-lg">
-            {modalMode === "view" && selectedUser ? (
-              <DetailUser user={selectedUser} onClose={closeModal} />
-            ) : (
-              <UserForm
-                initialData={modalMode === "edit" ? selectedUser! : undefined}
-                mode={modalMode}
-                onClose={() => {
-                  closeModal();
-                  queryClient.invalidateQueries({ queryKey: ["users"] });
-                }}
-              />
-            )}
+            <UserForm
+              initialData={modalMode === "edit" ? selectedUser! : undefined}
+              mode={modalMode}
+              onClose={() => {
+                closeModal();
+                queryClient.invalidateQueries({ queryKey: ["users"] });
+              }}
+            />
           </Modal>
         )}
 
@@ -242,42 +242,5 @@ export default function ManageUsersPage() {
         )}
       </div>
     </DashboardLayout>
-  );
-}
-
-function DetailUser({ user, onClose }: { user: User; onClose: () => void }) {
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["userActivities", user._id],
-    queryFn: () => fetchUserActivities(user._id),
-  });
-
-  return (
-    <div className="p-4 space-y-4">
-      <h2 className="text-xl font-semibold">{user.name}</h2>
-      <p>Email: {user.email}</p>
-      <p>Role: {user.role}</p>
-
-      <h3 className="font-medium">Recent Activity</h3>
-      {isLoading ? (
-        <p>Loading…</p>
-      ) : isError ? (
-        <p className="text-red-500">{(error as Error).message}</p>
-      ) : data && data.length ? (
-        <ul className="space-y-2 max-h-64 overflow-y-auto">
-          {data.map((act) => (
-            <li key={act.id} className="flex justify-between">
-              <span><strong>{act.type}:</strong> {act.description}</span>
-              <span className="text-gray-500 text-sm">{act.date}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No recent activity.</p>
-      )}
-
-      <div className="text-right">
-        <Button onClick={onClose}>Close</Button>
-      </div>
-    </div>
   );
 }

@@ -226,36 +226,38 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           style={{ display: 'none' }}
         />
 
-        <div className="flex items-center justify-between mb-4 space-x-4">
+        <div className="flex items-center justify-between mb-4">
           <Input
             placeholder="Search by name..."
             value={search}
             onChange={handleSearchChange}
             className="max-w-sm"
           />
-          <Select onValueChange={handleStatusFilterChange} value={statusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select onValueChange={handleLimitChange} value={String(limit)}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Limit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center space-x-4">
+            <Select onValueChange={handleStatusFilterChange} value={statusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select onValueChange={handleLimitChange} value={String(limit)}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <DataTable
