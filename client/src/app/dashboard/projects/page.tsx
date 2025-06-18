@@ -34,8 +34,8 @@ const ManageProjectsPage: React.FC = () => {
 
   const allLeads = data?.leads || [];
   const allProjectsData = allLeads.flatMap(lead =>
-    lead.projects.map(project => ({
-      _id: project._id,
+    lead.projects.map((project, projectIndex) => ({
+      _id: project._id || `${lead._id}-${projectIndex}`, // Ensure unique key, fallback to lead ID + index
       title: project.title,
       status: project.status,
       leadName: lead.name,
