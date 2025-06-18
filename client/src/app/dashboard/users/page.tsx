@@ -23,14 +23,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@components/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@components/ui/pagination";
+import { PaginationComponent } from "@components/ui/pagination";
 import { Button } from "@components/ui/button";
 import { useSelector } from "react-redux";
 import { RootState } from "@store/store";
@@ -182,35 +175,11 @@ export default function ManageUsersPage() {
 
         {/* Pagination */}
         <div className="flex justify-end">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); changePage(page - 1); }}
-                  className={page === 1 ? "opacity-50 pointer-events-none" : ""}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    href="#"
-                    onClick={(e) => { e.preventDefault(); changePage(i + 1); }}
-                    isActive={page === i + 1}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e) => { e.preventDefault(); changePage(page + 1); }}
-                  className={page === totalPages ? "opacity-50 pointer-events-none" : ""}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <PaginationComponent
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={changePage}
+          />
         </div>
 
         {/* CRUD Modal */}
