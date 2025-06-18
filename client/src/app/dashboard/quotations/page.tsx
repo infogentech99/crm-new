@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getQuotations, deleteQuotation } from '@services/quotationService';
 import DataTable from '@components/Common/DataTable';
@@ -34,6 +34,28 @@ const ManageQuotationsPage: React.FC = () => {
   const [isQuotationOpen, setIsQuotationOpen] = useState(false);
   const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['allQuotations', search],
+    queryFn: () => getQuotations(1, 10000, search),
+    enabled: isMounted, // Only fetch data if mounted
+  });
+
+  const allQuotations = data?.quotations || [];
+  const filteredQuotations = allQuotations.filter(quotation =>
+    (quotation.quotationNumber?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (quotation.clientName?.toLowerCase() || '').includes(search.toLowerCase())
+  );
+  const totalQuotations = filteredQuotations.length;
+  const totalPages = Math.ceil(totalQuotations / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const quotationsToDisplay = filteredQuotations.slice(startIndex, endIndex);
 
   const handleViewQuotation = useCallback((quotation: Quotation) => {
       setSelectedQuotation(quotation);
@@ -66,15 +88,7 @@ const ManageQuotationsPage: React.FC = () => {
     }
   };
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['quotations', page, limit, search],
-    queryFn: () => getQuotations(page, limit, search),
-  });
-  const quotations = data?.quotations || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
-
-  const config = manageQuotationsConfig(handleViewQuotation, handleEditQuotation, handleDeleteQuotation, userRole, currentPage, limit);
+  const config = manageQuotationsConfig(handleViewQuotation, handleEditQuotation, handleDeleteQuotation, userRole, page, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -91,6 +105,10 @@ const ManageQuotationsPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
+
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
@@ -121,14 +139,14 @@ const ManageQuotationsPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={quotations}
+          data={quotationsToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />

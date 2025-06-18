@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getLeads, deleteLead, createLead } from '@services/leadService';
 import DataTable from '@components/Common/DataTable';
@@ -46,23 +46,39 @@ const ManageLeadsPage: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["leads", page, limit, search, statusFilter],
-    queryFn: () => getLeads(page, limit, search, statusFilter),
-  });
-  const leads = data?.leads || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-const handleViewLead = useCallback((lead: Lead) => {
-  setSelectedLead(lead);
-   if (lead?._id) {
-    router.push(`/dashboard/leads/${lead._id}`)
-  }
- }, [router]);
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["allLeads", search, statusFilter],
+    queryFn: () => getLeads(1, 10000, search, statusFilter),
+    enabled: isMounted, // Only fetch data if mounted
+  });
+
+  const allLeads = data?.leads || [];
+  const filteredLeads = allLeads.filter(lead => {
+    const matchesSearch = (lead.name?.toLowerCase() || '').includes(search.toLowerCase());
+    const matchesStatus = statusFilter === '' || statusFilter === 'all' || lead.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalLeads = filteredLeads.length;
+  const totalPages = Math.ceil(totalLeads / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const leadsToDisplay = filteredLeads.slice(startIndex, endIndex);
+
+  const handleViewLead = useCallback((lead: Lead) => {
+    setSelectedLead(lead);
+    if (lead?._id) {
+      router.push(`/dashboard/leads/${lead._id}`)
+    }
+  }, [router]);
 
   const handleEditLead = useCallback((lead: Lead) => {
     setSelectedLead(lead);
@@ -145,17 +161,21 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleEditLead,
     handleDeleteLead,
     userRole,
-    currentPage,
+    page,
     limit
   );
 
   config.createLeadButtonAction = handleCreateLead;
 
   const handlePageChange = (newPage: number) => {
-     if (newPage >= 1 && newPage <= totalPages) {
+    if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
+    } else if (newPage < 1) {
+      setPage(1);
+    } else if (newPage > totalPages) {
+      setPage(totalPages);
     }
-    };
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -255,14 +275,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
         <DataTable
           columns={config.tableColumns}
-          data={leads}
+          data={leadsToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />

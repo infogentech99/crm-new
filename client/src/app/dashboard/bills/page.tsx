@@ -1,7 +1,7 @@
 // File: src/pages/bills/ManageBillsPage.tsx
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getBills, deleteBill } from "@services/billService";
 import DataTable from '@components/Common/DataTable';
@@ -29,22 +29,36 @@ const ManageBillsPage: React.FC = () => {
 
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
 
-
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['bills', page, limit, search],
-    queryFn: () => getBills(page, limit, search),
+    queryKey: ['allBills', search], 
+    queryFn: () => getBills(1, 10000, search),
+    enabled: isMounted, // Only fetch data if mounted
   });
-  const bills = data?.bills || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
+
+  const allBills = data?.bills || [];
+  const filteredBills = allBills.filter(bill =>
+    (bill.billNumber?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (bill.vendorName?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (bill.description?.toLowerCase() || '').includes(search.toLowerCase())
+  );
+
+  const totalBills = filteredBills.length;
+  const totalPages = Math.ceil(totalBills / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const billsToDisplay = filteredBills.slice(startIndex, endIndex);
 
 
   const [billToDelete, setBillToDelete] = useState<Bill | null>(null);
@@ -76,21 +90,23 @@ const ManageBillsPage: React.FC = () => {
 
   const config = manageBillsConfig(
     /* view */() => { },
-
     handleEditBill,
     handleDeleteBill,
     userRole,
-    currentPage,
+    page, 
     limit
   );
-
 
   config.createBillButtonAction = handleCreateBill;
 
   // Controls
- const handlePageChange = (newPage: number) => {
+  const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
+    } else if (newPage < 1) {
+      setPage(1);
+    } else if (newPage > totalPages) {
+      setPage(totalPages);
     }
   };
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +119,10 @@ const ManageBillsPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
+
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
@@ -136,15 +156,15 @@ const ManageBillsPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={bills}
+          data={billsToDisplay}
           isLoading={isLoading}
-         error={isError ? error?.message || 'Unknown error' : null}
+          error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
-            totalPages={totalPages}
+            currentPage={page} 
+            totalPages={totalPages} 
             onPageChange={handlePageChange}
           />
         </div>

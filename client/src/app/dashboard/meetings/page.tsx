@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getMeetings, deleteMeeting } from '@services/meetingService';
 import DataTable from '@components/Common/DataTable';
@@ -39,20 +39,34 @@ const ManageMeetingsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewMeeting, setViewMeeting] = useState<Meeting | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['meetings', page, limit, search],
-    queryFn: () => getMeetings(page, limit, search),
+    queryKey: ['allMeetings', search],
+    queryFn: () => getMeetings(1, 10000, search),
+    enabled: isMounted, // Only fetch data if mounted
   });
-  console.log(data, "praksd")
-  const meetings = data?.meetings || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
 
-const handleViewMeeting = useCallback((meeting: Meeting) => {
-  setViewMeeting(meeting);
-  setIsViewModalOpen(true); 
-}, []);
+  const allMeetings = data?.meetings || [];
+
+  const filteredMeetings = allMeetings.filter(meeting =>
+    (meeting.title?.toLowerCase() || '').includes(search.toLowerCase())
+  );
+
+  const totalMeetings = filteredMeetings.length;
+  const totalPages = Math.ceil(totalMeetings / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const meetingsToDisplay = filteredMeetings.slice(startIndex, endIndex);
+
+  const handleViewMeeting = useCallback((meeting: Meeting) => {
+    setViewMeeting(meeting);
+    setIsViewModalOpen(true);
+  }, []);
 
   const handleEditMeeting = useCallback((meeting: Meeting) => {
     setSelectedMeeting(meeting);
@@ -81,13 +95,20 @@ const handleViewMeeting = useCallback((meeting: Meeting) => {
     handleEditMeeting,
     handleDeleteMeeting,
     userRole,
-    currentPage,
+    page, // Use client-side page state for config
     limit
   );
   config.addMeetingButtonAction = handleCreateMeeting;
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) setPage(newPage);
+    // Ensure newPage is within valid bounds for client-side pagination
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    } else if (newPage < 1) {
+      setPage(1);
+    } else if (newPage > totalPages) {
+      setPage(totalPages);
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,6 +120,10 @@ const handleViewMeeting = useCallback((meeting: Meeting) => {
     setLimit(Number(value));
     setPage(1);
   };
+
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
@@ -130,14 +155,14 @@ const handleViewMeeting = useCallback((meeting: Meeting) => {
 
         <DataTable
           columns={config.tableColumns}
-          data={meetings}
+          data={meetingsToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />

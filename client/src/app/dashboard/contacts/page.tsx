@@ -1,6 +1,6 @@
 "use client";
 
-import React, {  useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
@@ -20,22 +20,39 @@ const ManageContactsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['contacts', page, limit, search],
-    queryFn: () => getLeads(page, limit, search),
+    queryKey: ['allLeadsForContacts', search], 
+    queryFn: () => getLeads(1, 10000, search),
+    enabled: isMounted, // Only fetch data if mounted
   });
 
-console.log(data,"pasdsad")
-  const contacts = data?.leads || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
+  const allLeads = data?.leads || [];
 
-  const config = manageContactsConfig( currentPage, limit);
+  const filteredContacts = allLeads.filter(lead =>
+    (lead.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (lead.email?.toLowerCase() || '').includes(search.toLowerCase())
+  );
+  const totalContacts = filteredContacts.length;
+  const totalPages = Math.ceil(totalContacts / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const contactsToDisplay = filteredContacts.slice(startIndex, endIndex);
+
+  const config = manageContactsConfig(page, limit); 
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
+    } else if (newPage < 1) {
+      setPage(1);
+    } else if (newPage > totalPages) {
+      setPage(totalPages);
     }
   };
 
@@ -49,13 +66,16 @@ console.log(data,"pasdsad")
     setPage(1);
   };
 
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">All contacts</h1>
-        </div>
+        </div> {/* Closing the h1's parent div */}
 
         <div className="flex items-center justify-between mb-4 space-x-4">
           <Input
@@ -79,15 +99,15 @@ console.log(data,"pasdsad")
 
         <DataTable
           columns={config.tableColumns}
-          data={contacts}
+          data={contactsToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
-            totalPages={totalPages}
+            currentPage={page}
+            totalPages={totalPages} 
             onPageChange={handlePageChange}
           />
         </div>
