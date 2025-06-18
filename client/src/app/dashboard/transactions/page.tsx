@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getTransactions, deleteTransaction } from '@services/transactionService';
 import DataTable from '@components/Common/DataTable';
@@ -30,13 +30,30 @@ const ManageTransactionsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['transactions', page, limit, search],
-    queryFn: () => getTransactions(page, limit, search),
+    queryKey: ['allTransactions', search],
+    queryFn: () => getTransactions(1, 10000, search),
+    enabled: isMounted, // Only fetch data if mounted
   });
+
+  const allTransactions = data?.transactions || [];
+  const filteredTransactions = allTransactions.filter(transaction =>
+    (transaction.transactionId?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (transaction.method?.toLowerCase() || '').includes(search.toLowerCase())
+  );
+  const totalTransactions = filteredTransactions.length;
+  const totalPages = Math.ceil(totalTransactions / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const transactionsToDisplay = filteredTransactions.slice(startIndex, endIndex);
 
   const handleEditTransaction = useCallback((txn: Transaction) => {
     setSelectedTransaction(txn);
@@ -62,14 +79,10 @@ const ManageTransactionsPage: React.FC = () => {
     }
   };
 
-  const transactions = data?.transactions || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
-
   const config = manageTransactionsConfig(
     handleEditTransaction,
     handleDeleteTransaction,
-    currentPage,
+    page, // Use client-side page state for config
     limit
   );
 
@@ -88,6 +101,10 @@ const ManageTransactionsPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
+
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
@@ -118,14 +135,14 @@ const ManageTransactionsPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={transactions}
+          data={transactionsToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />

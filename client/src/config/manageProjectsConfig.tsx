@@ -18,7 +18,6 @@ export const manageProjectsConfig = (
   return {
     pageTitle: 'Manage Projects',
     showCreateProjectButton: true,
-   
     tableColumns: filteredColumns,
   };
 };

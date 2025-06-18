@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import DataTable from '@components/Common/DataTable';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
@@ -20,32 +20,49 @@ const ManageProjectsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['projects', page, limit, search],
-    queryFn: () => getLeads(page, limit, search),
+    queryKey: ['allLeadsForProjects', search],
+    queryFn: () => getLeads(1, 10000, search),
+    enabled: isMounted, // Only fetch data if mounted
   });
 
-  const leads = data?.leads || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
-
-  // Flatten leads data to extract projects and associate lead info
-  const projectsData = leads.flatMap(lead =>
+  const allLeads = data?.leads || [];
+  const allProjectsData = allLeads.flatMap(lead =>
     lead.projects.map(project => ({
       _id: project._id,
       title: project.title,
       status: project.status,
-      leadName: lead.name, 
-      industry: lead.industry, 
+      leadName: lead.name,
+      industry: lead.industry,
     }))
   );
 
-  const config = manageProjectsConfig(currentPage, limit);
+  const filteredProjects = allProjectsData.filter(project =>
+    (project.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (project.leadName?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (project.industry?.toLowerCase() || '').includes(search.toLowerCase())
+  );
+  const totalProjects = filteredProjects.length;
+  const totalPages = Math.ceil(totalProjects / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const projectsToDisplay = filteredProjects.slice(startIndex, endIndex);
+
+  const config = manageProjectsConfig(page, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
+    } else if (newPage < 1) {
+      setPage(1);
+    } else if (newPage > totalPages) {
+      setPage(totalPages);
     }
   };
 
@@ -62,6 +79,10 @@ const ManageProjectsPage: React.FC = () => {
   const handleProjectAdded = () => {
     refetch();
   };
+
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
@@ -92,14 +113,14 @@ const ManageProjectsPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={projectsData} 
+          data={projectsToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />

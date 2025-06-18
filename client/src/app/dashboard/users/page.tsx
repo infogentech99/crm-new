@@ -1,7 +1,7 @@
 // File: src/app/dashboard/users/page.tsx
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   fetchUsers,
@@ -41,6 +41,7 @@ export default function ManageUsersPage() {
   // Pagination
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [isMounted, setIsMounted] = useState(false);
 
   // CRUD modal
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -53,25 +54,35 @@ export default function ManageUsersPage() {
   // Role from store
   const userRole = useSelector((s: RootState) => s.user.role || "");
 
-  // Fetch
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["users", page, limit],
-    queryFn: () => fetchUsers(page, limit),
-    keepPreviousData: true,
-  });
-  const users = data?.users || [];
-  const totalPages = data?.pages || 1;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  // Client-side filtering
-  const filteredUsers = users.filter((u) => {
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["allUsers"],
+    queryFn: () => fetchUsers(1, 10000),
+    placeholderData: (previousData) => previousData,
+    enabled: isMounted, // Only fetch data if mounted
+  });
+
+  const allUsers = data?.users || [];
+
+
+  const filteredUsers = allUsers.filter((u: User) => {
     const matchSearch =
-      u.name.toLowerCase().includes(search.toLowerCase()) ||
-      u.email.toLowerCase().includes(search.toLowerCase());
+      (u.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+      (u.email?.toLowerCase() || '').includes(search.toLowerCase());
     const matchRole = roleFilter === "all" || u.role === roleFilter;
     return matchSearch && matchRole;
   });
 
-  // Handlers
+  const totalUsers = filteredUsers.length;
+  const totalPages = Math.ceil(totalUsers / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const usersToDisplay = filteredUsers.slice(startIndex, endIndex);
+
+
   const openCreate = () => {
     setSelectedUser(null);
     setModalMode("create");
@@ -102,24 +113,31 @@ export default function ManageUsersPage() {
     setSelectedUser(null);
   };
 
-  // Table config
-  const config = manageUsersConfig(openView, openEdit, openDelete, openCreate, userRole, page, limit);
+  const config = manageUsersConfig(openView, openEdit, openDelete, openCreate);
 
   // Pagination
   const changePage = (n: number) => {
-    if (n >= 1 && n <= totalPages) setPage(n);
+    if (n >= 1 && n <= totalPages) {
+      setPage(n);
+    } else if (n < 1) {
+      setPage(1);
+    } else if (n > totalPages) {
+      setPage(totalPages);
+    }
   };
+
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
       <div className="p-6 bg-white rounded-lg shadow-md space-y-4">
-        {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">{config.pageTitle}</h1>
           <CreateUserButton onClick={openCreate} />
         </div>
 
-        {/* Filters (moved directly below header) */}
         <div className="flex items-center space-x-4">
           <Input
             className="max-w-sm"
@@ -168,7 +186,7 @@ export default function ManageUsersPage() {
         {/* DataTable */}
         <DataTable
           columns={config.tableColumns}
-          data={filteredUsers}
+          data={usersToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message : null}
         />
@@ -190,7 +208,7 @@ export default function ManageUsersPage() {
             ) : (
               <UserForm
                 initialData={modalMode === "edit" ? selectedUser! : undefined}
-                mode={modalMode}
+                mode={modalMode === "edit" ? "edit" : "create"}
                 onClose={() => {
                   closeModal();
                   queryClient.invalidateQueries({ queryKey: ["users"] });

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getTasks, deleteTask } from '@services/taskService';
 import DataTable from '@components/Common/DataTable';
@@ -32,16 +32,30 @@ const ManageTasksPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['tasks', page, limit, search],
-    queryFn: () => getTasks(page, limit, search),
+    queryKey: ['allTasks', search],
+    queryFn: () => getTasks(1, 10000, search),
+    enabled: isMounted, // Only fetch data if mounted
   });
-  const tasks = data?.tasks || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
+
+  const allTasks = data?.tasks || [];
+  const filteredTasks = allTasks.filter(task =>
+    (task.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (typeof task.assignee === 'object' && (task.assignee.name?.toLowerCase() || '').includes(search.toLowerCase()))
+  );
+  const totalTasks = filteredTasks.length;
+  const totalPages = Math.ceil(totalTasks / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const tasksToDisplay = filteredTasks.slice(startIndex, endIndex);
 
 
 
@@ -72,13 +86,19 @@ const ManageTasksPage: React.FC = () => {
     handleEditTask,
     handleDeleteTask,
     userRole,
-    currentPage,
+    page,
     limit
   );
   config.newTaskButtonAction = handleCreateTask;
 
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) setPage(newPage);
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+    } else if (newPage < 1) {
+      setPage(1);
+    } else if (newPage > totalPages) {
+      setPage(totalPages);
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,6 +110,10 @@ const ManageTasksPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
+
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
@@ -121,14 +145,14 @@ const ManageTasksPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={tasks}
+          data={tasksToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />

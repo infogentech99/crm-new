@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteInvoice, getInvoices } from '@services/invoiceService';
 import DataTable from '@components/Common/DataTable';
@@ -35,8 +35,32 @@ const ManageInvoicesPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['allInvoices', search], 
+    queryFn: () => getInvoices(1, 10000, search),
+    enabled: isMounted, // Only fetch data if mounted
+  });
+
+  const allInvoices = data?.invoices || [];
+
+  const filteredInvoices = allInvoices.filter(invoice =>
+    (invoice.invoiceNumber?.toLowerCase() || '').includes(search.toLowerCase()) ||
+    (invoice.clientName?.toLowerCase() || '').includes(search.toLowerCase())
+  );
+
+  const totalInvoices = filteredInvoices.length;
+  const totalPages = Math.ceil(totalInvoices / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const invoicesToDisplay = filteredInvoices.slice(startIndex, endIndex);
 
   const handleViewInvoice = useCallback((invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -72,15 +96,7 @@ const ManageInvoicesPage: React.FC = () => {
       setInvoiceToDelete(null);
     }
   };
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['invoices', page, limit, search],
-    queryFn: () => getInvoices(page, limit, search),
-  });
-  const invoices = data?.invoices || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
-
-  const config = manageInvoicesConfig(handleViewInvoice, handleEditInvoice, handleDeleteInvoice, handleOpenTransactionModal, userRole, currentPage, limit);
+  const config = manageInvoicesConfig(handleViewInvoice, handleEditInvoice, handleDeleteInvoice, handleOpenTransactionModal, userRole, page, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -97,6 +113,10 @@ const ManageInvoicesPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
+
+  if (!isMounted) {
+    return null; // Or a loading spinner, to prevent hydration mismatch
+  }
 
   return (
     <DashboardLayout>
@@ -127,14 +147,14 @@ const ManageInvoicesPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={invoices}
+          data={invoicesToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={currentPage}
+            currentPage={page}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />
