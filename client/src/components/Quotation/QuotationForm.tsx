@@ -260,12 +260,14 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
                   placeholder="Search or type"
                   onChange={(selected) => handleSelect(selected, idx)}
                   value={
-                    predefinedItems.find(
-                      (opt) => opt.value === item.description
-                    ) || {
-                      label: item.description,
-                      value: item.description,
-                    }
+                    item.description === ''
+                      ? null
+                      : predefinedItems.find(
+                          (opt) => opt.value === item.description
+                        ) || {
+                          label: item.description,
+                          value: item.description,
+                        }
                   }
                   isClearable
                   isSearchable

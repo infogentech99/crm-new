@@ -263,7 +263,9 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
                   placeholder="Search or type"
                   onChange={(selected) => handleSelect(selected, idx)}
                   value={
-                    predefinedItems.find(
+                   item.description === ''
+                      ? null
+                      : predefinedItems.find(
                       (opt) => opt.value === item.description
                     ) || {
                       label: item.description,

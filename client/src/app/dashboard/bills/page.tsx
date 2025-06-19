@@ -42,9 +42,9 @@ const ManageBillsPage: React.FC = () => {
   }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['allBills', search], 
+    queryKey: ['allBills', search],
     queryFn: () => getBills(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted,
   });
 
   const allBills = data?.bills || [];
@@ -93,7 +93,7 @@ const ManageBillsPage: React.FC = () => {
     handleEditBill,
     handleDeleteBill,
     userRole,
-    page, 
+    page,
     limit
   );
 
@@ -145,7 +145,7 @@ const ManageBillsPage: React.FC = () => {
             <SelectTrigger className="w-[100px]">
               <SelectValue placeholder="Limit" />
             </SelectTrigger>
-             <SelectContent>
+            <SelectContent>
               <SelectItem value="5">5</SelectItem>
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="20">20</SelectItem>
@@ -163,8 +163,8 @@ const ManageBillsPage: React.FC = () => {
 
         <div className="mt-4 flex justify-end">
           <PaginationComponent
-            currentPage={page} 
-            totalPages={totalPages} 
+            currentPage={page}
+            totalPages={totalPages}
             onPageChange={handlePageChange}
           />
         </div>
@@ -172,7 +172,10 @@ const ManageBillsPage: React.FC = () => {
 
         <Modal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            queryClient.invalidateQueries({ queryKey: ['allBills'] });
+          }}
           widthClass="max-w-lg"
         >
           <BillForm
@@ -180,7 +183,11 @@ const ManageBillsPage: React.FC = () => {
             data={selectedBill ?? undefined}
             mode={selectedBill ? "Edit" : "Create"}
 
-            onClose={() => setIsModalOpen(false)}
+            onClose={() => {
+              setIsModalOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['allBills'] });
+            }}
+
           />
         </Modal>
 
@@ -189,7 +196,7 @@ const ManageBillsPage: React.FC = () => {
 
           <DeleteModal
             isOpen={isDeleteModalOpen}
-            onClose={() => { setIsDeleteModalOpen(false); setBillToDelete(null); }}
+            onClose={() => { setIsDeleteModalOpen(false); setBillToDelete(null); queryClient.invalidateQueries({ queryKey: ['allBills'] }); }}
             onConfirm={confirmDeleteBill}
             itemLabel={`${billToDelete.description}`}
           />
