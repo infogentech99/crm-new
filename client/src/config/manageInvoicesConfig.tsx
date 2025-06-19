@@ -30,8 +30,9 @@ export const manageInvoicesConfig = (
     {
       key: 'actions',
       label: 'ACTIONS',
+      align: 'right',
       render: (item: Invoice) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-end space-x-2">
           <button className="text-yellow-500 hover:text-yellow-700 flex items-center cursor-pointer" onClick={() => handleOpenTransactionModal(item)}>
             <CreditCard className="h-4 w-4" />
           </button>

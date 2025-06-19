@@ -50,8 +50,9 @@ export const manageLeadsConfig = (
     {
       key: 'actions',
       label: 'ACTIONS',
+      align: 'right',
       render: (item: Lead) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-end space-x-2">
           <button className="text-gray-500 hover:text-gray-700 flex items-center cursor-pointer" onClick={() => handleViewLead(item)}>
             <Eye className="h-4 w-4" />
           </button>

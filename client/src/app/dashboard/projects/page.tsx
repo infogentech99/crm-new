@@ -15,6 +15,7 @@ import {
 import { PaginationComponent } from '@components/ui/pagination';
 import { manageProjectsConfig } from '@src/config/manageProjectsConfig';
 import { getLeads } from '@services/leadService';
+import { FlattenedProject } from '@customTypes/index'; // Import FlattenedProject type
 
 const ManageProjectsPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -29,13 +30,13 @@ const ManageProjectsPage: React.FC = () => {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['allLeadsForProjects', search],
     queryFn: () => getLeads(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted, 
   });
 
   const allLeads = data?.leads || [];
   const allProjectsData = allLeads.flatMap(lead =>
     lead.projects.map((project, projectIndex) => ({
-      _id: project._id || `${lead._id}-${projectIndex}`, // Ensure unique key, fallback to lead ID + index
+      _id: project._id || `${lead._id}-${projectIndex}`, 
       title: project.title,
       status: project.status,
       leadName: lead.name,
@@ -54,7 +55,17 @@ const ManageProjectsPage: React.FC = () => {
   const endIndex = startIndex + limit;
   const projectsToDisplay = filteredProjects.slice(startIndex, endIndex);
 
-  const config = manageProjectsConfig(page, limit);
+  const handleEditProject = (project: FlattenedProject) => {
+    alert(`Edit project: ${project.title}`);
+    // Implement actual edit logic here
+  };
+
+  const handleDeleteProject = (project: FlattenedProject) => {
+    alert(`Delete project: ${project.title}`);
+    // Implement actual delete logic here
+  };
+
+  const config = manageProjectsConfig(handleEditProject, handleDeleteProject, page, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {

@@ -29,12 +29,16 @@ interface GetUsersResponse {
 export const fetchUsers = async (
   page: number = 1,
   limit: number = 10,
+  search?: string,
   roleFilter?: string
 ): Promise<GetUsersResponse> => {
   const headers = getAuthHeaders();
   let url = `${API_URL}?page=${page}&limit=${limit}`;
-  if (roleFilter) {
+  if (roleFilter && roleFilter !== "all") { // Ensure "all" is not sent as a filter
     url += `&roleFilter=${roleFilter}`;
+  }
+  if (search) {
+    url += `&search=${encodeURIComponent(search)}`;
   }
 
   const response = await fetch(url, { headers });
