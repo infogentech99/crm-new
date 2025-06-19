@@ -2,6 +2,7 @@ import { Meeting } from '@customTypes/index';
 import {Eye, Trash2, Pencil } from 'lucide-react';
 import React from 'react';
 import BadgeDot from '@components/BadgeDot';
+import { DataTableProps } from '@components/Common/DataTable';
 
 export const manageMeetingsConfig = (
   handleViewMeeting: (meeting: Meeting) => void,
@@ -11,7 +12,7 @@ export const manageMeetingsConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns = [
+  const baseColumns: DataTableProps<Meeting>['columns'] = [
     { key: '_id', label: 'S.NO', render: (item: Meeting, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'title', label: 'TITLE' },
     { key: 'date', label: 'DATE & TIME', render: (item: Meeting) => <span>{new Date(item.date).toLocaleString()}</span> },
