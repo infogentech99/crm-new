@@ -49,6 +49,11 @@ export default function LeadDetailsPage() {
     }, [id]);
 
     const handleStatusChange = async (newStatus: LeadStatus) => {
+        if (!lead.projects || lead.projects.length === 0 || selectedProject === undefined || lead.projects[selectedProject] === undefined) {
+            toast.error('Please add a project first.');
+            return;
+        }
+
         if (lead.projects[selectedProject].status === newStatus) return;
 
         try {
@@ -231,5 +236,3 @@ export default function LeadDetailsPage() {
         </DashboardLayout>
     );
 }
-
-
