@@ -7,7 +7,8 @@ interface DataTableProps<T extends { _id: string }> {
   columns: {
     key: string;
     label: string;
-    render?: (item: T, index?: number) => React.ReactNode; 
+    render?: (item: T, index?: number) => React.ReactNode;
+    align?: 'left' | 'right' | 'center';
   }[];
   data: T[];
   isLoading: boolean;
@@ -50,7 +51,7 @@ const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error
               <th
                 key={column.key}
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider"
+                className={`px-6 py-3 text-${column.align || 'left'} text-xs font-bold text-gray-700 uppercase tracking-wider`}
               >
                 {column.label}
               </th>
@@ -63,7 +64,7 @@ const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error
               {columns.map((column) => (
                 <td
                   key={`${item._id}-${column.key}`}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-800"
+                  className={`px-6 py-4 whitespace-nowrap text-sm text-gray-800 text-${column.align || 'left'}`}
                 >
                   {column.render ? column.render(item, i) : (item[column.key as keyof T] as React.ReactNode)}
                 </td>
