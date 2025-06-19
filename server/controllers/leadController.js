@@ -30,7 +30,9 @@ export const getLeads = async (req, res) => {
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
-        { company: { $regex: search, $options: 'i' } },
+        { companyName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phoneNumber: { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -92,8 +94,13 @@ export const updateLead = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden: not your lead' });
     }
 
-    const { notes, projects, ...otherUpdates } = req.body;
+    const { notes, projects, jobTitle, ...otherUpdates } = req.body; // Destructure jobTitle
     Object.assign(lead, otherUpdates);
+
+    if (jobTitle !== undefined) { // Update jobTitle if provided
+      lead.jobTitle = jobTitle;
+    }
+
     if (notes && Array.isArray(notes)) {
       lead.notes = notes.map((note) => ({
         message: note.message,

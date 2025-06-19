@@ -29,14 +29,14 @@ export interface RecentActivity {
   type: "Lead" | "Meeting" | "Task";
   description: string;
   date: string;
-  // Lead fields
+
   name?: string;
   company?: string;
-  // Meeting fields
+
   title?: string;
   time?: string;
   participants?: string[];
-  // Task fields
+ 
   assignee?: string;
   status?: string;
 }
@@ -54,9 +54,9 @@ export interface Lead {
   _id: string;
   name: string;
   email: string;
-  phone: string;
+  phoneNumber?: string;
   createdBy: string | User;
-  company?: string;
+  companyName?: string; 
   jobTitle?: string;
   address?: string;
   city?: string;
@@ -90,9 +90,9 @@ export interface Lead {
 export interface Task {
   _id: string;
   title: string;
-  dueDate: string; // ISO date string
+  dueDate: string; 
   priority: 'High' | 'Medium' | 'Low';
-  assignee?: string | User; // User ID or populated User object
+  assignee?: string | User; 
   status: 'Pending' | 'Completed' | 'In Progress';
   createdBy: string | User;
   createdAt: string;
@@ -117,10 +117,10 @@ export interface Transaction {
 export interface Meeting {
   _id: string;
   title: string;
-  date: string; // Combined date and time, ISO string
-  duration: string; // e.g., "30 Min"
+  date: string; 
+  duration: string; 
   status: 'Scheduled' | 'Completed' | 'Cancelled';
-  participants?: (string | User | Contact | Lead)[]; // Array of IDs or populated objects
+  participants?: (string | User | Contact | Lead)[];
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
@@ -147,8 +147,8 @@ export interface Deal {
   dealName: string;
   amount: number;
   stage: 'Prospecting' | 'Qualification' | 'Proposal' | 'Negotiation' | 'Closed Won' | 'Closed Lost';
-  closeDate: string; // ISO date string
-  contactPerson?: string | Contact | Lead; // Can be Contact/Lead ID or populated object
+  closeDate: string; 
+  contactPerson?: string | Contact | Lead; 
   company?: string;
   createdBy: string | User;
   createdAt: string;
@@ -160,19 +160,19 @@ export interface Invoice {
   invoiceNumber: string;
   clientName: string;
   clientEmail: string;
-  clientPhone?: string; // Added for contact column
-  items: QuotationItem[]; // Reusing QuotationItem for consistency
+  clientPhone?: string; 
+  items: QuotationItem[]; 
   totalAmount: number;
-  paidAmount?: number; // Added for due amount calculation
+  paidAmount?: number; 
   status: 'Pending' | 'Paid' | 'Overdue' | 'Cancelled';
-  issueDate: string; // ISO date string
-  dueDate: string; // ISO date string
-  relatedQuotation?: string; // Optional: ID of the related quotation
-  createdBy: string | User; // User ID or populated User object
+  issueDate: string; 
+  dueDate: string; 
+  relatedQuotation?: string; 
+  createdBy: string | User; 
   createdAt: string;
   updatedAt: string;
-  // Add the populated user and totals objects
-  user: User; // Assuming the populated user will conform to the User interface
+
+  user: User; 
   totals: {
     taxable: number;
     igst: number;
@@ -190,18 +190,7 @@ export interface Contact {
   updatedAt: string;
 }
 
-// Original Project interface (if needed elsewhere, otherwise remove)
-// export interface Project {
-//   _id: string;
-//   name: string;
-//   company?: string;
-//   industry?: string;
-//   createdBy: string | User;
-//   createdAt: string;
-//   updatedAt: string;
-// }
 
-// New interface for flattened project data in DataTable
 export interface FlattenedProject {
   _id: string;
   title: string;
@@ -237,8 +226,8 @@ export interface Quotation {
   clientEmail: string;
   items: QuotationItem[];
   totalAmount: number;
-  issueDate: string; // ISO date string
-  validUntil: string; // ISO date string
+  issueDate: string;
+  validUntil: string; 
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
@@ -260,20 +249,26 @@ export type LeadStatus =
 
 export interface FormData {
   name: string;
-  phone: string;
+  phoneNumber: string;
   email: string;
-  company: string;
+  companyName: string;
   address: string;
   city: string;
   state: string;
   zipCode: string;
   country: string;
-  source: string;
-  industry: string;
-  status: string;
-  callResponse: string;
+  source: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
+  industry: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
+  status: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
+  callResponse: 'Picked' | 'Not Response' | 'Talk to later';
   description?: string;
   remark?: string;
   position?: string;
   website?: string;
+  createdBy?: string | User;
+  projects?: {
+    _id: string;
+    title: string;
+    status: string;
+  }[];
 }

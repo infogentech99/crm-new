@@ -3,16 +3,16 @@ import mongoose from 'mongoose';
 const LeadSchema = new mongoose.Schema({
   name:      { type: String, required: true },
   email:     { type: String, required: true, unique: true },
-  phone:     { type: String, required: true },
+  phoneNumber: { type: String, required: true },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  company:   String,
+  companyName:   String, // Changed from 'company' to 'companyName'
   jobTitle:  String,
-  description: String,
-  position:  String,
+  description: String, // Removed as it's now part of notes
+  position:  String, // Removed as it's mapped to jobTitle
   address:   String,
   city:      String,
   state:     String,
@@ -33,16 +33,6 @@ const LeadSchema = new mongoose.Schema({
   }
 ],
 
-  status:    {
-    type: String,
-    enum: [
-      'pending_approval','denied','approved',
-      'quotation_submitted','quotation_rejected','quotation_approved',
-      'invoice_issued','invoice_accepted','completed',  'processing_payments', 
-      'new','contacted','qualified','lost'
-    ],
-    default: 'pending_approval'
-  },
   gstin: { type: String},
   bestTimeToCall: { type: String },
   callResponse:  { type: String, enum: ["Picked", "Not Response", "Talk to later"], default: 'Picked' },

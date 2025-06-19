@@ -57,12 +57,18 @@ const ManageLeadsPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["allLeads", search, statusFilter],
     queryFn: () => getLeads(1, 10000, search, statusFilter),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted,
   });
 
   const allLeads = data?.leads || [];
   const filteredLeads = allLeads.filter(lead => {
-    const matchesSearch = (lead.name?.toLowerCase() || '').includes(search.toLowerCase());
+    const lowerCaseSearch = search.toLowerCase();
+    const matchesSearch = (
+      (lead.name?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.companyName?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.email?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.phoneNumber?.toLowerCase() || '').includes(lowerCaseSearch)
+    );
     const matchesStatus = statusFilter === '' || statusFilter === 'all' || lead.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -241,7 +247,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
         <div className="flex items-center justify-between mb-4">
           <Input
-            placeholder="Search by name..."
+            placeholder="Search by name, company, email, or phone..."
             value={search}
             onChange={handleSearchChange}
             className="max-w-sm"

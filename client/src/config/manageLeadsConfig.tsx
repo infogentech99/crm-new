@@ -16,7 +16,7 @@ export const manageLeadsConfig = (
   const baseColumns: DataTableProps<Lead>['columns'] = [
     { key: '_id', label: 'S.NO', render: (item: Lead, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'name', label: 'NAME' },
-    { key: 'company', label: 'COMPANY' },
+    { key: 'companyName', label: 'COMPANY' },
     {
       key: 'leadGenerate',
       label: 'LEAD GENERATE',
@@ -72,12 +72,12 @@ export const manageLeadsConfig = (
 
   if (userRole === 'superadmin' || userRole === 'admin') {
     const emailColumn = { key: 'email', label: 'EMAIL' };
-    const phoneColumn = { key: 'phone', label: 'PHONE' };
+    const phoneNumberColumn = { key: 'phoneNumber', label: 'PHONE' };
 
     filteredColumns = [
       ...baseColumns.slice(0, 2), 
          emailColumn,
-      phoneColumn,
+      phoneNumberColumn,
       ...baseColumns.slice(2), 
     ];
   }
