@@ -1,7 +1,6 @@
 import { Deal } from '@customTypes/index';
 import { Eye, Trash2, Pencil } from 'lucide-react';
 import React from 'react';
-import { DataTableProps } from '@components/Common/DataTable'; // Import DataTableProps
 
 export const manageDealsConfig = (
   handleViewDeal: (deal: Deal) => void,
@@ -11,7 +10,7 @@ export const manageDealsConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns: DataTableProps<Deal>['columns'] = [ // Explicitly type baseColumns
+  const baseColumns = [
     { key: '_id', label: 'S.NO', render: (item: Deal, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'dealName', label: 'DEAL NAME' },
     { key: 'amount', label: 'AMOUNT', render: (item: Deal) => <span>₹{item.amount.toFixed(2)}</span> },
