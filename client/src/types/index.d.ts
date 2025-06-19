@@ -24,7 +24,8 @@ export interface DashboardSummary {
 }
 
 export interface RecentActivity {
-  id: number;
+  _id: string;
+  id?: number;
   type: "Lead" | "Meeting" | "Task";
   description: string;
   date: string;

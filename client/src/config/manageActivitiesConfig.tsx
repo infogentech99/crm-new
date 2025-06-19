@@ -10,7 +10,7 @@ export interface ManageActivitiesConfig {
     key: string;
     label: string;
     render?: (item: RecentActivity, idx?: number) => React.ReactNode;
-    align?: string;
+    align?: 'left' | 'right' | 'center';
   }[];
 }
 
