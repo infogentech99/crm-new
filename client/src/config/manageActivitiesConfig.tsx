@@ -10,6 +10,7 @@ export interface ManageActivitiesConfig {
     key: string;
     label: string;
     render?: (item: RecentActivity, idx?: number) => React.ReactNode;
+    align?: string;
   }[];
 }
 
@@ -28,7 +29,7 @@ export const manageActivitiesConfig = (
   onDelete?: (act: RecentActivity) => void
 ): ManageActivitiesConfig => {
   // S.NO column
-  const cols = [
+  const cols: ManageActivitiesConfig['tableColumns'] = [
     {
       key: "_idx",
       label: "S.NO",
@@ -113,16 +114,16 @@ export const manageActivitiesConfig = (
     );
   }
 
-  // Only for Leads do we show actions
   if (tab === "Leads" && (onView || onDelete)) {
     cols.push({
       key: "actions",
       label: "ACTIONS",
+      align: "right",
       render: (a) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex justify-end space-x-2">
           {onView && (
             <button
-              className="text-gray-500 hover:text-gray-700 cursor-pointer"
+              className="text-gray-500 hover:text-gray-700 cursor-pointer cursor-pointer"
               onClick={() => onView(a)}
             >
               <Eye className="h-4 w-4" />
@@ -130,7 +131,7 @@ export const manageActivitiesConfig = (
           )}
           {onDelete && (
             <button
-              className="text-red-500 hover:text-red-700 cursor-pointer"
+              className="text-red-500 hover:text-red-700 cursor-pointer cursor-pointer"
               onClick={() => onDelete(a)}
             >
               <Trash2 className="h-4 w-4" />

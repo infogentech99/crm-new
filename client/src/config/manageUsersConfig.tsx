@@ -42,20 +42,20 @@ export const manageUsersConfig = (
       render: (item: User) => (
         <div className="flex items-center justify-end space-x-2">
           <button
-            className="text-gray-500 hover:text-gray-700 flex items-center"
+            className="text-gray-500 hover:text-gray-700 flex items-center cursor-pointer"
             onClick={() => handleViewUser(item)}
           >
             <Eye className="h-4 w-4 mr-1" />
           </button>
           
           <button
-            className="text-blue-500 hover:text-blue-700 flex items-center"
+            className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer"
             onClick={() => handleEditUser(item)}
           >
             <Pencil className="h-4 w-4 mr-1" />
           </button>
           <button
-            className="text-red-500 hover:text-red-700 flex items-center"
+            className="text-red-500 hover:text-red-700 flex items-center cursor-pointer"
             onClick={() => handleDeleteUser(item)}
           >
             <Trash2 className="h-4 w-4 mr-1" />
