@@ -81,7 +81,7 @@ const ManageMeetingsPage: React.FC = () => {
   const confirmDeleteMeeting = async () => {
     if (!meetingToDelete) return;
     await deleteMeeting(meetingToDelete._id);
-    queryClient.invalidateQueries({ queryKey: ['meetings'] });
+    queryClient.invalidateQueries({ queryKey: ['allMeetings'] });
     setIsDeleteOpen(false);
     setMeetingToDelete(null);
   };
@@ -178,7 +178,7 @@ const ManageMeetingsPage: React.FC = () => {
             mode={selectedMeeting ? 'Edit' : 'Create'}
             onClose={() => {
               setIsModalOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['meetings'] });
+              queryClient.invalidateQueries({ queryKey: ['allMeetings'] });
             }}
 
           />

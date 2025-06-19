@@ -107,7 +107,7 @@ const ManageLeadsPage: React.FC = () => {
 
     try {
       await deleteLead(leadToDelete._id);
-      queryClient.invalidateQueries({ queryKey: ["leads"] });
+      queryClient.invalidateQueries({ queryKey: ["allLeads"] });
     } catch (err) {
       console.error("Failed to delete lead:", err);
     } finally {
@@ -116,51 +116,51 @@ const ManageLeadsPage: React.FC = () => {
     }
   };
 
-const handleExport = async () => {
-  try {
-    const { leads: allLeads } = await getLeads(1, 9999, search, statusFilter);
-    exportLeadsToCSV(allLeads);
-    toast.success('Exported leads successfully');
-  } catch (err) {
-    console.error("Export all failed:", err);
-    toast.error('Export failed');
-  }
-};
+  const handleExport = async () => {
+    try {
+      const { leads: allLeads } = await getLeads(1, 9999, search, statusFilter);
+      exportLeadsToCSV(allLeads);
+      toast.success('Exported leads successfully');
+    } catch (err) {
+      console.error("Export all failed:", err);
+      toast.error('Export failed');
+    }
+  };
 
   const handleImportClick = () => {
     fileInputRef.current?.click();
   };
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (ev) => {
-    const text = ev.target?.result as string;
-    const parsedLeads = parseLeadsCSV(text);
-    let duplicateCount = 0;
-    let successCount = 0;
-    for (const leadData of parsedLeads) {
-      try {
-        await createLead(leadData as Lead);
-        successCount++;
-      } catch (err: any) {
-        const msg = err?.response?.data?.message || err.message;
-        if (msg.includes('E11000') || msg.includes('duplicate key')) {
-          duplicateCount++;
-        } else {
-          console.error('Import error:', err);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const text = ev.target?.result as string;
+      const parsedLeads = parseLeadsCSV(text);
+      let duplicateCount = 0;
+      let successCount = 0;
+      for (const leadData of parsedLeads) {
+        try {
+          await createLead(leadData as Lead);
+          successCount++;
+        } catch (err: any) {
+          const msg = err?.response?.data?.message || err.message;
+          if (msg.includes('E11000') || msg.includes('duplicate key')) {
+            duplicateCount++;
+          } else {
+            console.error('Import error:', err);
+          }
         }
       }
-    }
-    queryClient.invalidateQueries({ queryKey: ['leads'] });
-    if (duplicateCount > 0) {
-      toast.error(`Skipped ${duplicateCount} duplicate email${duplicateCount > 1 ? 's' : ''}`);
-    } else {
-      toast.success(`Imported ${successCount} lead${successCount > 1 ? 's' : ''} successfully`);
-    }
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      if (duplicateCount > 0) {
+        toast.error(`Skipped ${duplicateCount} duplicate email${duplicateCount > 1 ? 's' : ''}`);
+      } else {
+        toast.success(`Imported ${successCount} lead${successCount > 1 ? 's' : ''} successfully`);
+      }
+    };
+    reader.readAsText(file);
   };
-  reader.readAsText(file);
-};
 
   const config = manageLeadsConfig(
     handleViewLead,
@@ -223,14 +223,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         <LeadSummaryCards />
 
         <div className="flex justify-between items-center mb-4">
-           <h1 className="text-2xl font-semibold text-gray-800">
+          <h1 className="text-2xl font-semibold text-gray-800">
             {config.pageTitle}
           </h1>
-         <div className="flex space-x-2">
-           <Button onClick={handleImportClick}>
+          <div className="flex space-x-2">
+            <Button onClick={handleImportClick}>
               Import CSV
             </Button>
-            <Button  onClick={handleExport}>
+            <Button onClick={handleExport}>
               Export CSV
             </Button>
             <CreateLeadButton onClick={handleCreateLead} />
@@ -294,21 +294,22 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           />
         </div>
 
-          <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
+        <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
           <LeadForm
             initialData={selectedLead || undefined}
-             mode={selectedLead ? "Edit" : "Create"}
-            onClose={() => { setIsModalOpen(false); setSelectedLead(null); }}
+            mode={selectedLead ? "Edit" : "Create"}
+            onClose={() => { setIsModalOpen(false); setSelectedLead(null); queryClient.invalidateQueries({ queryKey: ["allLeads"] }); }}
+
           />
         </Modal>
         {leadToDelete && (
-         <DeleteModal
+          <DeleteModal
             isOpen={isDeleteModalOpen}
             onClose={() => {
               setIsDeleteModalOpen(false);
               setLeadToDelete(null);
-            }}        
-                onConfirm={handleConfirmDelete}
+            }}
+            onConfirm={handleConfirmDelete}
             itemLabel={leadToDelete.name}
           />
         )}

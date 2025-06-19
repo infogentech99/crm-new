@@ -77,7 +77,7 @@ const ManageTasksPage: React.FC = () => {
   const confirmDeleteTask = async () => {
     if (!taskToDelete) return;
     await deleteTask(taskToDelete._id);
-    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    queryClient.invalidateQueries({ queryKey: ['allTasks'] });
     setIsDeleteOpen(false);
     setTaskToDelete(null);
   };
@@ -163,7 +163,7 @@ const ManageTasksPage: React.FC = () => {
           onClose={() => {
             setIsModalOpen(false);
             setSelectedTask(null);
-            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            queryClient.invalidateQueries({ queryKey: ['allTasks'] });
           }}
           widthClass="max-w-3xl"
         >
@@ -173,7 +173,7 @@ const ManageTasksPage: React.FC = () => {
             onClose={() => {
               setIsModalOpen(false);
               setSelectedTask(null);
-               queryClient.invalidateQueries({ queryKey: ['tasks'] });
+               queryClient.invalidateQueries({ queryKey: ['allTasks'] });
             }}
           />
         </Modal>

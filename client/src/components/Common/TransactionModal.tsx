@@ -14,6 +14,7 @@ import {
   SelectItem,
 } from "@components/ui/select";
 import { Button } from "@components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function TransactionModal({
   selectedInvoice,
@@ -24,7 +25,7 @@ export default function TransactionModal({
 }) {
   const [loading, setLoading] = useState(false);
   const [method, setMethod] = useState("");
-
+  const router = useRouter();
   if (!selectedInvoice) return null;
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -57,6 +58,7 @@ export default function TransactionModal({
       setLoading(true);
       await createTransaction(payload);
       toast.success("Transaction saved Successfully.");
+      router.push('/dashboard/transactions');
       onClose();
     } catch (err) {
       console.error(err);

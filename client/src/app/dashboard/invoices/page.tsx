@@ -88,7 +88,7 @@ const ManageInvoicesPage: React.FC = () => {
 
     try {
       await deleteInvoice(invoiceToDelete._id);
-      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
     } catch (err) {
       console.error("Failed to delete quotation:", err);
     } finally {
@@ -115,7 +115,7 @@ const ManageInvoicesPage: React.FC = () => {
   };
 
   if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
+    return null; 
   }
 
   return (
@@ -171,7 +171,7 @@ const ManageInvoicesPage: React.FC = () => {
             projectId=''
             onClose={() => {
               setIsInvoiceOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['invoices'] });
+              queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
             }}
           />
         </Modal>
@@ -180,8 +180,8 @@ const ManageInvoicesPage: React.FC = () => {
             selectedInvoice={selectedInvoice}
             onClose={() => {
               setIsTransactionModalOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['invoices'] });
-              router.push('/dashboard/transactions');
+              queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
+              
             }}
           />
         )}
@@ -192,7 +192,6 @@ const ManageInvoicesPage: React.FC = () => {
             onClose={() => {
               setIsDeleteModalOpen(false);
               setInvoiceToDelete(null);
-              queryClient.invalidateQueries({ queryKey: ['invoices'] });
             }}
             onConfirm={handleConfirmDelete}
             itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}

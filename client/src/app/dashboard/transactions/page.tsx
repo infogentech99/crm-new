@@ -41,7 +41,7 @@ const ManageTransactionsPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allTransactions', search],
     queryFn: () => getTransactions(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted, 
   });
 
   const allTransactions = data?.transactions || [];
@@ -70,7 +70,7 @@ const ManageTransactionsPage: React.FC = () => {
 
     try {
       await deleteTransaction(transactionToDelete._id);
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] });
     } catch (err) {
       console.error("Failed to delete transaction:", err);
     } finally {
@@ -82,7 +82,7 @@ const ManageTransactionsPage: React.FC = () => {
   const config = manageTransactionsConfig(
     handleEditTransaction,
     handleDeleteTransaction,
-    page, // Use client-side page state for config
+    page,
     limit
   );
 
@@ -158,7 +158,7 @@ const ManageTransactionsPage: React.FC = () => {
               selectedInvoice={selectedTransaction}
               onClose={() => {
                 setIsTransactionModalOpen(false);
-                queryClient.invalidateQueries({ queryKey: ['transactions'] });
+                queryClient.invalidateQueries({ queryKey: ['allTransactions'] });
               }}
             />
           )}
@@ -173,7 +173,7 @@ const ManageTransactionsPage: React.FC = () => {
             }}
             onConfirm={handleConfirmDelete}
             itemLabel={`Transaction ${transactionToDelete?.transactionId || ''}`}
-
+               
           />
         )}
       </div>

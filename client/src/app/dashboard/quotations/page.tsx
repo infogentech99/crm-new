@@ -79,7 +79,7 @@ const ManageQuotationsPage: React.FC = () => {
 
     try {
       await deleteQuotation(quotationToDelete._id);
-      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['allQuotations'] });
     } catch (err) {
       console.error("Failed to delete quotation:", err);
     } finally {
@@ -162,7 +162,7 @@ const ManageQuotationsPage: React.FC = () => {
             data={selectedQuotation}
             onClose={() => {
               setIsQuotationOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['quotations'] });
+              queryClient.invalidateQueries({ queryKey: ['allQuotations'] });
             }}
           />
         </Modal>
