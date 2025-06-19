@@ -1,25 +1,22 @@
-// File: src/config/manageUsersConfig.ts
+
 
 import { User } from "@customTypes/index";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import React from "react";
+import { DataTableProps } from '@components/Common/DataTable';
 
 export interface ManageUsersConfig {
   pageTitle: string;
   showCreateUserButton: boolean;
   createUserButtonAction: () => void;
-  tableColumns: {
-    key: string;
-    label: string;
-    render?: (item: User, index?: number) => React.ReactNode;
-  }[];
+  tableColumns: DataTableProps<User>['columns']; 
 }
 
 /**
- * @param handleViewUser   Called when clicking “View” icon in a row
- * @param handleEditUser   Called when clicking “Edit” icon in a row
- * @param handleDeleteUser Called when clicking “Delete” icon in a row
- * @param handleCreateUser Called when clicking the “Create User” button
+ * @param handleViewUser 
+ * @param handleEditUser   
+ * @param handleDeleteUser 
+ * @param handleCreateUser 
  */
 export const manageUsersConfig = (
   handleViewUser: (user: User) => void,
@@ -27,7 +24,7 @@ export const manageUsersConfig = (
   handleDeleteUser: (user: User) => void,
   handleCreateUser: () => void
 ): ManageUsersConfig => {
-  const columns = [
+  const columns: DataTableProps<User>['columns'] = [
     {
       key: "_id",
       label: "S.NO",

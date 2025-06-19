@@ -3,6 +3,7 @@ import { Lead, User } from '@customTypes/index';
 import dayjs from 'dayjs';
 import { Eye, Trash2, Pencil } from 'lucide-react';
 import React from 'react';
+import { DataTableProps } from '@components/Common/DataTable'; // Import DataTableProps
 
 export const manageLeadsConfig = (
   handleViewLead: (lead: Lead) => void,
@@ -12,7 +13,7 @@ export const manageLeadsConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns = [
+  const baseColumns: DataTableProps<Lead>['columns'] = [
     { key: '_id', label: 'S.NO', render: (item: Lead, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'name', label: 'NAME' },
     { key: 'company', label: 'COMPANY' },

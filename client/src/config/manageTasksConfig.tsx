@@ -2,6 +2,7 @@ import { Task } from '@customTypes/index';
 import BadgeDot from '@components/BadgeDot';
 import { Trash2, Pencil } from 'lucide-react';
 import React from 'react';
+import { DataTableProps } from '@components/Common/DataTable';
 
 export const manageTasksConfig = (
   handleEditTask: (task: Task) => void,
@@ -10,7 +11,7 @@ export const manageTasksConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns = [
+  const baseColumns: DataTableProps<Task>['columns'] = [
     { key: '_id', label: 'S.NO', render: (item: Task, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'title', label: 'TITLE' },
     { key: 'createdBy', label: 'Task Created By', render: (item: Task) => <span>{typeof item.createdBy === 'object' && item.createdBy !== null ? item.createdBy.name : item.createdBy || 'N/A'}</span> },

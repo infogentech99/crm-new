@@ -1,3 +1,4 @@
+import { DataTableProps } from '@components/Common/DataTable';
 import { Bill } from '@customTypes/index';
 import { Trash2, Pencil } from 'lucide-react';
 import React from 'react';
@@ -10,7 +11,7 @@ export const manageBillsConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns = [
+  const baseColumns: DataTableProps<Bill>['columns'] = [
     { key: '_id', label: 'S.NO', render: (item: Bill, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
      {
          key: 'description',

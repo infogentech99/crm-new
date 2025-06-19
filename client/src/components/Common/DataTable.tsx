@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from "@lib/utils";
 
-interface DataTableProps<T extends { _id: string }> { 
+export interface DataTableProps<T extends { _id: string }> { 
   columns: {
     key: string;
     label: string;

@@ -2,6 +2,7 @@ import { Invoice } from '@customTypes/index';
 import dayjs from 'dayjs';
 import { Eye, Trash2, Pencil, CreditCard } from 'lucide-react'; // Import CreditCard
 import React from 'react';
+import { DataTableProps } from '@components/Common/DataTable'; // Import DataTableProps
 
 export const manageInvoicesConfig = (
   handleViewInvoice: (invoice: Invoice) => void,
@@ -12,7 +13,7 @@ export const manageInvoicesConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns = [
+  const baseColumns: DataTableProps<Invoice>['columns'] = [ // Explicitly type baseColumns
     { key: '_id', label: 'S.NO', render: (item: Invoice, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'issueDate', label: 'CREATED DATE', render: (item: Invoice) => <span>{dayjs(item.createdAt).format('DD/MM/YYYY hh:mm A')}</span> },
      {

@@ -2,6 +2,7 @@ import { Transaction } from '@customTypes/index';
 import { Pencil, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import React from 'react';
+import { DataTableProps } from '@components/Common/DataTable'; // Import DataTableProps
 
 export const manageTransactionsConfig = (
   handleEditTransaction: (transaction: Transaction) => void,
@@ -9,7 +10,7 @@ export const manageTransactionsConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns = [
+  const baseColumns: DataTableProps<Transaction>['columns'] = [
     {
       key: '_id',
       label: 'S.NO',
