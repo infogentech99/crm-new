@@ -6,7 +6,7 @@ import Task    from '../models/Task.js';
 
 export const getUsers = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, roleFilter } = req.query;
+    const { page = 1, limit = 10, roleFilter, search } = req.query;
     const skip = (page - 1) * limit;
 
     const query = {};
@@ -17,8 +17,15 @@ export const getUsers = async (req, res, next) => {
       return res.json([me]);
     }
 
-    if (roleFilter === "true") {
-      query.role = { $in: ["salesperson", "admin", "superadmin"] };
+    if (roleFilter && roleFilter !== "all") {
+      query.role = roleFilter;
+    }
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
     }
 
     const [users, total] = await Promise.all([
