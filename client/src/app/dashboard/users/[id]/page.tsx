@@ -1,7 +1,6 @@
-// File: src/app/dashboard/users/[id]/page.tsx
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { fetchUserById, fetchUserActivities } from "@services/userService";
@@ -13,7 +12,17 @@ import Modal from "@components/Common/Modal";
 import UserForm from "@components/Users/UserForm";
 import UserDetailsShimmer from "@components/ui/UserDetailsShimmer";
 import { Button } from "@components/ui/button";
-import { PaginationComponent } from "@components/ui/pagination";
+import { Input } from "@components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@components/ui/select";
+import {
+  PaginationComponent,
+} from "@components/ui/pagination";
 import { toast } from "sonner";
 import { User, RecentActivity } from "@customTypes/index";
 
@@ -21,11 +30,11 @@ export default function UserDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
 
-  // deletion modal
+  // Deletion modal state
   const [deleting, setDeleting] = useState<RecentActivity | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // handlers for Leads
+  // View/Delete handlers
   const onView = useCallback(
     (act: RecentActivity) => router.push(`/dashboard/leads/${act.id}`),
     [router]
@@ -35,7 +44,7 @@ export default function UserDetailsPage() {
     setIsDeleteOpen(true);
   }, []);
 
-  // state
+  // User & activities
   const [user, setUser] = useState<User | null>(null);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [tab, setTab] = useState<"Leads" | "Meetings" | "Tasks">("Leads");
@@ -43,14 +52,15 @@ export default function UserDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  // pagination
-  const [page, setPage] = useState(1);
-  const limit = 10;
+  // Filters & pagination
+  const [search, setSearch] = useState<string>("");
+  const [limit, setLimit] = useState<number>(10);
+  const [page, setPage] = useState<number>(1);
 
-  // load data
+  // Fetch data
   const load = useCallback(async () => {
     if (!id) return;
-    const userId: string = Array.isArray(id) ? id[0] : id;
+    const userId = Array.isArray(id) ? id[0] : id;
     setLoading(true);
     try {
       const [u, acts] = await Promise.all([
@@ -70,11 +80,12 @@ export default function UserDetailsPage() {
     load();
   }, [load]);
 
+  // Confirm delete
   const handleConfirmDelete = async () => {
     if (!deleting) return;
     try {
       await deleteLead(String(deleting.id));
-      toast.success("Lead deleted");
+      toast.success("Activity deleted");
       await load();
     } catch (e: any) {
       toast.error(e.message || "Delete failed");
@@ -84,35 +95,54 @@ export default function UserDetailsPage() {
     }
   };
 
-  if (loading) return <UserDetailsShimmer/>;
-  if (error)   return <DashboardLayout><div className="p-6 text-red-500 text-center">{error}</div></DashboardLayout>;
-  if (!user)   return <DashboardLayout><div className="p-6 text-gray-600 text-center">User not found.</div></DashboardLayout>;
+  if (loading) return <UserDetailsShimmer />;
+  if (error)
+    return (
+      <DashboardLayout>
+        <div className="p-6 text-red-500 text-center">{error}</div>
+      </DashboardLayout>
+    );
+  if (!user)
+    return (
+      <DashboardLayout>
+        <div className="p-6 text-gray-600 text-center">User not found.</div>
+      </DashboardLayout>
+    );
 
-  // filter + paginate
-  const filtered = activities.filter(a =>
-    tab === "Leads" ? a.type==="Lead"
-    : tab==="Meetings" ? a.type==="Meeting"
-    : a.type==="Task"
-  );
-  const totalPages = Math.ceil(filtered.length/limit);
-  const pageItems = filtered.slice((page-1)*limit, page*limit);
+  const filtered = activities
+    .filter((a) =>
+      tab === "Leads"
+        ? a.type === "Lead"
+        : tab === "Meetings"
+          ? a.type === "Meeting"
+          : a.type === "Task"
+    )
+    .filter((a) =>
+      search ? a.description.toLowerCase().includes(search.toLowerCase()) : true
+    );
 
-  // build columns
+  const totalPages = Math.ceil(filtered.length / limit);
+  const pageItems = filtered.slice((page - 1) * limit, page * limit);
+
   const cfg = manageActivitiesConfig(
     page,
     limit,
     tab,
-    tab==="Leads"? onView : undefined,
-    tab==="Leads"? onDelete : undefined
+    tab === "Leads" ? onView : undefined,
+    tab === "Leads" ? onDelete : undefined
   );
+
+  const handleLimitChange = (val: string) => {
+    setLimit(Number(val));
+    setPage(1);
+  };
 
   return (
     <DashboardLayout>
-      {/* User Details */}
       <div className="mb-4 bg-white shadow-sm rounded-md px-8 py-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">User Details</h2>
-          <Button onClick={()=>setIsEditOpen(true)}>Edit User</Button>
+          <Button onClick={() => setIsEditOpen(true)}>Edit User</Button>
         </div>
         <div className="grid md:grid-cols-2 gap-6 text-sm">
           <div className="space-y-2">
@@ -124,17 +154,51 @@ export default function UserDetailsPage() {
         </div>
       </div>
 
-      {/* Recent Activity */}
       <div className="bg-white shadow-sm rounded-md my-6 p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Recent Activity</h3>
           <div className="flex space-x-2">
-            {["Leads","Meetings","Tasks"].map(t=>(
-              <Button key={t} onClick={()=>{setTab(t as any); setPage(1)}}>
+            {[
+              "Leads",
+              "Meetings",
+              "Tasks",
+            ].map((t) => (
+              <Button
+                key={t}
+                variant={tab === t ? "default" : "outline"}
+                onClick={() => {
+                  setTab(t as any);
+                  setPage(1);
+                  setSearch("");
+                }}
+              >
                 {t}
               </Button>
             ))}
           </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-4 space-x-4">
+          <Input
+            placeholder="Search activities..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="max-w-sm"
+          />
+          <Select value={String(limit)} onValueChange={handleLimitChange}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="Limit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <DataTable
@@ -156,19 +220,19 @@ export default function UserDetailsPage() {
       </div>
 
       {/* Edit User Modal */}
-      <Modal isOpen={isEditOpen} onClose={()=>setIsEditOpen(false)} widthClass="max-w-3xl">
+      <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} widthClass="max-w-3xl">
         <UserForm
-          initialData={user}
+          initialData={user!}
           mode="edit"
-          onClose={()=>{ setIsEditOpen(false); toast.success("Saved") }}
+          onClose={() => { setIsEditOpen(false); toast.success("Saved"); }}
         />
       </Modal>
 
-      {/* Delete Lead Confirmation */}
+      {/* Delete Confirmation */}
       {deleting && (
         <DeleteModal
           isOpen={isDeleteOpen}
-          onClose={()=>setIsDeleteOpen(false)}
+          onClose={() => setIsDeleteOpen(false)}
           onConfirm={handleConfirmDelete}
           itemLabel={deleting.name}
         />
