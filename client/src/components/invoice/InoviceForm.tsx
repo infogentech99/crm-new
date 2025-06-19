@@ -236,7 +236,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
           <label className="text-sm font-medium block mb-1">Phone No</label>
           <Input
             type="text"
-            value={user?.phone || ''}
+            value={user?.phoneNumber || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />

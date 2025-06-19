@@ -52,7 +52,7 @@ export default function Page() {
                         city: invoice.user?.city || '',
                         postalCode: invoice.user?.zipCode || '',
                         email: invoice.user?.email || '',
-                        phone: invoice.user?.phone || '',
+                        phone: invoice.user?.phoneNumber || '',
                         gstn: invoice.user?.gstin || '',
                     },
                     items: (invoice.items || []).map((item: InvoiceItem) => ({
