@@ -247,7 +247,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
         <div className="flex items-center justify-between mb-4">
           <Input
-            placeholder="Search by name, company, email, or phone..."
+            placeholder="Search by name,or company..."
             value={search}
             onChange={handleSearchChange}
             className="max-w-sm"

@@ -24,8 +24,8 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Welcome to your Dashboard!</h1>
-      <p className="text-gray-600 mb-8">Here&#39;s a quick overview of your CRM activities.</p>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6 select-none">Welcome to your Dashboard!</h1>
+      <p className="text-gray-600 mb-8 select-none">Here&#39;s a quick overview of your CRM activities.</p>
       <DashboardCards />
       <RecentActivityTable />
     </DashboardLayout>
