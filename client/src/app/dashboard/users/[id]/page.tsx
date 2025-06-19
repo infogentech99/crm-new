@@ -13,14 +13,7 @@ import Modal from "@components/Common/Modal";
 import UserForm from "@components/Users/UserForm";
 import UserDetailsShimmer from "@components/ui/UserDetailsShimmer";
 import { Button } from "@components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@components/ui/pagination";
+import { PaginationComponent } from "@components/ui/pagination";
 import { toast } from "sonner";
 import { User, RecentActivity } from "@customTypes/index";
 
@@ -80,7 +73,7 @@ export default function UserDetailsPage() {
   const handleConfirmDelete = async () => {
     if (!deleting) return;
     try {
-      await deleteLead(deleting.id);
+      await deleteLead(String(deleting.id));
       toast.success("Lead deleted");
       await load();
     } catch (e: any) {
@@ -145,41 +138,19 @@ export default function UserDetailsPage() {
         </div>
 
         <DataTable
-          data={pageItems.map(item => ({ ...item, _id: item.id }))}
+          data={pageItems.map(item => ({ ...item, _id: String(item.id) }))}
           columns={cfg.tableColumns}
           isLoading={false}
           error={null}
         />
 
-        {totalPages>1 && (
+        {totalPages > 1 && (
           <div className="mt-4 flex justify-end">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={e=>{e.preventDefault(); setPage(p=>Math.max(p-1,1))}}
-                    className={page===1?"pointer-events-none opacity-50":""}
-                  />
-                </PaginationItem>
-                {Array.from({length:Math.min(totalPages,10)},(_,i)=>i+1).map(pn=>(
-                  <PaginationItem key={pn}>
-                    <PaginationLink
-                      href="#"
-                      isActive={page===pn}
-                      onClick={e=>{e.preventDefault(); setPage(pn)}}
-                    >{pn}</PaginationLink>
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={e=>{e.preventDefault(); setPage(p=>Math.min(p+1,totalPages))}}
-                    className={page===totalPages?"pointer-events-none opacity-50":""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <PaginationComponent
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </div>
