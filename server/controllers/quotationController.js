@@ -41,31 +41,28 @@ export const genrate = async (req, res) => {
 
 export const getAllQuotations = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search?.trim() || '';
+    const page   = parseInt(req.query.page,  10) || 1;
+    const limit  = parseInt(req.query.limit, 10) || 10;
+    const search = req.query.search || '';
 
-    let query = {};
-
-    if (search) {
-      //  First, search leads whose name matches
-      const matchedLeads = await Lead.find({
-        name: { $regex: search, $options: 'i' },
-      }).select('_id');
-
-      const matchedLeadIds = matchedLeads.map(lead => lead._id);
-
-      query = {
-        $or: [
-          { _id: { $regex: search, $options: 'i' } }, // Match quotation 
-          { user: { $in: matchedLeadIds } },          // Match user.name from Lead model
-        ],
-      };
+    // base filter: superadmin sees all, others only their own
+    const filter = {};
+    if (req.user.role !== 'superadmin') {
+      filter.createdBy = req.user._id;
     }
 
-    const totalQuotations = await Quotation.countDocuments(query);
-    const quotations = await Quotation.find(query)
-      .populate('user')  
+    // add optional text search
+    if (search) {
+      filter.$or = [
+        { _id:              { $regex: search, $options: 'i' } },
+        { 'user.name':      { $regex: search, $options: 'i' } },
+        // add any other fields you want to search
+      ];
+    }
+
+    const total = await Quotation.countDocuments(filter);
+    const quotations = await Quotation.find(filter)
+      .populate('user',      'name gstin')
       .populate('items')
       .populate('createdBy', 'name role')
       .sort('-createdAt')
@@ -75,8 +72,8 @@ export const getAllQuotations = async (req, res) => {
     res.json({
       quotations,
       currentPage: page,
-      totalPages:  Math.ceil(totalQuotations / limit),
-      totalQuotations: totalQuotations
+      totalPages:  Math.ceil(total / limit),
+      totalQuotations: total
     });
   } catch (err) {
     console.error(err);
