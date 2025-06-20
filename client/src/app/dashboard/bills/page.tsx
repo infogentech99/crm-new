@@ -46,14 +46,13 @@ const ManageBillsPage: React.FC = () => {
     queryFn: () => getBills(1, 10000, search),
     enabled: isMounted,
   });
-
   const allBills = data?.bills || [];
   const filteredBills = allBills.filter(bill =>
     (bill.billNumber?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (bill.vendorName?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (bill.description?.toLowerCase() || '').includes(search.toLowerCase())
   );
-
+  
   const totalBills = filteredBills.length;
   const totalPages = Math.ceil(totalBills / limit);
   const startIndex = (page - 1) * limit;
@@ -89,7 +88,7 @@ const ManageBillsPage: React.FC = () => {
   };
 
   const config = manageBillsConfig(
-    /* view */() => { },
+    () => { },
     handleEditBill,
     handleDeleteBill,
     userRole,
@@ -99,7 +98,6 @@ const ManageBillsPage: React.FC = () => {
 
   config.createBillButtonAction = handleCreateBill;
 
-  // Controls
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
@@ -121,7 +119,7 @@ const ManageBillsPage: React.FC = () => {
   };
 
   if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
+    return null;
   }
 
   return (
@@ -136,7 +134,7 @@ const ManageBillsPage: React.FC = () => {
 
         <div className="flex items-center justify-between mb-4 space-x-4">
           <Input
-            placeholder="Search by bill number or vendor name..."
+            placeholder="Search by Title..."
             value={search}
             onChange={handleSearchChange}
             className="max-w-sm"

@@ -15,7 +15,7 @@ export const manageBillsConfig = (
     { key: '_id', label: 'S.NO', render: (item: Bill, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
      {
          key: 'description',
-         label: 'DESCRIPTION',
+         label: 'TITLE',
          render: (item: Bill) => <span>{item.description}</span>,
        },
        {
