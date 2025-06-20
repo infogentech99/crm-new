@@ -7,7 +7,7 @@ import { DataTableProps } from '@components/Common/DataTable';
 export const manageMeetingsConfig = (
   handleViewMeeting: (meeting: Meeting) => void,
   handleEditMeeting: (meeting: Meeting) => void,
-  handleDeleteMeeting: (meeting: Meeting) => void,
+  handleDeleteMeeting: (meeting: Meeting) => void,  
   userRole: string,
   currentPage: number,
   limit: number
@@ -15,6 +15,7 @@ export const manageMeetingsConfig = (
   const baseColumns: DataTableProps<Meeting>['columns'] = [
     { key: '_id', label: 'S.NO', render: (item: Meeting, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'title', label: 'TITLE' },
+    { key: 'createdBy', label: 'Task Created By', render: (item: Meeting) => <span>{typeof item.createdBy === 'object' && item.createdBy !== null ? item.createdBy.name : item.createdBy || 'N/A'}</span> },
     { key: 'date', label: 'DATE & TIME', render: (item: Meeting) => <span>{new Date(item.date).toLocaleString()}</span> },
     { key: 'duration', label: 'DURATION' },
     {
