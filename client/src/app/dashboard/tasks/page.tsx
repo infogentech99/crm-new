@@ -45,7 +45,7 @@ const ManageTasksPage: React.FC = () => {
     queryFn: () => getTasks(1, 10000, search),
     enabled: isMounted, // Only fetch data if mounted
   });
-
+  console.log('Tasks data:', data);
   const allTasks = data?.tasks || [];
   const filteredTasks = allTasks.filter(task =>
     (task.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
@@ -112,7 +112,7 @@ const ManageTasksPage: React.FC = () => {
   };
 
   if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
+    return null;
   }
 
   return (
