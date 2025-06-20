@@ -24,11 +24,11 @@ import {
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { RxCross2 } from "react-icons/rx";
-import { FormData, Lead } from "@customTypes/index";
+import { FormData } from "@customTypes/index";
 
 
 interface LeadFormProps {
-  initialData?: Partial<Lead> & { _id?: string };
+  initialData?: Partial<FormData> & { _id?: string };
   onClose: () => void;
   mode: 'Create' | 'Edit';
 }
@@ -42,11 +42,11 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       companyName: "",
       address: "",
       city: "",
+      state: "",
       zipCode: "",
       country: "",
       source: "LinkedIn",
       industry: "IT",
-      status: "pending_approval",
       callResponse: "Picked",
       description: "",
       remark: "",
@@ -64,23 +64,26 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: (data: Partial<Lead>) =>
+
+    mutationFn: (data: FormData) =>
+      
       mode === "Edit" && initialData?._id
         ? updateLead(initialData._id, data)
-        : createLead(data as Lead),
+        : createLead(data),
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["allLeads"] }); // Invalidate allLeads query
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
       toast.success(`Lead ${mode === "Edit" ? "updated" : "created"} successfully`);
       onClose();
     },
-    onError: (error) => {
-      console.error("Lead mutation failed:", error);
+    onError: () => {
+
       toast.error("Something went wrong. Please try again.");
     },
   });
 
   const onSubmit = (values: FormData) => {
- mutation.mutate(values);
+    mutation.mutate(values);
   };
 
   return (
@@ -99,58 +102,54 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-          {["name", "phoneNumber", "email", "companyName", "address", "city", "state", "zipCode", "country", "source", "industry", "status", "callResponse", "description", "remark", "position", "website"].map((field) => {
-            // Exclude fields that are not simple string inputs
-            if (field === "createdBy" || field === "projects") {
-              return null;
-            }
-            return (
-              <FormField
-                key={field}
-                control={form.control}
-                name={field as keyof FormData}
-                render={({ field: f }) => (
-                  <FormItem>
-                    <FormLabel className="capitalize">{field.replace(/([A-Z])/g, ' $1')}</FormLabel>
-                    <FormControl>
-                      {(field === "source" || field === "industry" || field === "status" || field === "callResponse") ? (
-                        <Select
-                          key={field}
-                          value={f.value as string}
-                          onValueChange={f.onChange}
-                        >
-                          <SelectTrigger>
-                          <SelectValue>{String(f.value || '') || `Select ${field}`}</SelectValue>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {field === "source" &&
-                              ["LinkedIn", "Website", "Referral", "Cold Call", "Other"].map(val => (
-                                <SelectItem key={val} value={val}>{val}</SelectItem>
-                              ))}
-                            {field === "industry" &&
-                              ["IT", "Retail", "Manufacturing", "Other"].map(val => (
-                                <SelectItem key={val} value={val}>{val}</SelectItem>
-                              ))}
-                            {field === "status" &&
-                              ["pending_approval", "denied", "approved", "quotation_submitted", "quotation_rejected", "quotation_approved", "invoice_issued", "invoice_accepted", "completed", "processing_payments", "new", "contacted", "qualified", "lost"].map(val => (
-                                <SelectItem key={val} value={val}>{val}</SelectItem>
-                              ))}
-                            {field === "callResponse" &&
-                              ["Picked", "Not Response", "Talk to later"].map(val => (
-                                <SelectItem key={val} value={val}>{val}</SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input type="text" {...f} value={String(f.value || '')} />
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            );
-          })}
+          {["name", "phoneNumber", "email", "company", "address", "city", "state", "zipCode", "country", "source", "industry", "callResponse", "description", "remark", "position", "website"].map((field) => (
+            <FormField
+              key={field}
+              control={form.control}
+              name={field as keyof FormData}
+              render={({ field: f }) => (
+                <FormItem>
+                  <FormLabel className="capitalize">{field.replace(/([A-Z])/g, ' $1')}</FormLabel>
+                  <FormControl>
+                    {(field === "source" || field === "industry" || field === "status" || field === "callResponse") ? (
+                      <Select
+                        key={f.value}
+                        value={f.value}
+                        onValueChange={f.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue>{f.value || `Select ${field}`}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {field === "source" &&
+                            ["LinkedIn", "Website", "Referral", "Cold Call", "Other"].map(val => (
+                              <SelectItem key={val} value={val}>{val}</SelectItem>
+                            ))}
+                          {field === "industry" &&
+                            ["IT", "Retail", "Manufacturing", "Other"].map(val => (
+                              <SelectItem key={val} value={val}>{val}</SelectItem>
+                            ))}
+                          {field === "callResponse" &&
+                            ["Picked", "Not Response", "Talk to later"].map(val => (
+                              <SelectItem key={val} value={val}>{val}</SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input type="text" {...f} />
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+          ))}
+
+
+
+
+
 
           <div className="col-span-2 mt-4 flex justify-end gap-3">
             <Button
