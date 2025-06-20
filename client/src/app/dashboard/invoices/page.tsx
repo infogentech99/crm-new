@@ -48,6 +48,7 @@ const ManageInvoicesPage: React.FC = () => {
     queryFn: () => getInvoices(1, 10000, search),
     enabled: isMounted, 
   });
+  console.log("Invoices Data:", data);
   const allInvoices = data?.invoices || [];
 
 const totalInvoices = allInvoices.length;
