@@ -14,7 +14,7 @@ export const manageContactsConfig = (
     { key: 'industry', label: 'INDUSTRY' },
     { key: 'city', label: 'CITY' },
     { key: 'email', label: 'EMAIL' },
-    { key: 'phone', label: 'PHONE' },
+    { key: 'phoneNumber', label: 'PHONE' },
 
   ];
 
