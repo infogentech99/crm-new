@@ -289,8 +289,8 @@ export interface FormData {
   remark?: string;
   position?: string;
   website?: string;
-  createdBy?: string | User;
-  projects?: {
+  createdBy: string | User;
+  projects: {
     _id: string;
     title: string;
     status: string;

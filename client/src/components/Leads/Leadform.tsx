@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLead, updateLead } from "@services/leadService";
@@ -52,6 +52,8 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       remark: "",
       position: "",
       website: "",
+      createdBy: "",
+      projects: [], 
     },
   });
 
@@ -102,7 +104,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-          {["name", "phoneNumber", "email", "company", "address", "city", "state", "zipCode", "country", "source", "industry", "callResponse", "description", "remark", "position", "website"].map((field) => (
+          {["name", "phoneNumber", "email", "companyName", "address", "city", "state", "zipCode", "country", "source", "industry", "callResponse", "description", "remark", "position", "website"].map((field) => (
             <FormField
               key={field}
               control={form.control}
@@ -111,14 +113,14 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
                 <FormItem>
                   <FormLabel className="capitalize">{field.replace(/([A-Z])/g, ' $1')}</FormLabel>
                   <FormControl>
-                    {(field === "source" || field === "industry" || field === "status" || field === "callResponse") ? (
+                    {(field === "source" || field === "industry" || field === "callResponse") ? (
                       <Select
-                        key={f.value}
-                        value={f.value}
+                        key={f.value as string}
+                        value={f.value as string}
                         onValueChange={f.onChange}
                       >
                         <SelectTrigger>
-                          <SelectValue>{f.value || `Select ${field}`}</SelectValue>
+                          <SelectValue>{(f.value as string) || `Select ${field}`}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {field === "source" &&
@@ -136,14 +138,13 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <Input type="text" {...f} />
+                      <Input type="text" {...f} value={f.value as string} />
                     )}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
           ))}
 
 
