@@ -17,6 +17,7 @@ const InvoiceSchema = new mongoose.Schema({
     default: 0
   },
   projectId: { type: String }, 
+  createdBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true }
 }, { timestamps: true });
 
  InvoiceSchema.pre('save', async function (next) {

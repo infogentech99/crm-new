@@ -20,7 +20,8 @@ export const createTransaction = async (req, res, next) => {
       amount,
       method,
       transactionId,
-      projectId
+      projectId,  
+       createdBy:     req.user._id
     });
     invoice.paidAmount = (invoice.paidAmount || 0) + amount;
     invoice.transactions = invoice.transactions || [];

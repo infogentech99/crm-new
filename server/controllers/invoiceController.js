@@ -13,6 +13,7 @@ export const genrate = async (req, res) => {
       user: _id,
       totals,
       projectId,
+      createdBy: req.user._id
     });
 
     const user = await Lead.findById(_id);
