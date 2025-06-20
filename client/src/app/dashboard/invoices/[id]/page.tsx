@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from 'next/navigation';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import { InvoiceItem, QuotationItem, CustomerData, PaymentDetails } from "@customTypes/index";
+import { InvoiceItem, QuotationItem, CustomerData, PaymentDetails, InvoiceResponse } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
 import dayjs from "dayjs";
@@ -35,48 +35,62 @@ export default function Page() {
         totals: { taxable: 0, igst: 0, total: 0 },
     });
 
-    useEffect(() => {
-        if (!id) return;
+useEffect(() => {
+  if (!id) return;
 
-        getInvoiceById(id)
-            .then((invoice) => {
-                setData({
-                    order: {
-                        id: invoice._id,
-                        totalAmount: invoice.totals?.total || 0,
-                    },
-                    customer: {
-                        name: invoice.user?.name || '',
-                        address: invoice.user?.address || '',
-                        city: invoice.user?.city || '',
-                        postalCode: invoice.user?.zipCode || '',
-                        email: invoice.user?.email || '',
-                        phone: invoice.user?.phone || '',
-                        gstn: invoice.user?.gstin || '',
-                    },
-                    items: (invoice.items || []).map((item: InvoiceItem) => ({
-                        name: item.name,
-                        description: item.description,
-                        quantity: item.quantity,
-                        unitPrice: item.unitPrice,
-                        total: item.total,
-                        price: item.price,
-                        hsn: item.hsn,
-                    })),
-                    invoiceDate: dayjs(invoice.date || invoice.createdAt).format("DD/MM/YYYY"),
-                    payment: invoice.payment || { transactionId: "", amountPaid: 0, cardType: "", status: "", bankTransactionId: "", transactionDate: "" },
-                    totals: {
-                        taxable: invoice.totals?.taxable || 0,
-                        igst: invoice.totals?.igst || 0,
-                        total: invoice.totals?.total || 0,
-                    },
-                });
-            })
-            .catch((err) => {
-                console.error("Failed to fetch invoice:", err);
-                setError("Failed to load invoice.");
-            });
-    }, [id]);
+  const fetchInvoice = async () => {
+    try {
+      const response: InvoiceResponse = await getInvoiceById(id);
+      const invoice = response.data;
+      const formattedData = {
+        order: {
+          id: invoice._id,
+          totalAmount: invoice.totals?.total || 0,
+        },
+        customer: {
+          name: invoice.user?.name || '',
+          address: invoice.user?.address || '',
+          city: invoice.user?.city || '',
+          postalCode: invoice.user?.zipCode || '',
+          email: invoice.user?.email || '',
+          phone: invoice.user?.phone || '',
+          gstn: invoice.user?.gstin || '',
+        },
+        items: (invoice.items || []).map((item: InvoiceItem) => ({
+          name: item.description || '',
+          description: item.description || '',
+          quantity: item.quantity,
+          unitPrice: item.price,
+          total: item.total || item.quantity * item.price,
+          price: item.price,
+          hsn: item.hsn || '',
+        })),
+        invoiceDate: dayjs(invoice.date || invoice.createdAt).format("DD/MM/YYYY"),
+        payment: invoice.payment || {
+          transactionId: "",
+          amountPaid: invoice.paidAmount || 0,
+          cardType: "",
+          status: "",
+          bankTransactionId: "",
+          transactionDate: "",
+        },
+        totals: {
+          taxable: invoice.totals?.taxable || 0,
+          igst: invoice.totals?.igst || 0,
+          total: invoice.totals?.total || 0,
+        },
+      };
+
+      setData(formattedData);
+    } catch (err) {
+      console.error("Failed to fetch invoice:", err);
+      setError("Failed to load invoice.");
+    }
+  };
+
+  fetchInvoice();
+}, [id]);
+
 
     const downloadPDF = async () => {
         setDownloading(true);
