@@ -69,7 +69,10 @@ const ManageLeadsPage: React.FC = () => {
       (lead.email?.toLowerCase() || '').includes(lowerCaseSearch) ||
       (lead.phoneNumber?.toLowerCase() || '').includes(lowerCaseSearch)
     );
-    const matchesStatus = statusFilter === '' || statusFilter === 'all' || lead.status === statusFilter;
+    const matchesStatus =
+      statusFilter === '' ||
+      statusFilter === 'all' ||
+      lead.projects?.some(project => project.status === statusFilter);
     return matchesSearch && matchesStatus;
   });
 
