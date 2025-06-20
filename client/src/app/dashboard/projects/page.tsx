@@ -15,12 +15,13 @@ import {
 import { PaginationComponent } from '@components/ui/pagination';
 import { manageProjectsConfig } from '@src/config/manageProjectsConfig';
 import { getLeads } from '@services/leadService';
-import { FlattenedProject } from '@customTypes/index'; 
+import { FlattenedProject } from '@customTypes/index';
 
 const ManageProjectsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -49,14 +50,15 @@ const ManageProjectsPage: React.FC = () => {
     (project.leadName?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (project.industry?.toLowerCase() || '').includes(search.toLowerCase())
   );
-  const totalProjects = filteredProjects.length;
+  const projectsFilteredByStatus = filteredProjects.filter(project =>
+    statusFilter === '' || statusFilter === 'all' || project.status === statusFilter
+  );
+
+  const totalProjects = projectsFilteredByStatus.length;
   const totalPages = Math.ceil(totalProjects / limit);
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
-  const projectsToDisplay = filteredProjects.slice(startIndex, endIndex);
-
-
-
+  const projectsToDisplay = projectsFilteredByStatus.slice(startIndex, endIndex);
 
   const config = manageProjectsConfig(page, limit);
 
@@ -80,7 +82,28 @@ const ManageProjectsPage: React.FC = () => {
     setPage(1);
   };
 
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setPage(1);
+  };
 
+  const statusOptions = [
+    { value: 'all', label: 'All Status' },
+    { value: 'pending_approval', label: 'Pending Approval' },
+    { value: 'denied', label: 'Denied' },
+    { value: 'approved', label: 'Approved' },
+    { value: 'quotation_submitted', label: 'Quotation Submitted' },
+    { value: 'quotation_rejected', label: 'Quotation Rejected' },
+    { value: 'quotation_approved', label: 'Quotation Approved' },
+    { value: 'invoice_issued', label: 'Invoice Issued' },
+    { value: 'invoice_accepted', label: 'Invoice Accepted' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'processing_payments', label: 'Processing Payments' },
+    { value: 'new', label: 'New' },
+    { value: 'contacted', label: 'Contacted' },
+    { value: 'qualified', label: 'Qualified' },
+    { value: 'lost', label: 'Lost' },
+  ];
 
   if (!isMounted) {
     return null;
@@ -100,17 +123,31 @@ const ManageProjectsPage: React.FC = () => {
             onChange={handleSearchChange}
             className="max-w-sm"
           />
-          <Select onValueChange={handleLimitChange} value={String(limit)}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Limit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center space-x-4">
+            <Select onValueChange={handleStatusFilterChange} value={statusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select onValueChange={handleLimitChange} value={String(limit)}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <DataTable
