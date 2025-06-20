@@ -62,8 +62,17 @@ const ManageLeadsPage: React.FC = () => {
 
   const allLeads = data?.leads || [];
   const filteredLeads = allLeads.filter(lead => {
-    const matchesSearch = (lead.name?.toLowerCase() || '').includes(search.toLowerCase());
-    const matchesStatus = statusFilter === '' || statusFilter === 'all' || lead.status === statusFilter;
+    const lowerCaseSearch = search.toLowerCase();
+    const matchesSearch = (
+      (lead.name?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.companyName?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.email?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.phoneNumber?.toLowerCase() || '').includes(lowerCaseSearch)
+    );
+    const matchesStatus =
+      statusFilter === '' ||
+      statusFilter === 'all' ||
+      lead.projects?.some(project => project.status === statusFilter);
     return matchesSearch && matchesStatus;
   });
 

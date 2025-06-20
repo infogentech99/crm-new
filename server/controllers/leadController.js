@@ -36,9 +36,9 @@ export const getLeads = async (req, res) => {
       ];
     }
 
-    if (status) {
-      query.status = status;
-    }
+  if (status && status !== 'all') {
+  query['projects'] = { $elemMatch: { status: status } };
+}
 
     const total = await Lead.countDocuments(query);
     const leads = await Lead.find(query)
@@ -57,6 +57,7 @@ export const getLeads = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 export const getLead = async (req, res) => {
   try {
