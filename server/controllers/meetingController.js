@@ -1,4 +1,5 @@
 import Meeting from '../models/Meeting.js';
+import { sendEmail } from '../utils/email.js';
 export const getAllMeetings = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -18,9 +19,9 @@ export const getAllMeetings = async (req, res, next) => {
 
     const total = await Meeting.countDocuments(query);
     const meetings = await Meeting.find(query)
-      .populate({ path: 'participants', select: 'name email phone' }) // Populate participants with relevant fields
-      .populate({ path: 'createdBy', select: 'name email' }) // Populate createdBy with relevant fields
-      .sort('-createdAt') // Assuming 'createdAt' is the field for sorting, not 'created'
+      .populate({ path: 'participants', select: 'name email phone' })
+      .populate({ path: 'createdBy', select: 'name email' }) 
+      .sort('-createdAt') 
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -53,6 +54,37 @@ export const createMeeting = async (req, res, next) => {
       createdBy: userId
     };
     const meeting = await Meeting.create(payload);
+
+if (meeting.participants && meeting.participants.length > 0) {
+  const meetingDetails = `
+    <p><strong>Title:</strong> ${meeting.title}</p>
+    <p><strong>Date:</strong> ${new Date(meeting.date).toLocaleString()}</p>
+    <p><strong>Duration:</strong> ${meeting.duration} minutes</p>
+    <p><strong>Platform:</strong> ${meeting.platform}</p>
+    <p><strong>Meet Link:</strong> <a href="${meeting.meetlink || '#'}" target="_blank">${meeting.meetlink || 'N/A'}</a></p>
+    <p><strong>Description:</strong> ${meeting.description || 'N/A'}</p>
+  `;
+
+  for (const participantEmail of meeting.participants) {
+    console.log(`Sending email to participant: ${participantEmail}`);
+    try {
+      await sendEmail({
+        to: participantEmail,
+        subject: `Meeting Invitation: ${meeting.title}`,
+        html: `
+          <p>Dear participant,</p>
+          <p>You are invited to a new meeting with the following details:</p>
+          ${meetingDetails}
+          <p>We look forward to seeing you there!</p>
+        `
+      });
+    } catch (emailError) {
+      console.error(`Failed to send email to ${participantEmail}:`, emailError);
+    }
+  }
+}
+
+
     res.status(201).json({
       meeting,
       userId
