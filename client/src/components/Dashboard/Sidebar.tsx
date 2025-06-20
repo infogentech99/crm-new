@@ -2,10 +2,11 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
 import { removeToken } from "@store/slices/tokenSlice";
 import { removeUser } from "@store/slices/userSlice";
+import { RootState } from "@store/store";
 
 import {
   LayoutDashboard,
@@ -101,6 +102,7 @@ export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const role = useSelector((state: RootState) => state.user.role);
 
   const handleLogout = () => {
     dispatch(removeToken());
@@ -108,11 +110,17 @@ export default function Sidebar() {
     localStorage.removeItem("token");
     router.push("/");
   };
+  const filteredItems = sidebarItems.filter(item => {
+    if (item.id === "users" && (role === "salesperson" || role === "admin")) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="fixed top-0 left-0 h-screen w-16 bg-gray-800 text-gray-200 flex flex-col  shadow-lg z-50">
       <div className="flex flex-col h-full py-4 ">
-        {sidebarItems.map((item) => (
+        {filteredItems.map(item => (
           <Link href={item.href} key={item.id}>
             <div
               className={`relative py-4 space-y-2 flex justify-center items-center p-2 cursor-pointer rounded ${

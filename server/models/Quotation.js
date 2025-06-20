@@ -5,6 +5,7 @@ const QuotationSchema = new mongoose.Schema({
   _id: { type: String }, 
   date: { type: Date, default: Date.now },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'Lead', required: true },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true },
   items: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Item' }],
   totals: {
     taxable: Number,

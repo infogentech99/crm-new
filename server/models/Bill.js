@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 
 const billSchema = new mongoose.Schema({
   description: String,
-  hsnCode: String,
-  amount: Number,
+  hsnCode:     String,
+  amount:      Number,
+  createdBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true }
 }, { timestamps: true });
 
-const Bill = mongoose.model('Bill', billSchema);
-export default Bill;
+export default mongoose.model('Bill', billSchema);

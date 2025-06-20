@@ -11,12 +11,12 @@ import {
 const router = express.Router();
 
 router.route('/')
-  .get(protect, authorize(['superadmin','admin', 'manager', 'employee']), getDeals) // Add authorize
-  .post(protect, authorize(['superadmin','admin', 'manager', 'employee']), createDeal); // Add authorize
+  .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getDeals) // Add authorize
+  .post(protect, authorize('superadmin','admin', 'salesperson', 'employee'), createDeal); // Add authorize
 
 router.route('/:id')
-  .get(protect, authorize(['superadmin','admin', 'manager', 'employee']), getDeal) // Add new route with authorize
-  .put(protect, authorize(['superadmin','admin', 'manager']), updateDeal) // Add new route with authorize
-  .delete(protect, authorize(['superadmin','admin', 'manager']), deleteDeal); // Add new route with authorize
+  .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getDeal) // Add new route with authorize
+  .put(protect, authorize('superadmin','admin', 'salesperson'), updateDeal) // Add new route with authorize
+  .delete(protect, authorize('superadmin','admin', 'salesperson'), deleteDeal); // Add new route with authorize
 
 export default router;

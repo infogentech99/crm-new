@@ -14,6 +14,7 @@ export const genrate = async (req, res) => {
     const quotation = await Quotation.create({
       user: _id,
       totals,
+       createdBy: req.user._id
     });
 
     const user = await Lead.findById(_id);
@@ -25,8 +26,8 @@ export const genrate = async (req, res) => {
       await user.save();
     }
 
-    for (const item of items) {
-      const newItem = await Item.create(item);
+    for (const itemData of items) {
+      const newItem = await Item.create(itemData);
       quotation.items.push(newItem._id);
     }
 
@@ -66,6 +67,7 @@ export const getAllQuotations = async (req, res) => {
     const quotations = await Quotation.find(query)
       .populate('user')  
       .populate('items')
+      .populate('createdBy', 'name role')
       .sort('-createdAt')
       .skip((page - 1) * limit)
       .limit(limit);
@@ -73,81 +75,98 @@ export const getAllQuotations = async (req, res) => {
     res.json({
       quotations,
       currentPage: page,
-      totalPages: Math.ceil(totalQuotations / limit),
-      totalQuotations,
+      totalPages:  Math.ceil(totalQuotations / limit),
+      totalQuotations: totalQuotations
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to fetch quotations' });
+    res.status(500).json({ message: 'Failed to fetch quotations' });
   }
 };
 
+// Get one by ID
 export const getQuotationById = async (req, res) => {
   try {
-    const quotation = await Quotation.findById(req.params.id).populate('user items');
-    if (!quotation) {
-      return res.status(404).json({ error: 'Quotation not found' });
-    }
-    res.json({ data: quotation });
-  } catch (err) {
-    console.error("Error in getQuotationById:", err);
-    res.status(500).json({ error: 'Failed to fetch quotation' });
-  }
-};
-
-
-export const updateQuotation = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { totals, items, gstin } = req.body;
-
-    if (!id || !totals || !items) {
-      return res.status(400).json({ message: 'Missing required fields' });
-    }
-
-    const quotation = await Quotation.findById(id).populate('items');
+    const quotation = await Quotation.findById(req.params.id)
+      .populate('user')
+      .populate('items')
+      .populate('createdBy', 'name role');
     if (!quotation) {
       return res.status(404).json({ message: 'Quotation not found' });
     }
-    const oldItemIds = quotation.items.map((item) => item._id);
-    await Item.deleteMany({ _id: { $in: oldItemIds } });
 
+    // enforce per-role access
+    if (req.user.role !== 'superadmin' &&
+        !quotation.createdBy.equals(req.user._id)) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    res.json({ data: quotation });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to fetch quotation' });
+  }
+};
+
+// Update
+export const updateQuotation = async (req, res) => {
+  try {
+    const { totals, items, gstin } = req.body;
+    const quotation = await Quotation.findById(req.params.id).populate('items');
+    if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
+
+    // enforce per-role access
+    if (req.user.role !== 'superadmin' &&
+        !quotation.createdBy.equals(req.user._id)) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    // delete old items
+    const oldIds = quotation.items.map(i => i._id);
+    await Item.deleteMany({ _id: { $in: oldIds } });
+
+    // create new items
     quotation.items = [];
-    for (const item of items) {
-      const newItem = await Item.create(item);
+    for (const itemData of items) {
+      const newItem = await Item.create(itemData);
       quotation.items.push(newItem._id);
     }
 
     quotation.totals = totals;
-
-    const user = await Lead.findById(quotation.user);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    if (gstin) {
-      user.gstin = gstin;
-      await user.save();
-    }
-
     await quotation.save();
 
-    res.status(200).json({
-      message: 'Quotation updated successfully',
-      data: quotation,
-    });
+    // update lead GSTIN if given
+    if (gstin) {
+      const lead = await Lead.findById(quotation.user);
+      if (lead) {
+        lead.gstin = gstin;
+        await lead.save();
+      }
+    }
+
+    res.json({ message: 'Quotation updated', data: quotation });
   } catch (err) {
-    console.error('Update Quotation Error:', err);
+    console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-
+// Delete
 export const deleteQuotation = async (req, res) => {
   try {
-    await Quotation.findByIdAndDelete(req.params.id);
+    const quotation = await Quotation.findById(req.params.id);
+    if (!quotation) return res.status(404).json({ message: 'Not found' });
+
+    // enforce per-role access
+    if (req.user.role !== 'superadmin' &&
+        !quotation.createdBy.equals(req.user._id)) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    await quotation.deleteOne();
     res.json({ message: 'Quotation deleted' });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete quotation' });
+    console.error(err);
+    res.status(500).json({ message: 'Failed to delete quotation' });
   }
 };

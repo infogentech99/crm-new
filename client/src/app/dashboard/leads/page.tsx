@@ -57,7 +57,7 @@ const ManageLeadsPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["allLeads", search, statusFilter],
     queryFn: () => getLeads(1, 10000, search, statusFilter),
-    enabled: isMounted,
+   enabled: isMounted,
   });
 
   const allLeads = data?.leads || [];
@@ -229,15 +229,19 @@ const ManageLeadsPage: React.FC = () => {
           <h1 className="text-2xl font-semibold text-gray-800">
             {config.pageTitle}
           </h1>
-          <div className="flex space-x-2">
-            <Button onClick={handleImportClick}>
-              Import CSV
-            </Button>
-            <Button onClick={handleExport}>
-              Export CSV
-            </Button>
-            <CreateLeadButton onClick={handleCreateLead} />
-          </div>
+        <div className="flex space-x-2">
+          {userRole === 'superadmin' && (
+            <>
+              <Button onClick={handleImportClick}>
+                Import CSV
+              </Button>
+              <Button onClick={handleExport}>
+                Export CSV
+              </Button>
+            </>
+          )}
+          <CreateLeadButton onClick={handleCreateLead} />
+        </div>
         </div>
 
         <input
