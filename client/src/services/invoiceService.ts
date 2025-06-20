@@ -1,6 +1,6 @@
-import { Invoice, InvoiceItem, QuotationItem } from '@customTypes/index';
+import { Invoice, InvoiceItem, QuotationItem, InvoiceResponse } from '@customTypes/index';
 
-const API_URL = '/api/invoice'; // Assuming a /api/invoice endpoint based on server/index.js
+const API_URL = '/api/invoice'; 
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -29,7 +29,7 @@ export const getInvoices = async (
   return response.json();
 };
 
-export const getInvoiceById = async (id: string): Promise<Invoice> => {
+export const getInvoiceById = async (id: string): Promise<InvoiceResponse> => {
   const response = await fetch(`${API_URL}/${id}`, {
     headers: getAuthHeaders(),
   });

@@ -184,14 +184,19 @@ export interface Invoice {
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
-  date?: string; // Added for invoice date
-  payment?: PaymentDetails; // Added for payment details
+  date?: string; 
+  payment?: PaymentDetails; 
   user: User;
   totals: {
     taxable: number;
     igst: number;
     total: number;
   };
+}
+
+
+export interface InvoiceResponse {
+  data: Invoice;
 }
 
 export interface Contact {
