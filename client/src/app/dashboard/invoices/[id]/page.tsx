@@ -6,11 +6,12 @@ import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from 'next/navigation';
 import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import { InvoiceItem, QuotationItem } from "@customTypes/index";
+import { InvoiceItem, QuotationItem, CustomerData, PaymentDetails } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
 import dayjs from "dayjs";
 import { getInvoiceById } from "@services/invoiceService";
+
 export default function Page() {
     const params = useParams();
     const id = params?.id as string;
@@ -20,7 +21,7 @@ export default function Page() {
     const [error, setError] = useState("");
     const [data, setData] = useState({
         order: { id: "", totalAmount: 0 },
-        customer: { name: "", address: "", city: "", postalCode: "", email: "", phone: "" },
+        customer: { name: "", address: "", city: "", postalCode: "", email: "", phone: "", gstn: "" } as CustomerData,
         payment: {
             transactionId: "",
             amountPaid: 0,
@@ -28,8 +29,8 @@ export default function Page() {
             status: "",
             bankTransactionId: "",
             transactionDate: "",
-        },
-        items: [],
+        } as PaymentDetails,
+        items: [] as InvoiceItem[],
         invoiceDate: "",
         totals: { taxable: 0, igst: 0, total: 0 },
     });
@@ -38,9 +39,7 @@ export default function Page() {
         if (!id) return;
 
         getInvoiceById(id)
-            .then((res) => {
-                const invoice = res?.data;
-
+            .then((invoice) => {
                 setData({
                     order: {
                         id: invoice._id,
@@ -52,16 +51,20 @@ export default function Page() {
                         city: invoice.user?.city || '',
                         postalCode: invoice.user?.zipCode || '',
                         email: invoice.user?.email || '',
-                        phone: invoice.user?.phoneNumber || '',
+                        phone: invoice.user?.phone || '',
                         gstn: invoice.user?.gstin || '',
                     },
                     items: (invoice.items || []).map((item: InvoiceItem) => ({
+                        name: item.name,
                         description: item.description,
                         quantity: item.quantity,
+                        unitPrice: item.unitPrice,
+                        total: item.total,
                         price: item.price,
                         hsn: item.hsn,
                     })),
                     invoiceDate: dayjs(invoice.date || invoice.createdAt).format("DD/MM/YYYY"),
+                    payment: invoice.payment || { transactionId: "", amountPaid: 0, cardType: "", status: "", bankTransactionId: "", transactionDate: "" },
                     totals: {
                         taxable: invoice.totals?.taxable || 0,
                         igst: invoice.totals?.igst || 0,

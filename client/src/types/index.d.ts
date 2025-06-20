@@ -48,6 +48,10 @@ export interface User {
   email: string;
   role: string;
   phone?: string;
+  address?: string;
+  city?: string;
+  zipCode?: string;
+  gstin?: string;
 }
 
 export interface Lead {
@@ -155,6 +159,15 @@ export interface Deal {
   updatedAt: string;
 }
 
+export interface PaymentDetails {
+  transactionId: string;
+  amountPaid: number;
+  cardType: string;
+  status: string;
+  bankTransactionId: string;
+  transactionDate: string;
+}
+
 export interface Invoice {
   _id: string;
   invoiceNumber: string;
@@ -168,11 +181,12 @@ export interface Invoice {
   issueDate: string; 
   dueDate: string; 
   relatedQuotation?: string; 
-  createdBy: string | User; 
+  createdBy: string | User;
   createdAt: string;
   updatedAt: string;
-
-  user: User; 
+  date?: string; // Added for invoice date
+  payment?: PaymentDetails; // Added for payment details
+  user: User;
   totals: {
     taxable: number;
     igst: number;
@@ -197,6 +211,16 @@ export interface FlattenedProject {
   status: string;
   leadName: string;
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other' | undefined;
+}
+
+export interface CustomerData {
+  name: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  email: string;
+  phone: string;
+  gstn: string;
 }
 
 export interface QuotationItem {
