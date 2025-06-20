@@ -111,12 +111,12 @@ export default function Sidebar() {
 
   return (
     <div className="fixed top-0 left-0 h-screen w-16 bg-gray-800 text-gray-200 flex flex-col  shadow-lg z-50">
-      <div className="flex flex-col h-full py-4 overflow-hidden">
+      <div className="flex flex-col h-full py-4 ">
         {sidebarItems.map((item) => (
           <Link href={item.href} key={item.id}>
             <div
               className={`relative py-4 space-y-2 flex justify-center items-center p-2 cursor-pointer rounded ${
-                pathname === item.href ? "bg-gray-700" : "hover:bg-red-600 hover:scale-130"
+                pathname === item.href ? "bg-gray-700" : "hover:bg-red-600"
               }`}
               onMouseEnter={() => setHoveredItemId(item.id)}
               onMouseLeave={() => setHoveredItemId(null)}
