@@ -40,22 +40,30 @@ export const getAllInvoices = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search || '';
+    const search = req.query.search?.trim() || '';
 
     let query = {};
 
     if (search) {
+      const matchingLeads = await Lead.find({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+        ],
+      }).select('_id');
+
+      const matchedLeadIds = matchingLeads.map(lead => lead._id);
+
       query.$or = [
-        { invoiceNumber: { $regex: search, $options: 'i' } },
-        { clientName: { $regex: search, 'i': true } },
-        { clientEmail: { $regex: search, 'i': true } }, 
+        { _id: { $regex: search, $options: 'i' } },
+        { user: { $in: matchedLeadIds } },
       ];
     }
 
     const total = await Invoice.countDocuments(query);
     const invoices = await Invoice.find(query)
       .populate('user')
-      .populate('items') 
+      .populate('items')
       .populate('transactions')
       .sort('-createdAt')
       .skip((page - 1) * limit)

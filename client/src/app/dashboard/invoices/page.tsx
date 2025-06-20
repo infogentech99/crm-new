@@ -49,18 +49,13 @@ const ManageInvoicesPage: React.FC = () => {
     enabled: isMounted, // Only fetch data if mounted
   });
 
-  const allInvoices = data?.invoices || [];
+const allInvoices = data?.invoices || [];
 
-  const filteredInvoices = allInvoices.filter(invoice =>
-    (invoice.invoiceNumber?.toLowerCase() || '').includes(search.toLowerCase()) ||
-    (invoice.clientName?.toLowerCase() || '').includes(search.toLowerCase())
-  );
-
-  const totalInvoices = filteredInvoices.length;
-  const totalPages = Math.ceil(totalInvoices / limit);
-  const startIndex = (page - 1) * limit;
-  const endIndex = startIndex + limit;
-  const invoicesToDisplay = filteredInvoices.slice(startIndex, endIndex);
+const totalInvoices = allInvoices.length;
+const totalPages = Math.ceil(totalInvoices / limit);
+const startIndex = (page - 1) * limit;
+const endIndex = startIndex + limit;
+const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
 
   const handleViewInvoice = useCallback((invoice: Invoice) => {
     setSelectedInvoice(invoice);

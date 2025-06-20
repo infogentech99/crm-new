@@ -47,21 +47,17 @@ const ManageQuotationsPage: React.FC = () => {
   });
 
   const allQuotations = data?.quotations || [];
-  const filteredQuotations = allQuotations.filter(quotation =>
-    (quotation.quotationNumber?.toLowerCase() || '').includes(search.toLowerCase()) ||
-    (quotation.clientName?.toLowerCase() || '').includes(search.toLowerCase())
-  );
-  const totalQuotations = filteredQuotations.length;
+  const totalQuotations = allQuotations.length;
   const totalPages = Math.ceil(totalQuotations / limit);
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
-  const quotationsToDisplay = filteredQuotations.slice(startIndex, endIndex);
+  const quotationsToDisplay = allQuotations.slice(startIndex, endIndex);
 
   const handleViewQuotation = useCallback((quotation: Quotation) => {
-      setSelectedQuotation(quotation);
-   if (quotation?._id) {
-    router.push(`/dashboard/quotations/${quotation._id}`)
-  }
+    setSelectedQuotation(quotation);
+    if (quotation?._id) {
+      router.push(`/dashboard/quotations/${quotation._id}`)
+    }
   }, [router]);
 
   const handleEditQuotation = useCallback((quotation: Quotation) => {

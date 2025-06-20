@@ -2,6 +2,7 @@ import Item from '../models/Item.js';
 import Lead from '../models/Lead.js';
 import Quotation from '../models/Quotation.js';
 
+
 export const genrate = async (req, res) => {
   try {
     const { _id, totals, items ,gstin} = req.body;
@@ -41,20 +42,29 @@ export const getAllQuotations = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search || '';
+    const search = req.query.search?.trim() || '';
 
-    const query = search
-      ? {
-          $or: [
-            { quotationNumber: { $regex: search, $options: 'i' } },
-            { clientName: { $regex: search, $options: 'i' } },
-          ],
-        }
-      : {};
+    let query = {};
+
+    if (search) {
+      //  First, search leads whose name matches
+      const matchedLeads = await Lead.find({
+        name: { $regex: search, $options: 'i' },
+      }).select('_id');
+
+      const matchedLeadIds = matchedLeads.map(lead => lead._id);
+
+      query = {
+        $or: [
+          { _id: { $regex: search, $options: 'i' } }, // Match quotation 
+          { user: { $in: matchedLeadIds } },          // Match user.name from Lead model
+        ],
+      };
+    }
 
     const totalQuotations = await Quotation.countDocuments(query);
     const quotations = await Quotation.find(query)
-      .populate('user')
+      .populate('user')  
       .populate('items')
       .sort('-createdAt')
       .skip((page - 1) * limit)
