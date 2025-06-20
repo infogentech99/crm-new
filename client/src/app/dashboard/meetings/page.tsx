@@ -48,7 +48,7 @@ const ManageMeetingsPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allMeetings', search],
     queryFn: () => getMeetings(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted,
   });
 
   const allMeetings = data?.meetings || [];
@@ -95,13 +95,12 @@ const ManageMeetingsPage: React.FC = () => {
     handleEditMeeting,
     handleDeleteMeeting,
     userRole,
-    page, // Use client-side page state for config
+    page,
     limit
   );
   config.addMeetingButtonAction = handleCreateMeeting;
 
   const handlePageChange = (newPage: number) => {
-    // Ensure newPage is within valid bounds for client-side pagination
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
     } else if (newPage < 1) {
@@ -122,7 +121,7 @@ const ManageMeetingsPage: React.FC = () => {
   };
 
   if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
+    return null;
   }
 
   return (
