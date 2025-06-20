@@ -52,6 +52,7 @@ export interface User {
   city?: string;
   zipCode?: string;
   gstin?: string;
+  phoneNumber?: string;
 }
 
 export interface Lead {

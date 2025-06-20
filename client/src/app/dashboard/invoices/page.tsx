@@ -46,10 +46,9 @@ const ManageInvoicesPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allInvoices', search], 
     queryFn: () => getInvoices(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted, 
   });
-
-const allInvoices = data?.invoices || [];
+  const allInvoices = data?.invoices || [];
 
 const totalInvoices = allInvoices.length;
 const totalPages = Math.ceil(totalInvoices / limit);
