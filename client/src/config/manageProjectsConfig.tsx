@@ -1,11 +1,10 @@
+import BadgeDot from '@components/BadgeDot';
 import { DataTableProps } from '@components/Common/DataTable';
 import { FlattenedProject } from '@customTypes/index';
-import { Trash2, Pencil } from 'lucide-react';
 import React from 'react';
 
 export const manageProjectsConfig = (
-  handleEditProject: (project: FlattenedProject) => void,
-  handleDeleteProject: (project: FlattenedProject) => void,
+
   currentPage: number,
   limit: number
 ) => {
@@ -14,21 +13,8 @@ export const manageProjectsConfig = (
     { key: 'title', label: 'PROJECT NAME' },
     { key: 'leadName', label: 'LEAD NAME' },
     { key: 'industry', label: 'INDUSTRY' },
-    { key: 'status', label: 'STATUS' },
-    {
-      key: 'actions',
-      label: 'ACTIONS',
-      align: 'right',
-      render: (item: FlattenedProject) => (
-        <div className="flex items-center justify-end space-x-2">
-          <button className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer" onClick={() => handleEditProject(item)}>
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button className="text-red-500 hover:text-red-700 flex items-center cursor-pointer" onClick={() => handleDeleteProject(item)}>
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-      ),
+    { key: 'status', label: 'STATUS', 
+      render: (item: FlattenedProject) => <BadgeDot label={item.status || '-'} type="status" />,
     },
   ];
 

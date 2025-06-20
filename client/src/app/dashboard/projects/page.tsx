@@ -15,7 +15,7 @@ import {
 import { PaginationComponent } from '@components/ui/pagination';
 import { manageProjectsConfig } from '@src/config/manageProjectsConfig';
 import { getLeads } from '@services/leadService';
-import { FlattenedProject } from '@customTypes/index'; // Import FlattenedProject type
+import { FlattenedProject } from '@customTypes/index'; 
 
 const ManageProjectsPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -27,7 +27,7 @@ const ManageProjectsPage: React.FC = () => {
     setIsMounted(true);
   }, []);
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allLeadsForProjects', search],
     queryFn: () => getLeads(1, 10000, search),
     enabled: isMounted, 
@@ -55,17 +55,10 @@ const ManageProjectsPage: React.FC = () => {
   const endIndex = startIndex + limit;
   const projectsToDisplay = filteredProjects.slice(startIndex, endIndex);
 
-  const handleEditProject = (project: FlattenedProject) => {
-    alert(`Edit project: ${project.title}`);
-    // Implement actual edit logic here
-  };
 
-  const handleDeleteProject = (project: FlattenedProject) => {
-    alert(`Delete project: ${project.title}`);
-    // Implement actual delete logic here
-  };
 
-  const config = manageProjectsConfig(handleEditProject, handleDeleteProject, page, limit);
+
+  const config = manageProjectsConfig(page, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -87,12 +80,10 @@ const ManageProjectsPage: React.FC = () => {
     setPage(1);
   };
 
-  const handleProjectAdded = () => {
-    refetch();
-  };
+
 
   if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
+    return null;
   }
 
   return (
