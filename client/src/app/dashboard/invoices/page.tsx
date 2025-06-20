@@ -46,9 +46,9 @@ const ManageInvoicesPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allInvoices', search], 
     queryFn: () => getInvoices(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted, 
   });
-
+  console.log("Invoices Data:", data);
   const allInvoices = data?.invoices || [];
 
   const filteredInvoices = allInvoices.filter(invoice =>
