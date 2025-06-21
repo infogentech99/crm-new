@@ -13,6 +13,8 @@ import {
   deleteLead,
   uploadQuotation,
   getLeadHistory,
+  getLeadSourceSummary,
+  getLeadStatusSummary
 } from '../controllers/leadController.js';
 
 import { protect, authorize } from '../middlewares/authMiddleware.js';
@@ -43,10 +45,24 @@ router.get(
 );
 
 router.get(
-  '/:id',
+  '/invoiceHistory/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee'),
-  getLead
+  authorize('superadmin', 'admin', 'salesperson'),
+  getLeadHistory
+);
+
+router.get(
+  '/summary/status',
+  protect,
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
+  getLeadStatusSummary
+);
+
+router.get(
+  '/summary/source',
+  protect,
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
+  getLeadSourceSummary
 );
 
 router.put(

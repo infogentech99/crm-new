@@ -34,12 +34,97 @@ export const genrate = async (req, res) => {
 
     res.status(201).json({ message: 'Invoice generated', data: invoice });
   } catch (err) {
-    console.error(err);
+    console.error("genrate error:", err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-// List & search
+export const getMonthlyRevenueSummary = async (req, res) => {
+  try {
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11); // Go back 11 months to include current month
+
+    let query = {
+      createdAt: { $gte: twelveMonthsAgo },
+      // Assuming 'Paid' status for revenue calculation
+      // You might need to adjust this based on your Invoice schema's status field
+      // For example, if status is 'Paid' or 'invoice_accepted'
+      // status: 'Paid' 
+    };
+
+    // If you want to filter by user, add this:
+    // if (req.user.role !== 'superadmin') {
+    //   query.createdBy = req.user._id;
+    // }
+
+    const monthlyRevenue = await Invoice.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+          },
+          totalRevenue: { $sum: '$totals.total' }, // Assuming 'total' field in 'totals' object
+        },
+      },
+      {
+        $sort: {
+          '_id.year': 1,
+          '_id.month': 1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: {
+            $dateToString: {
+              format: '%Y-%m',
+              date: {
+                $dateFromParts: {
+                  year: '$_id.year',
+                  month: '$_id.month',
+                  day: 1,
+                },
+              },
+            },
+          },
+          revenue: '$totalRevenue',
+        },
+      },
+    ]);
+
+    res.status(200).json(monthlyRevenue);
+  } catch (err) {
+    console.error("getMonthlyRevenueSummary error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+export const getPendingInvoiceAmountSummary = async (req, res, next) => {
+  try {
+    const pendingAmountResult = await Invoice.aggregate([
+      {
+        $match: {
+          status: { $in: ['Pending', 'Overdue'] }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalPendingAmount: { $sum: { $subtract: ['$totalAmount', { $ifNull: ['$paidAmount', 0] }] } }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      totalPendingAmount: pendingAmountResult.length > 0 ? pendingAmountResult[0].totalPendingAmount : 0
+    });
+  } catch (err) {
+    console.error('getPendingInvoiceAmountSummary error:', err);
+    next(err);
+  }
+};
+
 export const getAllInvoices = async (req, res) => {
   try {
     const page   = parseInt(req.query.page)  || 1;
@@ -111,7 +196,7 @@ export const getInvoiceById = async (req, res) => {
 
     res.json({ data: invoice });
   } catch (err) {
-    console.error('getInvoiceById error:', err);
+    console.error("getInvoiceById error:", err);
     res.status(500).json({ error: 'Failed to fetch invoice' });
   }
 };
@@ -153,7 +238,7 @@ export const updateInvoice = async (req, res) => {
     await invoice.save();
     res.json({ message: 'Invoice updated successfully', data: invoice });
   } catch (err) {
-    console.error('UpdateInvoice error:', err);
+    console.error('updateInvoice error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

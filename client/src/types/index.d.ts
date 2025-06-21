@@ -17,10 +17,16 @@ export interface DashboardSummary {
   totalLeads: number;
   newContacts: number;
   openDeals: string;
+  openDeals: string;
   tasksDue: number;
   approvedQuotations: number;
   approvedInvoices: number;
   lostLeads: number;
+  pendingAmount: string;
+  leadStatusSummary: { [key: string]: number };
+  leadSourceSummary: { [key: string]: number };
+  monthlyRevenue: { name: string; revenue: number }[];
+  taskStatusSummary: { [key: string]: number };
 }
 
 export interface RecentActivity {
@@ -251,7 +257,7 @@ export interface InvoiceItem {
 }
 
 export interface Quotation {
-  data: any;
+  data?: Record<string, unknown>;
   _id: string;
   quotationNumber: string;
   clientName: string;
