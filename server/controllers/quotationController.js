@@ -50,8 +50,7 @@ export const getAllQuotations = async (req, res) => {
       query.createdBy = req.user._id;
     }
 
-    if (search) {
-      //  First, search leads whose name matches
+    if (search) {      
       const matchedLeads = await Lead.find({
         name: { $regex: search, $options: 'i' },
       }).select('_id');
@@ -60,8 +59,8 @@ export const getAllQuotations = async (req, res) => {
 
       query = {
         $or: [
-          { _id: { $regex: search, $options: 'i' } }, // Match quotation 
-          { user: { $in: matchedLeadIds } },          // Match user.name from Lead model
+          { _id: { $regex: search, $options: 'i' } }, 
+          { user: { $in: matchedLeadIds } }, 
         ],
       };
     }

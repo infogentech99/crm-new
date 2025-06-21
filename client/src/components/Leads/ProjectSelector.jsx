@@ -1,35 +1,68 @@
 "use client";
 import clsx from "clsx";
+import { Pencil, Trash2 } from "lucide-react";
 
 export default function ProjectSelector({
   projects = [],
   selectedProjectIndex,
   onSelect,
+  onEdit,
+  onDelete,
 }) {
   if (!projects.length) return null;
 
   return (
-    <div className="mb-6 space-x-2 space-y-2">
-      <h3 className="text-xl font-bold mb-4 text-gray-800">All Project</h3>
+    <div className="mb-6">
+      <h3 className="text-xl font-bold mb-4 text-gray-800">All Projects</h3>
+      <div className="flex flex-wrap gap-3">
         {projects.map((project, index) => {
           const isSelected = index === selectedProjectIndex;
           const fullTitle = project.title || `Project ${index + 1}`;
+
           return (
-            <button
+            <div
               key={index}
-              onClick={() => onSelect(index)}
-              title={fullTitle}
               className={clsx(
-                "relative group cursor-pointer rounded-lg px-4 py-2 transition-all duration-200 shadow-sm",
+                "inline-flex items-center px-4 py-2 rounded-lg transition-all duration-200 shadow-sm border text-sm ",
                 isSelected
-                  ? "bg-gradient-to-r from-gray-500 to-gray-700 border-l-6 border-black text-white font-semibold"
-                  : "hover:bg-gray-100 text-gray-700"
+                  ? "bg-gradient-to-r from-gray-500 to-gray-700 text-white border-black font-semibold"
+                  : "bg-white text-gray-800 hover:bg-gray-100"
               )}
             >
-              <span className="block">{index+1} - {fullTitle}</span>
-            </button>
+              <button
+                onClick={() => onSelect(index)}
+                title={fullTitle}
+                className="text-left whitespace-nowrap cursor-pointer"
+              >
+                {index + 1} - {fullTitle}
+              </button>
+
+              <div className="flex gap-2 items-center ml-3">
+                <button
+                  onClick={() => onEdit(index)}
+                  className={clsx(
+                    "cursor-pointer",
+                    isSelected ? "text-white" : "text-gray-600 hover:text-blue-600"
+                  )}
+                  title="Edit"
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  onClick={() => onDelete(index)}
+                  className={clsx(
+                    "cursor-pointer",
+                    isSelected ? "text-white" : "text-gray-600 hover:text-red-600"
+                  )}
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
           );
         })}
+      </div>
     </div>
   );
 }

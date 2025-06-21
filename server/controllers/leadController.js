@@ -111,20 +111,7 @@ export const updateLead = async (req, res) => {
     }
 
     if (projects && Array.isArray(projects)) {
-      const existingProjects = lead.projects || [];
-      projects.forEach((newProject) => {
-        const index = existingProjects.findIndex(
-          (p) => p._id?.toString() === newProject._id?.toString()
-        );
-
-        if (index > -1) {
-          existingProjects[index] = { ...existingProjects[index], ...newProject };
-        } else {
-          existingProjects.push(newProject);
-        }
-      });
-
-      lead.projects = existingProjects;
+      lead.projects = projects;
     }
     await lead.save();
     res.status(200).json(lead);
