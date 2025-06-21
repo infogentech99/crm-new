@@ -19,6 +19,12 @@ import {
   Calendar,
   ListChecks,
   LogOut,
+  FolderOpenDot,
+  Phone,
+  Wallet,
+  ScrollText,
+  Landmark,
+  ChartNoAxesCombined,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -44,19 +50,19 @@ const sidebarItems: SidebarItem[] = [
   {
     id: "leads",
     href: "/dashboard/leads",
-    icon: <ClipboardList size={24} />,
+    icon: <ChartNoAxesCombined size={24} />,
     label: "All Leads",
   },
   {
     id: "contacts",
     href: "/dashboard/contacts",
-    icon: <MessageSquare size={24} />,
+    icon: <Phone  size={24}/>,
     label: "Contacts",
   },
   {
     id: "projects",
     href: "/dashboard/projects",
-    icon: <ClipboardList size={24} />,
+    icon: <FolderOpenDot  size={24}/>,
     label: "Projects",
   },
   {
@@ -68,19 +74,19 @@ const sidebarItems: SidebarItem[] = [
   {
     id: "invoices",
     href: "/dashboard/invoices",
-    icon: <Receipt size={24} />,
+    icon: <Wallet size={24}/>,
     label: "Invoices",
   },
   {
     id: "bills",
     href: "/dashboard/bills",
-    icon: <ListChecks size={24} />,
+    icon: <ScrollText size={24}/>,
     label: "Deals Bill",
   },
   {
     id: "transactions",
     href: "/dashboard/transactions",
-    icon: <Repeat size={24} />,
+    icon: <Landmark size={24} />,
     label: "Transactions",
   },
   {
