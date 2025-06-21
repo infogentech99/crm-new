@@ -139,16 +139,15 @@ export default function Sidebar() {
           </Link>
         ))}
 
-        {/* Logout icon */}
         <div
-          className="relative mt-auto flex justify-center items-center p-2 cursor-pointer hover:bg-red-700 rounded mb-4"
+          className="relative mt-auto flex justify-center items-center py-4 cursor-pointer hover:bg-red-700 rounded mb-4"
           onClick={handleLogout}
           onMouseEnter={() => setHoveredItemId("logout")}
           onMouseLeave={() => setHoveredItemId(null)}
         >
           <LogOut size={24} />
           {hoveredItemId === "logout" && (
-            <span className="absolute left-full ml-3 whitespace-nowrap bg-gray-700 text-white text-xs px-3 py-2 rounded">
+            <span className="absolute left-full ml-3 whitespace-nowrap bg-gray-700 text-white text-xs px-3 py-4 rounded">
               Logout
             </span>
           )}

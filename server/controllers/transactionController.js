@@ -1,10 +1,8 @@
-// controllers/transactionController.js
 
 import Transaction from '../models/Transaction.js';
 import Invoice     from '../models/Invoice.js';
 import Lead        from '../models/Lead.js';
 
-// Create a new transaction
 export const createTransaction = async (req, res, next) => {
   try {
     const { leadId, invoiceId, amount, method, transactionId, projectId } = req.body;
@@ -17,7 +15,6 @@ export const createTransaction = async (req, res, next) => {
       return res.status(404).json({ error: 'Invoice not found' });
     }
 
-    // create
     const txn = await Transaction.create({
       user: leadId,
       invoice: invoiceId,
@@ -85,35 +82,89 @@ export const listTransactions = async (req, res, next) => {
     const search = req.query.search?.trim()  || '';
     const invoiceId = req.query.invoiceId;
 
-    // build query
     const query = {};
     if (invoiceId) {
       query.invoice = invoiceId;
     }
     if (search) {
       query.$or = [
-        { description: { $regex: search, $options: 'i' } },
-        { type: { $regex: search, $options: 'i' } },
+        { transactionId: { $regex: search, $options: 'i' } },//search using transaction id
+        { method: { $regex: search, $options: 'i' } }, //search using method 
+        { 'invoice._id': { $regex: search, $options: 'i' } } //search using invoice 
       ];
     }
-    // role-based restriction
-    if (req.user.role !== 'superadmin') {
+     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       query.createdBy = req.user._id;
     }
 
-    const total = await Transaction.countDocuments(query);
-    const txns  = await Transaction.find(query)
-      .populate({ path: 'invoice', select: '_id invoiceNumber' })
-      .populate({ path: 'user', select: 'name email' })
-      .sort('-createdAt')
-      .skip((page - 1) * limit)
-      .limit(limit);
+    const pipeline = [
+      {
+        $lookup: {
+          from: 'invoices',
+          localField: 'invoice',
+          foreignField: '_id',
+          as: 'invoice'
+        }
+      },
+      { $unwind: '$invoice' },
+
+      {
+        $lookup: {
+          from: 'leads',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: '$user' },
+
+      ...(search ? [{ $match: query }] : []),
+
+      {
+        $project: {
+          _id: 1,
+          amount: 1,
+          transactionId: 1,
+          projectId: 1,
+          method: 1,
+          createdBy: 1,
+          transactionDate: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          __v: 1,
+          invoice: {
+            _id: '$invoice._id'
+          },
+          user: {
+            _id: '$user._id',
+            name: '$user.name',
+            email: '$user.email'
+          }
+        }
+      },
+
+      { $sort: { createdAt: -1 } },
+
+      {
+        $facet: {
+          transactions: [
+            { $skip: (page - 1) * limit },
+            { $limit: limit }
+          ],
+          totalCount: [{ $count: 'count' }]
+        }
+      }
+    ];
+
+    const result = await Transaction.aggregate(pipeline);
+    const txns = result[0].transactions || [];
+    const total = result[0].totalCount[0]?.count || 0;
 
     res.status(200).json({
       transactions: txns,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
-      totalTransactions: total,
+      totalTransactions: total
     });
   } catch (err) {
     console.error('listTransactions error:', err);
@@ -121,7 +172,7 @@ export const listTransactions = async (req, res, next) => {
   }
 };
 
-// Get a single transaction by ID
+
 export const getTransaction = async (req, res, next) => {
   try {
     const txn = await Transaction.findById(req.params.id)
@@ -139,7 +190,6 @@ export const getTransaction = async (req, res, next) => {
   }
 };
 
-// Update a transaction
 export const updateTransaction = async (req, res, next) => {
   try {
     const txn = await Transaction.findById(req.params.id);
@@ -158,7 +208,7 @@ export const updateTransaction = async (req, res, next) => {
   }
 };
 
-// Delete a transaction
+
 export const deleteTransaction = async (req, res, next) => {
   try {
     const txn = await Transaction.findById(req.params.id);

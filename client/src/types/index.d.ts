@@ -53,6 +53,7 @@ export interface User {
   zipCode?: string;
   gstin?: string;
   phoneNumber?: string;
+  projects?: { _id: string; title: string; status: string }[];
 }
 
 export interface Lead {
@@ -302,4 +303,14 @@ export interface FormData {
     title: string;
     status: string;
   }[];
+}
+
+export interface MeetingEmailData {
+  title: string;
+  date: string;
+  duration: number;
+  platform: string;
+  meetlink: string;
+  description: string;
+  participants: string[];
 }

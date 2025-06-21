@@ -16,7 +16,7 @@ export const getInvoices = async (
   search: string = ''
 ): Promise<{ invoices: Invoice[]; totalPages: number; currentPage: number; totalInvoices: number }> => {
   const headers = getAuthHeaders();
-  let url = `${API_URL}?page=${page}&limit=${limit}`;
+  let url = `${API_URL}?page=${page}&limit=${limit}&populate=projects`;
   if (search) {
     url += `&search=${search}`;
   }

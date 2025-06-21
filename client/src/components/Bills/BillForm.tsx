@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { RxCross2 } from 'react-icons/rx';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input'; 
-
+import RequiredLabel from '@components/ui/RequiredLabel'; // Assuming this is the correct path for RequiredLabel]
 interface Props {
   data: any;
   mode: 'Create' | 'Edit';
@@ -23,6 +23,15 @@ export default function BillForm({ data, mode, onClose }: Props) {
     hsnCode: data?.hsnCode || '',
     amount: data?.amount || '',
   });
+
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
+const isDescriptionInvalid = touched.description && !form.description;
+const isAmountInvalid = touched.amount && !form.amount;
+
+const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  setTouched((prev) => ({ ...prev, [e.target.name]: true }));
+};
+
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,9 +72,11 @@ export default function BillForm({ data, mode, onClose }: Props) {
   };
 
   const handleSubmit = () => {
-    setSubmitting(true);
-    mutate();
-  };
+  setTouched({ description: true, amount: true });
+  if (!form.description || !form.amount) return;
+  setSubmitting(true);
+  mutate();
+};
 
   return (
     <div>
@@ -84,14 +95,19 @@ export default function BillForm({ data, mode, onClose }: Props) {
 
       <div className="grid grid-cols-1 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
-          <Input
-            type="text"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
+        <RequiredLabel required>Description</RequiredLabel>
+  <Input
+    type="text"
+    name="description"
+    value={form.description}
+    onChange={handleChange}
+    onBlur={handleBlur}
+    aria-invalid={isDescriptionInvalid}
+    className={`w-full border rounded px-3 py-2 ${isDescriptionInvalid ? 'border-red-500' : ''}`}
+  />
+  {isDescriptionInvalid && (
+    <span className="text-xs text-red-500">Description is required</span>
+  )}
         </div>
 
         <div>
@@ -106,14 +122,19 @@ export default function BillForm({ data, mode, onClose }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Amount (₹)</label>
-          <Input
-            type="number"
-            name="amount"
-            value={form.amount}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-          />
+           <RequiredLabel required>Amount (₹)</RequiredLabel>
+  <Input
+    type="number"
+    name="amount"
+    value={form.amount}
+    onChange={handleChange}
+    onBlur={handleBlur}
+    aria-invalid={isAmountInvalid}
+    className={`w-full border rounded px-3 py-2 ${isAmountInvalid ? 'border-red-500' : ''}`}
+  />
+  {isAmountInvalid && (
+    <span className="text-xs text-red-500">Amount is required</span>
+  )}
         </div>
       </div>
 

@@ -65,12 +65,12 @@ export const getAllInvoices = async (req, res) => {
       ];
     }
 
-    // 3) restrict non-superadmin to own invoices
-    if (req.user.role !== 'superadmin') {
+
+    if (req.user.role !== 'superadmin' &&
+        req.user.role !== 'admin') {
       query.createdBy = req.user._id;
     }
 
-    // 4) fetch + paginate
     const total    = await Invoice.countDocuments(query);
     const invoices = await Invoice.find(query)
       .populate('user')
@@ -92,7 +92,6 @@ export const getAllInvoices = async (req, res) => {
   }
 };
 
-// Get one
 export const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
@@ -104,7 +103,7 @@ export const getInvoiceById = async (req, res) => {
       return res.status(404).json({ error: 'Invoice not found' });
     }
 
-    // enforce per-role access
+
     if (req.user.role !== 'superadmin' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
@@ -117,7 +116,6 @@ export const getInvoiceById = async (req, res) => {
   }
 };
 
-// Update
 export const updateInvoice = async (req, res) => {
   try {
     const { id } = req.params;
@@ -131,13 +129,11 @@ export const updateInvoice = async (req, res) => {
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
-    // enforce per-role access
     if (req.user.role !== 'superadmin' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
-    // replace items
     const oldIds = invoice.items.map(i => i._id);
     await Item.deleteMany({ _id: { $in: oldIds } });
     invoice.items = [];
@@ -148,7 +144,6 @@ export const updateInvoice = async (req, res) => {
 
     invoice.totals = totals;
 
-    // update GSTIN on Lead
     const user = await Lead.findById(invoice.user);
     if (gstin && user) {
       user.gstin = gstin;
@@ -163,7 +158,6 @@ export const updateInvoice = async (req, res) => {
   }
 };
 
-// Delete
 export const deleteInvoice = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id).populate('createdBy');
