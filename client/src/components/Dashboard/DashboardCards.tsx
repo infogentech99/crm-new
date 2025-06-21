@@ -73,6 +73,30 @@ export default function DashboardCards() {
         icon="📅"
         bgColor="bg-red-500"
       />
+      <StatCard
+        title="Approved Quotations"
+        value={data?.approvedQuotations.toLocaleString() || 'N/A'}
+        icon="✅"
+        bgColor="bg-purple-500"
+      />
+      <StatCard
+        title="Approved Invoices"
+        value={data?.approvedInvoices.toLocaleString() || 'N/A'}
+        icon="📄"
+        bgColor="bg-indigo-500"
+      />
+      <StatCard
+        title="Lost Leads"
+        value={data?.lostLeads.toLocaleString() || 'N/A'}
+        icon="❌"
+        bgColor="bg-gray-500"
+      />
+      <StatCard
+        title="Pending Amount"
+        value={`₹${data?.pendingAmount || 'N/A'}`}
+        icon="⏳"
+        bgColor="bg-orange-500"
+      />
     </div>
   );
 }
