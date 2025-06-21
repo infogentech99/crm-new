@@ -32,7 +32,7 @@ export const genrate = async (req, res) => {
     }
 
     await quotation.save();
-    res.status(201).json({ message: 'Quotation generated' });
+    res.status(201).json({ message: 'Quotation generated', data: quotation });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
@@ -46,6 +46,9 @@ export const getAllQuotations = async (req, res) => {
     const search = req.query.search?.trim() || '';
 
     let query = {};
+    if (req.user.role !== 'superadmin') {
+      query.createdBy = req.user._id;
+    }
 
     if (search) {
       //  First, search leads whose name matches
@@ -76,7 +79,7 @@ export const getAllQuotations = async (req, res) => {
       quotations,
       currentPage: page,
       totalPages:  Math.ceil(totalQuotations / limit),
-      totalQuotations: totalQuotations
+      totalQuotations 
     });
   } catch (err) {
     console.error(err);

@@ -1,7 +1,10 @@
-import Transaction from '../models/Transaction.js';
-import Invoice from '../models/Invoice.js';
-import Lead from '../models/Lead.js';
+// controllers/transactionController.js
 
+import Transaction from '../models/Transaction.js';
+import Invoice     from '../models/Invoice.js';
+import Lead        from '../models/Lead.js';
+
+// Create a new transaction
 export const createTransaction = async (req, res, next) => {
   try {
     const { leadId, invoiceId, amount, method, transactionId, projectId } = req.body;
@@ -14,6 +17,7 @@ export const createTransaction = async (req, res, next) => {
       return res.status(404).json({ error: 'Invoice not found' });
     }
 
+    // create
     const txn = await Transaction.create({
       user: leadId,
       invoice: invoiceId,
@@ -32,7 +36,7 @@ export const createTransaction = async (req, res, next) => {
       $push: {
         transactions: {
           transaction: txn.transactionId,
-          invoiceId: invoiceId,
+          invoiceId,
           date: new Date(),
           amount,
           method,
@@ -54,11 +58,20 @@ export const getTransactionsByInvoice = async (req, res, next) => {
     if (!invoiceId) {
       return res.status(400).json({ error: 'Missing invoice ID' });
     }
-    const invoice = await Invoice.findById(invoiceId).populate('transactions');
+    const invoice = await Invoice.findById(invoiceId);
     if (!invoice) {
       return res.status(404).json({ error: 'Invoice not found' });
     }
-    res.json(invoice);
+    const txnQuery = { invoice: invoiceId };
+    if (req.user.role !== 'superadmin') {
+      txnQuery.createdBy = req.user._id;
+    }
+
+    const txns = await Transaction.find(txnQuery)
+      .populate({ path: 'invoice', select: '_id invoiceNumber' })
+      .populate({ path: 'user',    select: 'name email' })
+      .sort('-createdAt');
+    res.json({ invoiceId, transactions: txns });
   } catch (err) {
     next(err);
   }
@@ -69,21 +82,29 @@ export const listTransactions = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search || '';
+    const search = req.query.search?.trim()  || '';
+    const invoiceId = req.query.invoiceId;
 
-    let query = {};
-
+    // build query
+    const query = {};
+    if (invoiceId) {
+      query.invoice = invoiceId;
+    }
     if (search) {
       query.$or = [
         { description: { $regex: search, $options: 'i' } },
         { type: { $regex: search, $options: 'i' } },
       ];
     }
+    // role-based restriction
+    if (req.user.role !== 'superadmin') {
+      query.createdBy = req.user._id;
+    }
 
     const total = await Transaction.countDocuments(query);
-    const txns = await Transaction.find(query)
-      .populate({ path: 'invoice', select: '_id invoiceNumber' }) // Populate invoice with _id and invoiceNumber
-      .populate({ path: 'user', select: 'name email' }) // Populate user with name and email
+    const txns  = await Transaction.find(query)
+      .populate({ path: 'invoice', select: '_id invoiceNumber' })
+      .populate({ path: 'user', select: 'name email' })
       .sort('-createdAt')
       .skip((page - 1) * limit)
       .limit(limit);
@@ -100,35 +121,55 @@ export const listTransactions = async (req, res, next) => {
   }
 };
 
+// Get a single transaction by ID
 export const getTransaction = async (req, res, next) => {
   try {
     const txn = await Transaction.findById(req.params.id)
       .populate({ path: 'invoice', select: '_id invoiceNumber' })
       .populate({ path: 'user', select: 'name email' });
-    if (!txn) return res.status(404).json({ success: false, message: 'Transaction not found' });
+    if (!txn) {
+      return res.status(404).json({ success: false, message: 'Transaction not found' });
+    }
+    if (req.user.role !== 'superadmin' && !txn.createdBy.equals(req.user._id)) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
     res.status(200).json({ success: true, data: txn });
   } catch (err) {
     next(err);
   }
 };
 
+// Update a transaction
 export const updateTransaction = async (req, res, next) => {
   try {
-    const txn = await Transaction.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
-    if (!txn) return res.status(404).json({ success: false, message: 'Transaction not found' });
+    const txn = await Transaction.findById(req.params.id);
+    if (!txn) {
+      return res.status(404).json({ success: false, message: 'Transaction not found' });
+    }
+    if (req.user.role !== 'superadmin' && !txn.createdBy.equals(req.user._id)) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    Object.assign(txn, req.body);
+    await txn.save();
     res.status(200).json({ success: true, data: txn });
   } catch (err) {
     next(err);
   }
 };
 
+// Delete a transaction
 export const deleteTransaction = async (req, res, next) => {
   try {
-    const txn = await Transaction.findByIdAndDelete(req.params.id);
-    if (!txn) return res.status(404).json({ success: false, message: 'Transaction not found' });
+    const txn = await Transaction.findById(req.params.id);
+    if (!txn) {
+      return res.status(404).json({ success: false, message: 'Transaction not found' });
+    }
+    if (req.user.role !== 'superadmin' && !txn.createdBy.equals(req.user._id)) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    await txn.deleteOne();
     res.status(200).json({ success: true, message: 'Transaction deleted' });
   } catch (err) {
     next(err);

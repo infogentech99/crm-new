@@ -150,7 +150,7 @@ export const fetchUserActivities = async (
   if (data.leads) {
     data.leads.forEach((lead: any) => {
       activities.push({
-        id: lead._id,
+        _id: lead._id,
         type: "Lead",
        description: lead.description || '-',
         date: new Date(lead.createdAt).toLocaleDateString(),
@@ -162,7 +162,7 @@ export const fetchUserActivities = async (
   if (data.meetings) {
     data.meetings.forEach((meeting: any) => {
       activities.push({
-        id: meeting._id,
+        _id: meeting._id,
         type: "Meeting",
          description: meeting.description || '-',
         date: new Date(meeting.date).toLocaleDateString(),
@@ -175,7 +175,7 @@ export const fetchUserActivities = async (
   if (data.tasks) {
     data.tasks.forEach((task: any) => {
       activities.push({
-        id: task._id,
+        _id: task._id,
         type: "Task",
          description: task.description || '-',
         date: new Date(task.dueDate).toLocaleDateString(),

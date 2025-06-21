@@ -32,6 +32,9 @@ import { User } from "@customTypes/index";
 type ModalMode = "edit" | "create";
 
 export default function ManageUsersPage() {
+  // 1) Redux / router / queryClient
+  const userRole = useSelector((s: RootState) => s.user.role || "");
+
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -56,8 +59,6 @@ export default function ManageUsersPage() {
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Role from store
-  const userRole = useSelector((s: RootState) => s.user.role || "");
 
   // Fetch
   const { data, isLoading, isError, error } = useQuery({
@@ -65,6 +66,24 @@ export default function ManageUsersPage() {
     queryFn: () => fetchUsers(page, limit, search, roleFilter), // Pass search and roleFilter to fetchUsers
     enabled: isMounted, // Only fetch data if mounted
   });
+
+  // 4) Effects
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted && userRole !== "superadmin") {
+      router.replace("/dashboard");
+    }
+  }, [isMounted, userRole, router]);
+
+  // 5) Conditional render—**after** all hooks
+  if (!isMounted || userRole !== "superadmin") {
+    return null;
+  }
+
+  // 6) Rest of your logic now that we know it’s a superadmin
   const users = data?.users || [];
   const totalPages = data?.pages || 1;
 
@@ -91,7 +110,7 @@ export default function ManageUsersPage() {
   const confirmDelete = async () => {
     if (!userToDelete) return;
     await deleteUser(userToDelete._id);
-    queryClient.invalidateQueries({ queryKey: ["users"] });
+    queryClient.invalidateQueries({ queryKey: ["users", page, limit, search, roleFilter] });
     setIsDeleteModalOpen(false);
     setUserToDelete(null);
   };
@@ -200,7 +219,7 @@ export default function ManageUsersPage() {
               mode={modalMode}
               onClose={() => {
                 closeModal();
-                queryClient.invalidateQueries({ queryKey: ["users"] });
+                queryClient.invalidateQueries({ queryKey: ["users", page, limit, search, roleFilter] });
               }}
             />
           </Modal>

@@ -111,7 +111,7 @@ export default function Sidebar() {
     router.push("/");
   };
   const filteredItems = sidebarItems.filter(item => {
-    if (item.id === "users" && (role === "salesperson" || role === "admin")) {
+    if (item.id === "users" && role !== "superadmin") {
       return false;
     }
     return true;
