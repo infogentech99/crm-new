@@ -6,9 +6,6 @@ import Lead    from '../models/Lead.js';
 import Meeting from '../models/Meeting.js';
 import Task    from '../models/Task.js';
 
-/**
- * GET /api/users
- */
 export const getUsers = async (req, res, next) => {
   try {
     const page       = parseInt(req.query.page, 10)  || 1;
@@ -27,11 +24,16 @@ export const getUsers = async (req, res, next) => {
       ];
     }
 
+    let query = User.find(filter).skip(skip).limit(limit);
+
+    if (req.user.role !== 'superadmin') {
+      query = query.select('_id name email');
+    } else {
+      query = query.select('-password');
+    }
+
     const [users, total] = await Promise.all([
-      User.find(filter)
-        .select('-password')
-        .skip(skip)
-        .limit(limit),
+      query.exec(),
       User.countDocuments(filter),
     ]);
 
@@ -45,9 +47,7 @@ export const getUsers = async (req, res, next) => {
   }
 };
 
-/**
- * POST /api/users
- */
+
 export const createUser = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
@@ -72,9 +72,7 @@ export const createUser = async (req, res, next) => {
   }
 };
 
-/**
- * GET /api/users/:id
- */
+
 export const getUserById = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
@@ -85,16 +83,13 @@ export const getUserById = async (req, res, next) => {
   }
 };
 
-/**
- * PUT /api/users/:id
- */
+
 export const updateUser = async (req, res, next) => {
   try {
     const { name, email, role } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // apply updates
     if (name)  user.name  = name;
     if (email) user.email = email;
     if (role)  user.role  = role;
@@ -106,9 +101,6 @@ export const updateUser = async (req, res, next) => {
   }
 };
 
-/**
- * DELETE /api/users/:id
- */
 export const deleteUser = async (req, res, next) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -119,9 +111,7 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
-/**
- * GET /api/users/:id/activities
- */
+
 export const getUserActivities = async (req, res, next) => {
   try {
     const userId = req.params.id;

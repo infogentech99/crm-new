@@ -46,7 +46,7 @@ export const getAllQuotations = async (req, res) => {
     const search = req.query.search?.trim() || '';
 
     let query = {};
-    if (req.user.role !== 'superadmin') {
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       query.createdBy = req.user._id;
     }
 

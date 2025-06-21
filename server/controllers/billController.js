@@ -28,13 +28,12 @@ export const getAllBills = async (req, res) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const search = req.query.search || '';
 
-    // Base filter: non-superadmins only their own
     const filter = {};
-    if (req.user.role !== 'superadmin') {
-      filter.createdBy = req.user._id;
-    }
+    
+    // if (req.user.role !== 'superadmin') {
+    //   filter.createdBy = req.user._id;
+    // }
 
-    // Optional text search on description/hsnCode
     if (search) {
       filter.$or = [
         { description: { $regex: search, $options: 'i' } },

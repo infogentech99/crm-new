@@ -1,10 +1,8 @@
-// controllers/transactionController.js
 
 import Transaction from '../models/Transaction.js';
 import Invoice     from '../models/Invoice.js';
 import Lead        from '../models/Lead.js';
 
-// Create a new transaction
 export const createTransaction = async (req, res, next) => {
   try {
     const { leadId, invoiceId, amount, method, transactionId, projectId } = req.body;
@@ -17,7 +15,6 @@ export const createTransaction = async (req, res, next) => {
       return res.status(404).json({ error: 'Invoice not found' });
     }
 
-    // create
     const txn = await Transaction.create({
       user: leadId,
       invoice: invoiceId,
@@ -85,7 +82,6 @@ export const listTransactions = async (req, res, next) => {
     const search = req.query.search?.trim()  || '';
     const invoiceId = req.query.invoiceId;
 
-    // build query
     const query = {};
     if (invoiceId) {
       query.invoice = invoiceId;
@@ -97,8 +93,7 @@ export const listTransactions = async (req, res, next) => {
         { 'invoice._id': { $regex: search, $options: 'i' } } //search using invoice 
       ];
     }
-    // role-based restriction
-    if (req.user.role !== 'superadmin') {
+     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       query.createdBy = req.user._id;
     }
 
@@ -177,7 +172,7 @@ export const listTransactions = async (req, res, next) => {
   }
 };
 
-// Get a single transaction by ID
+
 export const getTransaction = async (req, res, next) => {
   try {
     const txn = await Transaction.findById(req.params.id)
@@ -195,7 +190,6 @@ export const getTransaction = async (req, res, next) => {
   }
 };
 
-// Update a transaction
 export const updateTransaction = async (req, res, next) => {
   try {
     const txn = await Transaction.findById(req.params.id);
@@ -214,7 +208,7 @@ export const updateTransaction = async (req, res, next) => {
   }
 };
 
-// Delete a transaction
+
 export const deleteTransaction = async (req, res, next) => {
   try {
     const txn = await Transaction.findById(req.params.id);
