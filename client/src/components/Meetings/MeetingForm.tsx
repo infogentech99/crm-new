@@ -16,6 +16,7 @@ import {
   SelectItem
 } from '@components/ui/select';
 import { RxCross2 } from 'react-icons/rx';
+import { sendMeetingEmail } from './MeetingEmailSender';
 
 interface Props {
   data?: any;
@@ -26,6 +27,7 @@ interface Props {
 export default function MeetingForm({ data, mode, onClose }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const [platform, setPlatform] = useState('google');
   const [meetLinks, setMeetLinks] = useState({
@@ -107,6 +109,26 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
         await updateMeeting(data._id, payload);
         toast.success('Meeting updated successfully!');
       }
+      if (allParticipants.length > 0) {
+        setSendingEmail(true);
+        try {
+          await sendMeetingEmail({
+            title: payload.title,
+            date: payload.date,
+            duration: payload.duration,
+            platform: payload.platform,
+            meetlink: payload.meetlink,
+            description: payload.description,
+            participants: allParticipants,
+          });
+          toast.success('Meeting email sent successfully!');
+        } catch (emailErr) {
+          console.error('Error sending meeting email:', emailErr);
+          toast.error('Failed to send meeting email.');
+        } finally {
+          setSendingEmail(false);
+        }
+      }
 
       router.push('/dashboard/meetings');
       onClose();
@@ -159,19 +181,14 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
             <label className="text-sm font-medium block mb-1">Meeting Platform</label>
             <Select value={platform} onValueChange={(val) => {
               setPlatform(val);
-
               const defaultLinks = {
                 google: 'https://meet.google.com/landing',
                 zoom: 'https://app.zoom.us/wc/home?from=pwa',
                 microsoft: 'https://teams.live.com/free',
                 other: ''
               };
-
               const defaultLink = defaultLinks[val as keyof typeof defaultLinks];
-
-              setMeetLinks(prev => ({ ...prev, [val]: '' }));
-
-              handleChange('meetlink', val === 'other' ? '' : '');
+              handleChange('meetlink', val === 'other' ? '' : defaultLink);
             }}>
 
               <SelectTrigger>
@@ -256,7 +273,7 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
           <Button type="button" onClick={onClose} variant="outline">
             Cancel
           </Button>
-          <Button type="submit" disabled={submitting}>
+          <Button type="submit" disabled={submitting || sendingEmail}>
             {submitting ? 'Submitting...' : mode === 'Edit' ? 'Update Meeting' : 'Create Meeting'}
           </Button>
         </div>

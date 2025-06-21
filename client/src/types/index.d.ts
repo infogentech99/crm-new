@@ -303,3 +303,13 @@ export interface FormData {
     status: string;
   }[];
 }
+
+export interface MeetingEmailData {
+  title: string;
+  date: string;
+  duration: number;
+  platform: string;
+  meetlink: string;
+  description: string;
+  participants: string[];
+}
