@@ -45,7 +45,6 @@ const ManageTasksPage: React.FC = () => {
     queryFn: () => getTasks(1, 10000, search),
     enabled: isMounted, 
   });
-  console.log('Tasks data:', data);
   const allTasks = data?.tasks || [];
   const filteredTasks = allTasks.filter(task =>
     (task.title?.toLowerCase() || '').includes(search.toLowerCase()) ||

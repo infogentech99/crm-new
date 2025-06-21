@@ -17,7 +17,32 @@ export const manageTasksConfig = (
     { key: 'createdBy', label: 'Task Created By', render: (item: Task) => <span>{typeof item.createdBy === 'object' && item.createdBy !== null ? item.createdBy.name : item.createdBy || 'N/A'}</span> },
     { key: 'dueDate', label: 'DUE DATE', render: (item: Task) => <span>{new Date(item.dueDate).toLocaleDateString()}</span> },
     { key: 'priority', label: 'PRIORITY' },
-    { key: 'assignee', label: 'ASSIGNEE', render: (item: Task) => <span>{typeof item.assignee === 'object' ? item.assignee.name : item.assignee || 'N/A'}</span> },
+    {
+      key: 'assignee',
+      label: 'ASSIGNEE',
+      render: (item: Task) => {
+        const assignee = item.assignee;
+
+        if (!assignee) {
+          return <span>N/A</span>;
+        }
+
+        if (Array.isArray(assignee)) {
+          if (assignee.length === 0) {
+            return <span>N/A</span>;
+          }
+          if (typeof assignee[0] === 'object' && assignee[0] !== null && 'name' in assignee[0]) {
+            return <span>{assignee.map((user: any) => user.name).join(', ')}</span>;
+          } else {
+            return <span>{assignee.join(', ')}</span>;
+          }
+        } else if (typeof assignee === 'object' && assignee !== null && 'name' in assignee) {
+          return <span>{(assignee as any).name}</span>;
+        } else {       
+          return <span>{assignee}</span>;
+        }
+      }
+    },
     {
       key: 'status',
       label: 'STATUS',
