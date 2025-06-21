@@ -33,12 +33,14 @@ export const getLeads = async (req, res) => {
         { companyName: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
         { phoneNumber: { $regex: search, $options: 'i' } },
+        { industry: { $regex: search, $options: 'i' } },
+        { projects: { $elemMatch: { title: { $regex: search, $options: 'i' } } } }, // ✅ Added
       ];
     }
 
-  if (status && status !== 'all') {
-  query['projects'] = { $elemMatch: { status: status } };
-}
+    if (status && status !== 'all') {
+      query['projects'] = { $elemMatch: { status: status } };
+    }
 
     const total = await Lead.countDocuments(query);
     const leads = await Lead.find(query)
