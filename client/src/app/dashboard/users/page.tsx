@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 import { RootState } from "@store/store";
 import { User } from "@customTypes/index";
 
-type ModalMode = "edit" | "create";
+type ModalMode = "Edit" | "Create";
 
 export default function ManageUsersPage() {
   const userRole = useSelector((s: RootState) => s.user.role || "");
@@ -57,9 +57,9 @@ export default function ManageUsersPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["users", page, limit, search, roleFilter], 
+    queryKey: ["users", page, limit, search, roleFilter],
     queryFn: () => fetchUsers(page, limit, search, roleFilter),
-    enabled: isMounted, 
+    enabled: isMounted,
   });
 
 
@@ -85,11 +85,11 @@ export default function ManageUsersPage() {
 
   const openCreate = () => {
     setSelectedUser(null);
-    setModalMode("create");
+    setModalMode("Create");
   };
   const openEdit = (u: User) => {
     setSelectedUser(u);
-    setModalMode("edit");
+    setModalMode("Edit");
   };
   const openView = (u: User) => {
     router.push(`/dashboard/users/${u._id}`);
@@ -132,54 +132,53 @@ export default function ManageUsersPage() {
           <CreateUserButton onClick={openCreate} />
         </div>
 
-      <div className="flex items-center justify-between mb-4">
-  <Input
-    className="max-w-sm"
-    placeholder="Search by name or email…"
-    value={search}
-    onChange={(e) => {
-      setSearch(e.target.value);
-      setPage(1);
-    }}
-  />
+        <div className="flex items-center justify-between mb-4">
+          <Input
+            className="max-w-sm"
+            placeholder="Search by name or email…"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+          />
 
-  <div className="flex items-center space-x-4">
-    <Select
-      value={roleFilter}
-      onValueChange={(val) => {
-        setRoleFilter(val as any);
-        setPage(1);
-      }}
-    >
-      <SelectTrigger className="w-[150px]">
-        <SelectValue placeholder="All Roles" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">All Roles</SelectItem>
-        <SelectItem value="admin">Admin</SelectItem>
-        <SelectItem value="salesperson">Salesperson</SelectItem>
-      </SelectContent>
-    </Select>
-    <Select
-      value={String(limit)}
-      onValueChange={(val) => {
-        setLimit(Number(val));
-        setPage(1);
-      }}
-    >
-      <SelectTrigger className="w-[100px]">
-        <SelectValue placeholder="Limit" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="5">5</SelectItem>
-        <SelectItem value="10">10</SelectItem>
-        <SelectItem value="20">20</SelectItem>
-        <SelectItem value="50">50</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
-</div>
-
+          <div className="flex items-center space-x-4">
+            <Select
+              value={roleFilter}
+              onValueChange={(val) => {
+                setRoleFilter(val as any);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="All Roles" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="salesperson">Salesperson</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={String(limit)}
+              onValueChange={(val) => {
+                setLimit(Number(val));
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <DataTable
           columns={config.tableColumns}
           data={filteredUsers}
@@ -194,10 +193,10 @@ export default function ManageUsersPage() {
           />
         </div>
 
-        {(modalMode === "edit" || modalMode === "create") && (
-          <Modal isOpen onClose={closeModal} widthClass="max-w-lg">
+        {(modalMode === "Edit" || modalMode === "Create") && (
+          <Modal isOpen onClose={closeModal} widthClass="max-w-sm">
             <UserForm
-              initialData={modalMode === "edit" ? selectedUser! : undefined}
+              data={modalMode === "Edit" ? selectedUser! : undefined}
               mode={modalMode}
               onClose={() => {
                 closeModal();

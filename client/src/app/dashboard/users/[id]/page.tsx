@@ -220,8 +220,8 @@ export default function UserDetailsPage() {
       {/* Edit User Modal */}
       <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} widthClass="max-w-3xl">
         <UserForm
-          initialData={user!}
-          mode="edit"
+          data={user!}
+          mode="Edit"
           onClose={() => { setIsEditOpen(false); toast.success("Saved"); }}
         />
       </Modal>
