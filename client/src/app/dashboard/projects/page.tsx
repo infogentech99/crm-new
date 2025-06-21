@@ -71,6 +71,9 @@ const ManageProjectsPage: React.FC = () => {
       setPage(totalPages);
     }
   };
+   useEffect(() => {
+     document.title = "Manage Projects – CRM Application";
+   }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);

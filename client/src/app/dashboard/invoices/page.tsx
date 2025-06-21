@@ -39,6 +39,10 @@ const ManageInvoicesPage: React.FC = () => {
   const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
+   useEffect(() => {
+     document.title = "Manage Invoices – CRM Application";
+   }, []);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);

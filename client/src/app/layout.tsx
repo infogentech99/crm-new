@@ -20,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CRM Application",
   description: "Modern CRM with React Query, Tailwind CSS, and Shadcn UI",
+  icons: {
+    icon: "public/assets/img/faveicon.png",   // ← update here
+  },
 };
 
 export default function RootLayout({
@@ -29,6 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/assets/img/faveicon.png" />
+      </head>
       <body
         className={`${inter.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >

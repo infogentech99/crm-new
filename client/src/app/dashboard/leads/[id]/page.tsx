@@ -37,6 +37,9 @@ export default function LeadDetailsPage() {
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+     useEffect(() => {
+       document.title = "Leads Details – CRM Application";
+     }, []);
     useEffect(() => {
         const fetchLead = async () => {
             if (!id) return;

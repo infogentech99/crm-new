@@ -46,7 +46,9 @@ export default function ManageUsersPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [isMounted, setIsMounted] = useState(false);
-
+ useEffect(() => {
+   document.title = "Manage Users – CRM Application";
+ }, []);
   useEffect(() => {
     setIsMounted(true);
   }, []);

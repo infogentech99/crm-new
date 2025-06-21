@@ -76,6 +76,10 @@ export default function UserDetailsPage() {
     }
   }, [id]);
 
+   useEffect(() => {
+     document.title = "User Details – CRM Application";
+   }, []);
+
   useEffect(() => {
     load();
   }, [load]);

@@ -36,6 +36,9 @@ const ManageQuotationsPage: React.FC = () => {
   const userRole = useSelector((state: RootState) => state.user.role || '');
   const [isMounted, setIsMounted] = useState(false);
 
+   useEffect(() => {
+     document.title = "Manage Quotations – CRM Application";
+   }, []);
   useEffect(() => {
     setIsMounted(true);
   }, []);

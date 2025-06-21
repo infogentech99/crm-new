@@ -33,7 +33,9 @@ const ManageTransactionsPage: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
-
+ useEffect(() => {
+   document.title = "Manage Transactions – CRM Application";
+ }, []);
   useEffect(() => {
     setIsMounted(true);
   }, []);

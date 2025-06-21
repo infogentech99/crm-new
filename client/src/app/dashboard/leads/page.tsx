@@ -49,6 +49,9 @@ const ManageLeadsPage: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
+  useEffect(() => {
+   document.title = "Manage Leads – CRM Application";
+ }, []);
 
   useEffect(() => {
     setIsMounted(true);

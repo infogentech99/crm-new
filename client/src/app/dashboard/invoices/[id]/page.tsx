@@ -35,6 +35,10 @@ export default function Page() {
         totals: { taxable: 0, igst: 0, total: 0 },
     });
 
+     useEffect(() => {
+       document.title = "Invoice Details – CRM Application";
+     }, []);
+
 useEffect(() => {
   if (!id) return;
 

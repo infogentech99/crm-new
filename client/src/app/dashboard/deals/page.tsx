@@ -32,6 +32,10 @@ const ManageDealsPage: React.FC = () => {
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
+   useEffect(() => {
+     document.title = "Manage Deals – CRM Application";
+   }, []);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);

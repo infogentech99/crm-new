@@ -40,6 +40,9 @@ const ManageMeetingsPage: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [viewMeeting, setViewMeeting] = useState<Meeting | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+   useEffect(() => {
+     document.title = "Manage Meetings – CRM Application";
+   }, []);
 
   useEffect(() => {
     setIsMounted(true);

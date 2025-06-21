@@ -37,6 +37,10 @@ const ManageBillsPage: React.FC = () => {
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
+   useEffect(() => {
+     document.title = "Manage Bills – CRM Application";
+   }, []);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);

@@ -75,6 +75,10 @@ export default function Page() {
             });
     }, [id]);
 
+     useEffect(() => {
+       document.title = "Quotation Details – CRM Application";
+     }, []);
+
     const downloadPDF = async () => {
         setDownloading(true);
         const doc = await generatePDFBlob(invoiceRef);

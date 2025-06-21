@@ -11,7 +11,9 @@ import RecentActivityTable from "@components/Dashboard/RecentActivityTable";
 export default function DashboardPage() {
   const router = useRouter();
   const token = useSelector((state: RootState) => state.token.token);
-
+ useEffect(() => {
+   document.title = "Dashboard – CRM Application";
+ }, []);
   useEffect(() => {
     if (!token) {
       router.push("/");

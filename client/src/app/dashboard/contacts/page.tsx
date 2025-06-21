@@ -55,6 +55,9 @@ const ManageContactsPage: React.FC = () => {
       setPage(totalPages);
     }
   };
+ useEffect(() => {
+   document.title = "Manage Contact – CRM Application";
+ }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
