@@ -53,6 +53,7 @@ export interface User {
   zipCode?: string;
   gstin?: string;
   phoneNumber?: string;
+  projects?: { _id: string; title: string; status: string }[];
 }
 
 export interface Lead {

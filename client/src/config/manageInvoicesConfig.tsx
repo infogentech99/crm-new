@@ -1,8 +1,8 @@
 import { Invoice } from '@customTypes/index';
 import dayjs from 'dayjs';
-import { Eye, Trash2, Pencil, CreditCard } from 'lucide-react'; // Import CreditCard
+import { Eye, Trash2, Pencil, CreditCard } from 'lucide-react'; 
 import React from 'react';
-import { DataTableProps } from '@components/Common/DataTable'; // Import DataTableProps
+import { DataTableProps } from '@components/Common/DataTable';
 
 export const manageInvoicesConfig = (
   handleViewInvoice: (invoice: Invoice) => void,
@@ -13,7 +13,7 @@ export const manageInvoicesConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns: DataTableProps<Invoice>['columns'] = [ // Explicitly type baseColumns
+  const baseColumns: DataTableProps<Invoice>['columns'] = [ 
     { key: '_id', label: 'S.NO', render: (item: Invoice, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'issueDate', label: 'CREATED DATE', render: (item: Invoice) => <span>{dayjs(item.createdAt).format('DD/MM/YYYY hh:mm A')}</span> },
      {
@@ -28,6 +28,17 @@ export const manageInvoicesConfig = (
     { key: 'invoiceNumber', label: 'INVOICE NO', render: (item: Invoice) => <span>{item._id}</span> },
     { key: 'totalAmount', label: 'TOTAL', render: (item: Invoice) => <span>₹{item.totals?.total?.toFixed(2) || '0.00'} Rs</span> }, 
     { key: 'dueAmount', label: 'DUE AMOUNT', render: (item: Invoice) => <span>₹{((item.totals?.total || 0) - (item.paidAmount || 0)).toFixed(2)} Rs</span> },
+    {
+      key: 'projectId',
+      label: 'PROJECT TITLE',
+      render: (item: Invoice) => (
+        <span>
+          {item.user?.projects && item.user.projects.length > 0
+            ? item.user.projects.map((project) => project.title).join(', ')
+            : 'N/A'}
+        </span>
+      ),
+    },
     {
       key: 'actions',
       label: 'ACTIONS',
