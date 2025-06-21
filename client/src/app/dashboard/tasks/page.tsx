@@ -49,7 +49,15 @@ const ManageTasksPage: React.FC = () => {
   const allTasks = data?.tasks || [];
   const filteredTasks = allTasks.filter(task =>
     (task.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
-    (typeof task.assignee === 'object' && (task.assignee.name?.toLowerCase() || '').includes(search.toLowerCase()))
+    (
+      Array.isArray(task.assignee)
+        ? task.assignee.some(
+            (assignee: any) =>
+              (typeof assignee === 'object' && 'name' in assignee && (assignee.name?.toLowerCase() || '').includes(search.toLowerCase())) ||
+              (typeof assignee === 'string' && assignee.toLowerCase().includes(search.toLowerCase()))
+          )
+        : false
+    )
   );
   const totalTasks = filteredTasks.length;
   const totalPages = Math.ceil(totalTasks / limit);
