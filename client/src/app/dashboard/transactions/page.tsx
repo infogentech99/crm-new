@@ -45,15 +45,11 @@ const ManageTransactionsPage: React.FC = () => {
   });
 
   const allTransactions = data?.transactions || [];
-  const filteredTransactions = allTransactions.filter(transaction =>
-    (transaction.transactionId?.toLowerCase() || '').includes(search.toLowerCase()) ||
-    (transaction.method?.toLowerCase() || '').includes(search.toLowerCase())
-  );
-  const totalTransactions = filteredTransactions.length;
+  const totalTransactions = allTransactions.length;
   const totalPages = Math.ceil(totalTransactions / limit);
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
-  const transactionsToDisplay = filteredTransactions.slice(startIndex, endIndex);
+  const transactionsToDisplay = allTransactions.slice(startIndex, endIndex);
 
   const handleEditTransaction = useCallback((txn: Transaction) => {
     setSelectedTransaction(txn);
