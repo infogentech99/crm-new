@@ -23,7 +23,7 @@ export const getLeads = async (req, res) => {
 
     let query = {};
 
-    if (req.user.role !== 'superadmin') {
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       query.createdBy = req.user._id;
     }
 

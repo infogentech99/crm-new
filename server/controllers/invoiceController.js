@@ -66,7 +66,8 @@ export const getAllInvoices = async (req, res) => {
     }
 
     // 3) restrict non-superadmin to own invoices
-    if (req.user.role !== 'superadmin') {
+    if (req.user.role !== 'superadmin' &&
+        req.user.role !== 'admin') {
       query.createdBy = req.user._id;
     }
 
