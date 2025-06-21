@@ -43,7 +43,7 @@ const ManageTasksPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allTasks', search],
     queryFn: () => getTasks(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted, 
   });
   console.log('Tasks data:', data);
   const allTasks = data?.tasks || [];
