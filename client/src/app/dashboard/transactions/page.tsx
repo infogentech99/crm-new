@@ -101,7 +101,7 @@ const ManageTransactionsPage: React.FC = () => {
   };
 
   if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
+    return null; 
   }
 
   return (

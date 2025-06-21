@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "CRM Application",
   description: "Modern CRM with React Query, Tailwind CSS, and Shadcn UI",
   icons: {
-    icon: "public/assets/img/faveicon.png",   // ← update here
+    icon: "public/assets/img/faveicon.png", 
   },
 };
 

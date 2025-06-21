@@ -41,7 +41,6 @@ export default function Page() {
 
 useEffect(() => {
   if (!id) return;
-
   const fetchInvoice = async () => {
     try {
       const response: InvoiceResponse = await getInvoiceById(id);

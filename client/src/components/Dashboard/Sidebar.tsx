@@ -119,11 +119,11 @@ export default function Sidebar() {
 
   return (
     <div className="fixed top-0 left-0 h-screen w-16 bg-gray-800 text-gray-200 flex flex-col  shadow-lg z-50">
-      <div className="flex flex-col h-full py-4 ">
+      <div className="flex flex-col h-full ">
         {filteredItems.map(item => (
           <Link href={item.href} key={item.id}>
             <div
-              className={`relative py-4 space-y-2 flex justify-center items-center p-2 cursor-pointer rounded ${
+              className={`relative py-4 space-y-2 flex justify-center items-center cursor-pointer rounded ${
                 pathname === item.href ? "bg-gray-700" : "hover:bg-red-600"
               }`}
               onMouseEnter={() => setHoveredItemId(item.id)}
@@ -147,7 +147,7 @@ export default function Sidebar() {
         >
           <LogOut size={24} />
           {hoveredItemId === "logout" && (
-            <span className="absolute left-full ml-3 whitespace-nowrap bg-gray-700 text-white text-xs px-3 py-4 rounded">
+            <span className="absolute left-full ml-3 whitespace-nowrap bg-gray-700 text-white text-xs px-3  rounded">
               Logout
             </span>
           )}

@@ -39,11 +39,9 @@ const ManageInvoicesPage: React.FC = () => {
   const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
-   useEffect(() => {
-     document.title = "Manage Invoices – CRM Application";
-   }, []);
 
   useEffect(() => {
+    document.title = "Manage Invoices – CRM Application";
     setIsMounted(true);
   }, []);
 
@@ -52,7 +50,6 @@ const ManageInvoicesPage: React.FC = () => {
     queryFn: () => getInvoices(1, 10000, search),
     enabled: isMounted, 
   });
-  console.log("Invoices Data:", data);
   const allInvoices = data?.invoices || [];
 
 const totalInvoices = allInvoices.length;

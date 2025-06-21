@@ -30,11 +30,9 @@ export default function UserDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
 
-  // Deletion modal state
   const [deleting, setDeleting] = useState<RecentActivity | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // View/Delete handlers
   const onView = useCallback(
     (act: RecentActivity) => router.push(`/dashboard/leads/${act.id}`),
     [router]
@@ -44,7 +42,6 @@ export default function UserDetailsPage() {
     setIsDeleteOpen(true);
   }, []);
 
-  // User & activities
   const [user, setUser] = useState<User | null>(null);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [tab, setTab] = useState<"Leads" | "Meetings" | "Tasks">("Leads");
@@ -52,12 +49,11 @@ export default function UserDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  // Filters & pagination
+
   const [search, setSearch] = useState<string>("");
   const [limit, setLimit] = useState<number>(10);
   const [page, setPage] = useState<number>(1);
 
-  // Fetch data
   const load = useCallback(async () => {
     if (!id) return;
     const userId = Array.isArray(id) ? id[0] : id;
@@ -76,15 +72,13 @@ export default function UserDetailsPage() {
     }
   }, [id]);
 
-   useEffect(() => {
-     document.title = "User Details – CRM Application";
-   }, []);
 
   useEffect(() => {
+    document.title = "User Details – CRM Application";
     load();
   }, [load]);
 
-  // Confirm delete
+
   const handleConfirmDelete = async () => {
     if (!deleting) return;
     try {

@@ -36,17 +36,16 @@ const ManageQuotationsPage: React.FC = () => {
   const userRole = useSelector((state: RootState) => state.user.role || '');
   const [isMounted, setIsMounted] = useState(false);
 
-   useEffect(() => {
-     document.title = "Manage Quotations – CRM Application";
-   }, []);
+  
   useEffect(() => {
+    document.title = "Manage Quotations – CRM Application";
     setIsMounted(true);
   }, []);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allQuotations', search],
     queryFn: () => getQuotations(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted,
   });
 
   const allQuotations = data?.quotations || [];
@@ -106,7 +105,7 @@ const ManageQuotationsPage: React.FC = () => {
   };
 
   if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
+    return null; 
   }
 
   return (

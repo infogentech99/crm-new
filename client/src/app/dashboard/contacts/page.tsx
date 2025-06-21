@@ -23,6 +23,7 @@ const ManageContactsPage: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+      document.title = "Manage Contact – CRM Application";
     setIsMounted(true);
   }, []);
 
@@ -55,10 +56,7 @@ const ManageContactsPage: React.FC = () => {
       setPage(totalPages);
     }
   };
- useEffect(() => {
-   document.title = "Manage Contact – CRM Application";
- }, []);
-
+ 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
     setPage(1); 
