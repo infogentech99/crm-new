@@ -60,7 +60,7 @@ export interface Lead {
   name: string;
   email: string;
   phoneNumber?: string;
-  createdBy: string | User;
+  createdBy: string | User; 
   companyName?: string; 
   jobTitle?: string;
   address?: string;
@@ -95,9 +95,10 @@ export interface Lead {
 export interface Task {
   _id: string;
   title: string;
+  description?: string;
   dueDate: string; 
   priority: 'High' | 'Medium' | 'Low';
-  assignee?: string | User; 
+  assignee?: string[] | User[]; 
   status: 'Pending' | 'Completed' | 'In Progress';
   createdBy: string | User;
   createdAt: string;
@@ -301,4 +302,14 @@ export interface FormData {
     title: string;
     status: string;
   }[];
+}
+
+export interface MeetingEmailData {
+  title: string;
+  date: string;
+  duration: number;
+  platform: string;
+  meetlink: string;
+  description: string;
+  participants: string[];
 }

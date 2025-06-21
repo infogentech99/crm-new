@@ -18,6 +18,8 @@ import InvoiceForm from '@components/invoice/InoviceForm';
 import AddProjectModal from '@components/AddProjectModal';
 import ProjectSelector from '@components/Leads/ProjectSelector'
 import TransactionList from '@components/Leads/TransactionList';
+import { RxCross2 } from 'react-icons/rx';
+import DeleteModal from '@components/Common/DeleteModal';
 export default function LeadDetailsPage() {
     const { id } = useParams();
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
@@ -30,6 +32,11 @@ export default function LeadDetailsPage() {
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState(0);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editTitle, setEditTitle] = useState('');
+    const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
     useEffect(() => {
         const fetchLead = async () => {
             if (!id) return;
@@ -74,9 +81,52 @@ export default function LeadDetailsPage() {
         }
     };
 
+    const handleEditProject = (index: number) => {
+        setEditTitle(lead.projects[index].title || '');
+        setEditIndex(index);
+        setIsEditModalOpen(true);
+    };
 
+    const handleDeleteProject = (index: number) => {
+        setDeleteIndex(index);
+        setIsDeleteModalOpen(true);
+    };
 
+    const confirmDeleteProject = async () => {
+        if (deleteIndex === null) return;
 
+        const updatedProjects = lead.projects.filter((_: any, i: number) => i !== deleteIndex);
+
+        try {
+            const updated = await updateLead(lead._id, { projects: updatedProjects });
+            setLead(updated);
+            toast.success("Project deleted successfully");
+            if (selectedProject === deleteIndex) setSelectedProject(0);
+        } catch (err) {
+            toast.error("Failed to delete project");
+        } finally {
+            setDeleteIndex(null);
+            setIsDeleteModalOpen(false);
+        }
+    };
+
+    const handleSubmitEdit = async () => {
+        if (editIndex === null || !editTitle.trim()) return;
+
+        const updatedProjects = lead.projects.map((p: any, i: number) =>
+            i === editIndex ? { ...p, title: editTitle.trim() } : p
+        );
+
+        try {
+            const updated = await updateLead(lead._id, { projects: updatedProjects });
+            setLead(updated);
+            toast.success("Project title updated");
+            setIsEditModalOpen(false);
+            setEditIndex(null);
+        } catch (err) {
+            toast.error("Failed to update title");
+        }
+    };
 
     if (loading) return <LeadDetailsShimmer />;
     return (
@@ -146,7 +196,7 @@ export default function LeadDetailsPage() {
                     </div>
                 </div>
             </div>
-            
+
             <LeadNotes
                 leadId={lead._id}
                 notes={lead.notes || []}
@@ -154,18 +204,18 @@ export default function LeadDetailsPage() {
             />
             <div className='bg-white shadow-sm rounded-md my-6 p-4'>
                 <ProjectSelector
-                projects={lead.projects || []}
-                selectedProjectIndex={selectedProject}
-                onSelect={(index: any) => {
-                    setSelectedProject(index);
-                }}
-            />
-            <PipelineStepper
-                currentStatus={lead.projects?.[selectedProject]?.status || 'new'}
-                onStatusChange={(status: string) => handleStatusChange(status as LeadStatus)}
-                onCreateQuotation={() => setIsQuotationOpen(true)}
-                onCreateInvoice={() => setIsInvoiceOpen(true)}
-            />
+                    projects={lead.projects || []}
+                    selectedProjectIndex={selectedProject}
+                    onSelect={(index: any) => setSelectedProject(index)}
+                    onEdit={handleEditProject}
+                    onDelete={handleDeleteProject}
+                />
+                <PipelineStepper
+                    currentStatus={lead.projects?.[selectedProject]?.status || 'new'}
+                    onStatusChange={(status: string) => handleStatusChange(status as LeadStatus)}
+                    onCreateQuotation={() => setIsQuotationOpen(true)}
+                    onCreateInvoice={() => setIsInvoiceOpen(true)}
+                />
             </div>
             <TransactionList
                 transactions={
@@ -233,6 +283,45 @@ export default function LeadDetailsPage() {
                 isOpen={isEmailModalOpen}
                 onClose={() => setIsEmailModalOpen(false)}
             />
+            <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} widthClass='max-w-md'>
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-semibold text-blue-600">
+                            Edit Project Title
+                        </h2>
+                        <button
+                            onClick={() => setIsEditModalOpen(false)}
+                            className="text-gray-200 rounded-full p-1 text-2xl leading-none hover:text-gray-500 cursor-pointer"
+                            aria-label="Close"
+                        >
+                            <RxCross2 />
+                        </button>
+                    </div>
+                    <input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter new project title"
+                    />
+                    <div className="flex justify-end gap-2">
+                        <Button variant="secondary" onClick={() => setIsEditModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSubmitEdit}>Update</Button>
+                    </div>
+                </div>
+            </Modal>
+            <DeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => {
+                    setIsDeleteModalOpen(false);
+                    setDeleteIndex(null);
+                }}
+                onConfirm={confirmDeleteProject}
+                itemLabel={deleteIndex !== null && lead.projects?.[deleteIndex]?.title ? lead.projects[deleteIndex].title : "Project"}
+                title="Delete Project"
+            />
+
         </DashboardLayout>
     );
 }
