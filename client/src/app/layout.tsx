@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   title: "CRM Application",
   description: "Modern CRM of Infogentech for managing your business",
   icons: {
-    icon: "./favicon.png", 
+    icon: "/favicon.png", 
   },
 };
 
@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="./favicon.png" />
+        <link rel="icon" href="/favicon.png" />
       </head>
       <body
         className={`${inter.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
