@@ -5,7 +5,6 @@ import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getLeads, deleteLead, createLead } from '@services/leadService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import CreateLeadButton from '@components/Common/CreateLeadButton';
 import { exportLeadsToCSV } from '@utils/exportUtils';
 import { parseLeadsCSV } from '@utils/importUtils';
@@ -224,7 +223,6 @@ const ManageLeadsPage: React.FC = () => {
 
 
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <LeadSummaryCards />
 
@@ -324,7 +322,6 @@ const ManageLeadsPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
   );
 };
 

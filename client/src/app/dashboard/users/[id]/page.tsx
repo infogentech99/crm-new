@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { fetchUserById, fetchUserActivities } from "@services/userService";
 import { deleteLead } from "@services/leadService";
 import DataTable from "@components/Common/DataTable";
@@ -96,15 +95,15 @@ export default function UserDetailsPage() {
   if (loading) return <UserDetailsShimmer />;
   if (error)
     return (
-      <DashboardLayout>
+      <>
         <div className="p-6 text-red-500 text-center">{error}</div>
-      </DashboardLayout>
+      </>
     );
   if (!user)
     return (
-      <DashboardLayout>
+      <>
         <div className="p-6 text-gray-600 text-center">User not found.</div>
-      </DashboardLayout>
+      </>
     );
 
   const filtered = activities
@@ -136,7 +135,7 @@ export default function UserDetailsPage() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="mb-4 bg-white shadow-sm rounded-md px-8 py-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">User Details</h2>
@@ -235,6 +234,6 @@ export default function UserDetailsPage() {
           itemLabel={deleting.name}
         />
       )}
-    </DashboardLayout>
+    </>
   );
 }

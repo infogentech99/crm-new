@@ -8,7 +8,6 @@ import {
   deleteUser,
 } from "@services/userService";
 import DataTable from "@components/Common/DataTable";
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import CreateUserButton from "@components/Common/CreateUserButton";
 import { manageUsersConfig } from "@config/manageUsersConfig";
 import Modal from "@components/Common/Modal";
@@ -125,7 +124,7 @@ export default function ManageUsersPage() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 bg-white rounded-lg shadow-md space-y-4">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">{config.pageTitle}</h1>
@@ -214,6 +213,6 @@ export default function ManageUsersPage() {
           />
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

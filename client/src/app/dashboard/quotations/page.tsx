@@ -4,7 +4,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getQuotations, deleteQuotation } from '@services/quotationService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { manageQuotationsConfig } from '@config/manageQuotationsConfig';
 import Modal from '@components/Common/Modal';
 import { Quotation } from '@customTypes/index';
@@ -109,7 +108,7 @@ const ManageQuotationsPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -177,7 +176,7 @@ const ManageQuotationsPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

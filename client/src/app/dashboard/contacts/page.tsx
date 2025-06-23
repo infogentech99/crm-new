@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { manageContactsConfig } from '@config/manageContactsConfig'
 import { Input } from '@components/ui/input';
 import {
@@ -72,7 +71,6 @@ const ManageContactsPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">All contacts</h1>
@@ -113,7 +111,6 @@ const ManageContactsPage: React.FC = () => {
           />
         </div>
       </div>
-    </DashboardLayout>
   );
 };
 

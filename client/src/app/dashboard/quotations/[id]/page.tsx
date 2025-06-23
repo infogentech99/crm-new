@@ -6,7 +6,6 @@ import { getQuotationById } from "@services/quotationService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from 'next/navigation';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { QuotationItem } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
@@ -134,7 +133,7 @@ export default function Page() {
     const total = totals.total;
 
     return (
-        <DashboardLayout>
+        <>
             <div className="bg-gray-100 py-8">
                 <div className="max-w-6xl mx-auto px-4">
                     <div ref={invoiceRef} className="bg-white p-6 shadow rounded-lg">
@@ -277,6 +276,6 @@ export default function Page() {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
+        </>
     );
 }

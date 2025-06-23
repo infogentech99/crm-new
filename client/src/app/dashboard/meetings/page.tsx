@@ -5,7 +5,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getMeetings, deleteMeeting } from '@services/meetingService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import AddMeetingButton from '@components/Common/AddMeetingButton';
 import { manageMeetingsConfig } from '@config/manageMeetingsConfig';
 import Modal from '@components/Common/Modal';
@@ -128,7 +127,6 @@ const ManageMeetingsPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
       <div className="p-6 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -213,7 +211,6 @@ const ManageMeetingsPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
   );
 };
 

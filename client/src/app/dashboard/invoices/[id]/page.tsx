@@ -5,7 +5,6 @@ import { createEmail } from "@services/emailService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from 'next/navigation';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { InvoiceItem, QuotationItem, CustomerData, PaymentDetails, InvoiceResponse } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
@@ -150,7 +149,6 @@ useEffect(() => {
     const total = totals.total;
 
     return (
-        <DashboardLayout>
             <div className="bg-gray-100 py-8">
                 <div className="max-w-6xl mx-auto px-4">
                     <div ref={invoiceRef} className="bg-white p-6 shadow rounded-lg">
@@ -293,6 +291,5 @@ useEffect(() => {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
     );
 }

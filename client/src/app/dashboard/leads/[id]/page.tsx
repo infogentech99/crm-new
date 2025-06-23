@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getLeadById, updateLead } from '@services/leadService';
-import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import dayjs from 'dayjs';
 import Modal from '@components/Common/Modal';
 import LeadForm from '@components/Leads/Leadform';
@@ -133,7 +132,7 @@ export default function LeadDetailsPage() {
 
     if (loading) return <LeadDetailsShimmer />;
     return (
-        <DashboardLayout>
+        <>
             <div className="w-full px-8 py-6 bg-white shadow-sm rounded-md mb-2">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold mb-4 text-gray-800">Lead Details</h2>
@@ -325,6 +324,6 @@ export default function LeadDetailsPage() {
                 title="Delete Project"
             />
 
-        </DashboardLayout>
+        </>
     );
 }

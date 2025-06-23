@@ -4,7 +4,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteInvoice, getInvoices } from '@services/invoiceService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { manageInvoicesConfig } from '@config/manageInvoicesConfig';
 import Modal from '@components/Common/Modal';
 import { Invoice } from '@customTypes/index';
@@ -115,7 +114,6 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
   }
 
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -194,7 +192,6 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
           />
         )}
       </div>
-    </DashboardLayout>
   );
 };
 

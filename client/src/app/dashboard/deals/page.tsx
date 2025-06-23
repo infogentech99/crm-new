@@ -4,7 +4,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getDeals } from '@services/dealService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import CreateDealButton from '@components/Common/CreateDealButton';
 import { manageDealsConfig } from '@config/manageDealsConfig';
 import Modal from '@components/Common/Modal';
@@ -102,7 +101,6 @@ const ManageDealsPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -158,7 +156,6 @@ const ManageDealsPage: React.FC = () => {
           )}
         </Modal>
       </div>
-    </DashboardLayout>
   );
 };
 
