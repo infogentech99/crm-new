@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const taskSchema = new mongoose.Schema({
   title:       { type: String, required: true },
   description: { type: String },
-  assignee:    { type: String },
+  assignee:    [{ type: String }], 
   dueDate:     { type: String },
   priority:    {
     type: String,
@@ -25,8 +25,7 @@ const taskSchema = new mongoose.Schema({
       ref: "User",
       required: true,
     },
-  created:     { type: Date, default: Date.now },
-});
+},{ timestamps: true });
 
 export default mongoose.models.Task ||
   mongoose.model('Task', taskSchema);

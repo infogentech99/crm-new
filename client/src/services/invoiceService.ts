@@ -1,6 +1,6 @@
-import { Invoice, InvoiceItem, QuotationItem } from '@customTypes/index';
+import { Invoice, InvoiceItem, InvoiceResponse } from '@customTypes/index';
 
-const API_URL = '/api/invoice'; // Assuming a /api/invoice endpoint based on server/index.js
+const API_URL = '/api/invoice'; 
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -16,7 +16,7 @@ export const getInvoices = async (
   search: string = ''
 ): Promise<{ invoices: Invoice[]; totalPages: number; currentPage: number; totalInvoices: number }> => {
   const headers = getAuthHeaders();
-  let url = `${API_URL}?page=${page}&limit=${limit}`;
+  let url = `${API_URL}?page=${page}&limit=${limit}&populate=projects`;
   if (search) {
     url += `&search=${search}`;
   }
@@ -29,7 +29,7 @@ export const getInvoices = async (
   return response.json();
 };
 
-export const getInvoiceById = async (id: string): Promise<Invoice> => {
+export const getInvoiceById = async (id: string): Promise<InvoiceResponse> => {
   const response = await fetch(`${API_URL}/${id}`, {
     headers: getAuthHeaders(),
   });
@@ -45,13 +45,14 @@ export const createInvoice = async (
     _id: string;
     gstin: string;
     items: InvoiceItem[];
+    projectId: string | null;
     totals: {
       taxable: number;
       igst: number;
       total: number;
     };
   }
-): Promise<any> => {
+): Promise<{ message: string; data: Invoice }> => {
   const response = await fetch(`${API_URL}/genrate`, {
     method: 'POST',
     headers: {

@@ -16,6 +16,13 @@ const InvoiceSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  status: {
+    type: String,
+    enum: ['Draft', 'Pending', 'Paid', 'Overdue', 'Cancelled'],
+    default: 'Draft'
+  },
+  projectId: { type: String }, 
+  createdBy:  { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, index: true }
 }, { timestamps: true });
 
  InvoiceSchema.pre('save', async function (next) {
@@ -34,5 +41,3 @@ const InvoiceSchema = new mongoose.Schema({
 
 const Invoice = mongoose.model('Invoice', InvoiceSchema);
 export default Invoice;
-
-

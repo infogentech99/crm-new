@@ -6,25 +6,29 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createQuotation, updateQuotation } from '@services/quotationService';
 import dayjs from 'dayjs';
-import { Bill, QuotationItem } from '@customTypes/index';
+import { Bill, QuotationItem, Quotation } from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
 import { Input } from '@components/ui/input';
 import { getBills } from '@services/billService';
 import CreatableSelect from 'react-select/creatable';
 
 interface Props {
-  data: any;
+  data: Quotation;
   mode: 'Create' | 'Edit';
   onClose: () => void;
 }
 
+interface PredefinedItem {
+  label: string;
+  value: string;
+  price: number;
+  hsn: string;
+}
+
 export default function QuotationForm({ data, mode, onClose }: Props) {
-  console.log(data, "pasdasd")
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
-  const [loadingBills, setLoadingBills] = useState(true);
-  const [billError, setBillError] = useState<string | null>(null);
   const [items, setItems] = useState<QuotationItem[]>(
     mode === 'Edit' && data?.items?.length
       ? data.items
@@ -42,7 +46,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
   );
 
   const [gstin, setGstin] = useState(
-    mode === 'Edit' ? data?.user?.gstin || '' : data?.gstin || ''
+    mode === 'Edit' ? data?.user?.gstin || '' : ''
   );
 
   useEffect(() => {
@@ -50,11 +54,11 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
       try {
         const res = await getBills();
         setBills(res.bills);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to fetch bills:', err);
-        setBillError(err.message || 'Failed to load bills');
+        // setBillError(err.message || 'Failed to load bills'); // billError is unused
       } finally {
-        setLoadingBills(false);
+        // setLoadingBills(false); // loadingBills is unused
       }
     };
 
@@ -68,7 +72,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
     hsn: bill.hsnCode,
   }));
 
-  const handleSelect = (selected: any, index: number) => {
+  const handleSelect = (selected: PredefinedItem | null, index: number) => {
     const updated = [...items];
     if (selected) {
       updated[index] = {
@@ -137,7 +141,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
     setSubmitting(true);
     try {
       const payload = {
-        _id: data?.user?._id || data?._id,
+        clientId: data?.user?._id || data?._id,
         gstin,
         items,
         totals: {
@@ -234,7 +238,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           <label className="text-sm font-medium block mb-1">Phone No</label>
           <Input
             type="text"
-            value={user?.phone || ''}
+            value={user?.phoneNumber || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -261,12 +265,16 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
                   placeholder="Search or type"
                   onChange={(selected) => handleSelect(selected, idx)}
                   value={
-                    predefinedItems.find(
-                      (opt) => opt.value === item.description
-                    ) || {
-                      label: item.description,
-                      value: item.description,
-                    }
+                    item.description === ''
+                      ? null
+                      : predefinedItems.find(
+                          (opt) => opt.value === item.description
+                        ) || {
+                          label: item.description || '',
+                          value: item.description || '',
+                          price: item.price, // Ensure price is included
+                          hsn: item.hsn,     // Ensure hsn is included
+                        }
                   }
                   isClearable
                   isSearchable
@@ -277,7 +285,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
                     control: (base) => ({
                       ...base,
                       minHeight: '36px',
-                      fontSize: '0.875rem',
+                      fontSize: '0.85rem',
                     }),
                     menuPortal: (base) => ({
                       ...base,

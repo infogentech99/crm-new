@@ -1,6 +1,6 @@
 // File: src/services/userService.ts
 
-import { User, RecentActivity } from "@customTypes/index";
+import { User, RecentActivity, Lead, Meeting, Task } from "@customTypes/index";
 
 const API_URL = "/api/users";
 
@@ -29,12 +29,16 @@ interface GetUsersResponse {
 export const fetchUsers = async (
   page: number = 1,
   limit: number = 10,
+  search?: string,
   roleFilter?: string
 ): Promise<GetUsersResponse> => {
   const headers = getAuthHeaders();
   let url = `${API_URL}?page=${page}&limit=${limit}`;
-  if (roleFilter) {
+  if (roleFilter && roleFilter !== "all") { // Ensure "all" is not sent as a filter
     url += `&roleFilter=${roleFilter}`;
+  }
+  if (search) {
+    url += `&search=${encodeURIComponent(search)}`;
   }
 
   const response = await fetch(url, { headers });
@@ -44,6 +48,18 @@ export const fetchUsers = async (
   }
   return response.json();
 };
+
+
+export const fetchUserById = async (id: string): Promise<User> => {
+  const headers = getAuthHeaders();
+  const response = await fetch(`${API_URL}/${id}`, { headers });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || `Failed to fetch user ${id}`);
+  }
+  return response.json();
+};
+
 
 /**
  * Create a new user. Only superadmin may call.
@@ -132,32 +148,40 @@ export const fetchUserActivities = async (
   const activities: RecentActivity[] = [];
 
   if (data.leads) {
-    data.leads.forEach((lead: any) => {
+    data.leads.forEach((lead: Lead) => {
       activities.push({
-        id: lead._id,
+        _id: lead._id,
         type: "Lead",
-        description: `New lead: ${lead.name} from ${lead.company}`,
+       description: lead.remark || '-', // Using remark as a fallback for description
         date: new Date(lead.createdAt).toLocaleDateString(),
+        name: lead.name,
+        company: lead.companyName, // Using companyName from Lead
       });
     });
   }
   if (data.meetings) {
-    data.meetings.forEach((meeting: any) => {
+    data.meetings.forEach((meeting: Meeting) => {
       activities.push({
-        id: meeting._id,
+        _id: meeting._id,
         type: "Meeting",
-        description: `Meeting with ${meeting.client}`,
+         description: meeting.description || '-',
         date: new Date(meeting.date).toLocaleDateString(),
+        title: meeting.title,
+        time: meeting.date,
+        participants: meeting.participants?.map(p => typeof p === 'object' ? p.name || p.email : p) as string[], // Map participants to string array
       });
     });
   }
   if (data.tasks) {
-    data.tasks.forEach((task: any) => {
+    data.tasks.forEach((task: Task) => {
       activities.push({
-        id: task._id,
+        _id: task._id,
         type: "Task",
-        description: `Task: ${task.description}`,
+         description: task.description || '-',
         date: new Date(task.dueDate).toLocaleDateString(),
+        title: task.title ,
+        assignee: task.assignee?.map(a => typeof a === 'object' ? a.name || a.email : a).join(', '), // Join assignees into a single string
+        status: task.status,
       });
     });
   }

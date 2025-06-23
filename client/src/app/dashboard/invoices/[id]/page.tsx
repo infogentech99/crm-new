@@ -5,75 +5,78 @@ import { createEmail } from "@services/emailService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from 'next/navigation';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import { InvoiceItem, QuotationItem } from "@customTypes/index";
+import Image from 'next/image'; // Import Image component
+import { InvoiceItem, QuotationItem, CustomerData, InvoiceResponse } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
 import dayjs from "dayjs";
 import { getInvoiceById } from "@services/invoiceService";
+
 export default function Page() {
     const params = useParams();
     const id = params?.id as string;
     const invoiceRef = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
     const [sending, setSending] = useState(false);
     const [downloading, setDownloading] = useState(false);
-    const [error, setError] = useState("");
     const [data, setData] = useState({
         order: { id: "", totalAmount: 0 },
-        customer: { name: "", address: "", city: "", postalCode: "", email: "", phone: "" },
-        payment: {
-            transactionId: "",
-            amountPaid: 0,
-            cardType: "",
-            status: "",
-            bankTransactionId: "",
-            transactionDate: "",
-        },
-        items: [],
+        customer: { name: "", address: "", city: "", postalCode: "", email: "", phone: "", gstn: "" } as CustomerData,
+        items: [] as InvoiceItem[],
         invoiceDate: "",
         totals: { taxable: 0, igst: 0, total: 0 },
     });
 
-    useEffect(() => {
-        if (!id) return;
+     useEffect(() => {
+       document.title = "Invoice Details – CRM Application";
+     }, []);
 
-        getInvoiceById(id)
-            .then((res) => {
-                const invoice = res?.data;
+useEffect(() => {
+  if (!id) return;
+  const fetchInvoice = async () => {
+    try {
+      const response: InvoiceResponse = await getInvoiceById(id);
+      const invoice = response.data;
+      const formattedData = {
+        order: {
+          id: invoice._id,
+          totalAmount: invoice.totals?.total || 0,
+        },
+        customer: {
+          name: invoice.user?.name || '',
+          address: invoice.user?.address || '',
+          city: invoice.user?.city || '',
+          postalCode: invoice.user?.zipCode || '',
+          email: invoice.user?.email || '',
+          phone: invoice.user?.phone || '',
+          gstn: invoice.user?.gstin || '',
+        },
+        items: (invoice.items || []).map((item: InvoiceItem) => ({
+          name: item.description || '',
+          description: item.description || '',
+          quantity: item.quantity,
+          unitPrice: item.price,
+          total: item.total || item.quantity * item.price,
+          price: item.price,
+          hsn: item.hsn || '',
+        })),
+        invoiceDate: dayjs(invoice.date || invoice.createdAt).format("DD/MM/YYYY"),
+        totals: {
+          taxable: invoice.totals?.taxable || 0,
+          igst: invoice.totals?.igst || 0,
+          total: invoice.totals?.total || 0,
+        },
+      };
 
-                setData({
-                    order: {
-                        id: invoice._id,
-                        totalAmount: invoice.totals?.total || 0,
-                    },
-                    customer: {
-                        name: invoice.user?.name || '',
-                        address: invoice.user?.address || '',
-                        city: invoice.user?.city || '',
-                        postalCode: invoice.user?.zipCode || '',
-                        email: invoice.user?.email || '',
-                        phone: invoice.user?.phone || '',
-                        gstn: invoice.user?.gstin || '',
-                    },
-                    items: (invoice.items || []).map((item: InvoiceItem) => ({
-                        description: item.description,
-                        quantity: item.quantity,
-                        price: item.price,
-                        hsn: item.hsn,
-                    })),
-                    invoiceDate: dayjs(invoice.date || invoice.createdAt).format("DD/MM/YYYY"),
-                    totals: {
-                        taxable: invoice.totals?.taxable || 0,
-                        igst: invoice.totals?.igst || 0,
-                        total: invoice.totals?.total || 0,
-                    },
-                });
-            })
-            .catch((err) => {
-                console.error("Failed to fetch invoice:", err);
-                setError("Failed to load invoice.");
-            });
-    }, [id]);
+      setData(formattedData);
+    } catch (err) {
+      console.error("Failed to fetch invoice:", err);
+      toast.error("Failed to load invoice."); // Use toast for error
+    }
+  };
+
+  fetchInvoice();
+}, [id]);
+
 
     const downloadPDF = async () => {
         setDownloading(true);
@@ -125,19 +128,18 @@ export default function Page() {
 
     if (!id) return <p className="p-4 text-center"><LeadDetailsShimmer /></p>;
 
-    const { order, customer, payment, items, invoiceDate, totals } = data;
+    const { order, customer, items, invoiceDate, totals } = data;
     const subtotal = totals.taxable;
     const total = totals.total;
 
     return (
-        <DashboardLayout>
             <div className="bg-gray-100 py-8">
                 <div className="max-w-6xl mx-auto px-4">
                     <div ref={invoiceRef} className="bg-white p-6 shadow rounded-lg">
                         <div className="flex justify-between border-b pb-4">
 
                             <div>
-                                <img src="/assets/img/companyLogo.webp" alt="Company Logo" className="h-16 mb-2" />
+                                <Image src="/assets/img/companyLogo.webp" alt="Company Logo" width={100} height={64} className="h-16 mb-2" />
                                 <h5 className="text-lg font-bold">INFOGENTECH SOFTWARES LLP</h5>
                                 <p className="text-sm leading-tight">
                                     <strong>Address:</strong> A-85, First Floor, G.T. Karnal Road,<br />
@@ -226,7 +228,7 @@ export default function Page() {
                                     <p>IFSC: KKBK0004626</p>
                                 </div>
                                 <div className="text-center mt-4 md:mt-0">
-                                    <img src="/assets/img/qr.webp" alt="QR Code" className="h-40 mx-auto" />
+                                    <Image src="/assets/img/qr.webp" alt="QR Code" width={160} height={160} className="h-40 mx-auto" />
                                     <p className="font-semibold mt-2">UPI ID : Infogentechsoftwares@kotak</p>
                                 </div>
                             </div>
@@ -246,7 +248,7 @@ export default function Page() {
                         </div>
 
                         <div className="mt-6 text-right">
-                            <img src="/assets/img/sign.webp" alt="Signature" className="h-16 ml-auto " />
+                            <Image src="/assets/img/sign.webp" alt="Signature" width={100} height={64} className="h-16 ml-auto " />
                             <p className="font-semibold">Authorised Signatory</p>
                             <p className="text-sm">For INFOGENTECH SOFTWARES LLP</p>
                         </div>
@@ -273,6 +275,5 @@ export default function Page() {
                     </div>
                 </div>
             </div>
-        </DashboardLayout>
     );
 }

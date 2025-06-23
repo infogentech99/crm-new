@@ -16,19 +16,39 @@ export interface AuthResponse {
 export interface DashboardSummary {
   totalLeads: number;
   newContacts: number;
-  openDeals: string; 
+  openDeals: string;
+  openDeals: string;
   tasksDue: number;
   approvedQuotations: number;
   approvedInvoices: number;
   lostLeads: number;
+  pendingAmount: string;
+  totalInvoicesAmount: string;
+  totalPaidInvoicesAmount: string;
+  leadStatusSummary: { [key: string]: number };
+  leadSourceSummary: { [key: string]: number };
+  monthlyRevenue: { name: string; revenue: number }[];
+  taskStatusSummary: { [key: string]: number };
 }
 
 export interface RecentActivity {
-  id: number;
-  type: string;
+  _id: string;
+  id?: number;
+  type: "Lead" | "Meeting" | "Task";
   description: string;
   date: string;
+
+  name?: string;
+  company?: string;
+
+  title?: string;
+  time?: string;
+  participants?: string[];
+ 
+  assignee?: string;
+  status?: string;
 }
+
 
 export interface User {
   _id: string;
@@ -36,15 +56,25 @@ export interface User {
   email: string;
   role: string;
   phone?: string;
+  address?: string;
+  city?: string;
+  zipCode?: string;
+  gstin?: string;
+  phoneNumber?: string;
+  projects?: { _id: string; title: string; status: string }[];
+  createdAt: string; // Added createdAt
 }
 
 export interface Lead {
   _id: string;
   name: string;
   email: string;
-  phone: string;
-  createdBy: string | User;
-  company?: string;
+  phone?: string; // Added
+  position?: string; // Added
+  company?: string; // Added (assuming this is the field used in the UI)
+  phoneNumber?: string;
+  createdBy: string | User; 
+  companyName?: string; 
   jobTitle?: string;
   address?: string;
   city?: string;
@@ -55,11 +85,7 @@ export interface Lead {
   linkedIn?: string;
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
-    notes?: {
-    message?: string;
-    createdAt?: string;
-    createdBy?: string;
-  }[];
+  notes?: Note[]; // Changed to use Note interface
   status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
   gstin?: string;
   bestTimeToCall?: string;
@@ -68,43 +94,65 @@ export interface Lead {
   remark?: string;
   createdAt: string;
   updatedAt: string;
+  projects: Project[]; // Changed to use Project interface
+  transactions?: Transaction[]; // Added
+}
+
+export interface Project { // New interface for Project
+  _id: string;
+  title: string;
+  status: string;
+}
+
+export interface Note { // New interface for Note
+  message: string; // Made required
+  createdAt?: string;
+  createdBy?: string;
 }
 
 export interface Task {
   _id: string;
   title: string;
-  dueDate: string; // ISO date string
+  description?: string;
+  dueDate: string; 
   priority: 'High' | 'Medium' | 'Low';
-  assignee?: string | User; // User ID or populated User object
+  assignee?: string[] | User[]; 
   status: 'Pending' | 'Completed' | 'In Progress';
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  repeat?: 'None' | 'Daily' | 'Weekly' | 'Monthly'; // Added repeat property
 }
 
 export interface Transaction {
   _id: string;
-  type: 'Credit' | 'Debit';
+  method: string
   amount: number;
-  date: string; // ISO date string
-  description: string;
-  relatedInvoice?: string; // Optional: ID of related invoice
-  relatedBill?: string; // Optional: ID of related bill
+  transactionId: string
+  invoiceId: string;
+  leadId: string;
+  projectId?: string; // Added projectId
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  user: User;
+  invoice: Invoice;
+  transactionDate: string;
 }
 
 export interface Meeting {
   _id: string;
   title: string;
-  date: string; // Combined date and time, ISO string
-  duration: string; // e.g., "30 Min"
+  date: string; 
+  duration: number; // Changed to number
   status: 'Scheduled' | 'Completed' | 'Cancelled';
-  participants?: (string | User | Contact | Lead)[]; // Array of IDs or populated objects
+  participants?: (string | User | Contact | Lead)[];
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  platform?: string; // Added platform
+  meetlink?: string; // Added meetlink
+  description?: string; // Added description
 }
 
 export interface Bill {
@@ -115,7 +163,7 @@ export interface Bill {
   status: 'Pending' | 'Paid' | 'Due' | 'Overdue';
   issueDate: string;
   dueDate: string;
-  items?: QuotationItem[]; 
+  items?: QuotationItem[];
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
@@ -128,12 +176,21 @@ export interface Deal {
   dealName: string;
   amount: number;
   stage: 'Prospecting' | 'Qualification' | 'Proposal' | 'Negotiation' | 'Closed Won' | 'Closed Lost';
-  closeDate: string; // ISO date string
-  contactPerson?: string | Contact | Lead; // Can be Contact/Lead ID or populated object
+  closeDate: string; 
+  contactPerson?: string | Contact | Lead; 
   company?: string;
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PaymentDetails {
+  transactionId: string;
+  amountPaid: number;
+  cardType: string;
+  status: string;
+  bankTransactionId: string;
+  transactionDate: string;
 }
 
 export interface Invoice {
@@ -141,24 +198,30 @@ export interface Invoice {
   invoiceNumber: string;
   clientName: string;
   clientEmail: string;
-  clientPhone?: string; // Added for contact column
-  items: QuotationItem[]; // Reusing QuotationItem for consistency
+  clientPhone?: string; 
+  items: QuotationItem[]; 
   totalAmount: number;
-  paidAmount?: number; // Added for due amount calculation
+  paidAmount?: number; 
   status: 'Pending' | 'Paid' | 'Overdue' | 'Cancelled';
-  issueDate: string; // ISO date string
-  dueDate: string; // ISO date string
-  relatedQuotation?: string; // Optional: ID of the related quotation
-  createdBy: string | User; // User ID or populated User object
+  issueDate: string; 
+  dueDate: string; 
+  relatedQuotation?: string; 
+  createdBy: string | User;
   createdAt: string;
   updatedAt: string;
-  // Add the populated user and totals objects
-  user: User; // Assuming the populated user will conform to the User interface
+  date?: string; 
+  payment?: PaymentDetails; 
+  user: User;
   totals: {
     taxable: number;
     igst: number;
     total: number;
   };
+}
+
+
+export interface InvoiceResponse {
+  data: Invoice;
 }
 
 export interface Contact {
@@ -171,14 +234,33 @@ export interface Contact {
   updatedAt: string;
 }
 
+
+export interface FlattenedProject {
+  _id: string;
+  title: string;
+  status: string;
+  leadName: string;
+  industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other' | undefined;
+}
+
+export interface CustomerData {
+  name: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  email: string;
+  phone: string;
+  gstn: string;
+}
+
 export interface QuotationItem {
   name: string;
   description?: string;
   quantity: number;
   unitPrice: number;
   total: number;
-  price:number;
-  hsn : string
+  price: number;
+  hsn: string
 }
 export interface InvoiceItem {
   name: string;
@@ -186,25 +268,29 @@ export interface InvoiceItem {
   quantity: number;
   unitPrice: number;
   total: number;
-  price:number;
-  hsn : string
+  price: number;
+  hsn: string
 }
 
 export interface Quotation {
-  data: any;
   _id: string;
   quotationNumber: string;
   clientName: string;
   clientEmail: string;
   items: QuotationItem[];
   totalAmount: number;
-  issueDate: string; // ISO date string
-  validUntil: string; // ISO date string
-  createdBy: string | User; 
+  issueDate: string;
+  validUntil: string; 
+  createdBy: string | User;
   createdAt: string;
   updatedAt: string;
   user: Lead;
-  totals:QuotationItem;
+  totals: {
+    taxable: number;
+    igst: number;
+    total: number;
+  };
+  date?: string; // Added date as it's used in page.tsx
 }
 
 export type LeadStatus =
@@ -218,25 +304,46 @@ export type LeadStatus =
   | 'invoice_accepted'
   | 'processing_payments'
   | 'completed';
-  
+
 export interface FormData {
   name: string;
-  phone: string;
+  phoneNumber: string;
   email: string;
-  company: string;
+  companyName: string;
   address: string;
   city: string;
   state: string;
   zipCode: string;
   country: string;
-  source: string;
-  industry: string;
-  status: string;
-  callResponse: string;
+  source: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
+  industry: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
+  status: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
+  callResponse: 'Picked' | 'Not Response' | 'Talk to later';
   description?: string;
   remark?: string;
   position?: string;
   website?: string;
+  createdBy: string | User;
+  projects: {
+    _id: string;
+    title: string;
+    status: string;
+  }[];
 }
 
+export interface MeetingEmailData {
+  title: string;
+  date: string;
+  duration: number;
+  platform: string;
+  meetlink: string;
+  description: string;
+  participants: string[];
+}
 
+export interface MeetingSummary {
+  totalMeetings: number;
+  upcomingMeetings: number;
+  completedMeetings: number;
+  cancelledMeetings: number;
+}

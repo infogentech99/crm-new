@@ -14,7 +14,6 @@ export const getAllTasks = async (req, res, next) => {
         { 'assignee.name': { $regex: search, $options: 'i' } }, // Assuming assignee is populated
       ];
     }
-
     const total = await Task.countDocuments(query);
     const tasks = await Task.find(query)
       .populate({ path: 'assignee', select: 'name email' }) // Populate assignee with name and email
@@ -40,7 +39,64 @@ export const getTask = async (req, res, next) => {
     const t = await Task.findById(req.params.id);
     if (!t) return res.status(404).json({ message: 'Not found' });
     res.json(t);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error("getTask error:", err);
+    next(err); 
+  }
+};
+
+export const getTaskStatusSummary = async (req, res) => {
+  try {
+    let query = {};
+    // If you want to filter by user, add this:
+    // if (req.user.role !== 'superadmin') {
+    //   query.createdBy = req.user._id;
+    // }
+
+    const statusSummary = await Task.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          status: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+
+    const formattedSummary = statusSummary.reduce((acc, item) => {
+      acc[item.status] = item.count;
+      return acc;
+    }, {});
+
+    res.status(200).json(formattedSummary);
+  } catch (err) {
+    console.error("getTaskStatusSummary error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getTasksDueSummary = async (req, res, next) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today
+
+    const tasksDue = await Task.countDocuments({
+      status: { $in: ['Pending', 'In Progress'] },
+      dueDate: { $lte: today.toISOString().split('T')[0] } // Compare with YYYY-MM-DD string
+    });
+
+    res.status(200).json({ totalTasksDue: tasksDue });
+  } catch (err) {
+    console.error('getTasksDueSummary error:', err);
+    next(err);
+  }
 };
 
 export const createTask = async (req, res, next) => {
@@ -53,7 +109,10 @@ export const createTask = async (req, res, next) => {
 
     const t = await Task.create(payload);
     res.status(201).json(t);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error("createTask error:", err);
+    next(err); 
+  }
 };
 
 export const updateTask = async (req, res, next) => {
@@ -64,12 +123,18 @@ export const updateTask = async (req, res, next) => {
       { new: true }
     );
     res.json(t);
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error("updateTask error:", err);
+    next(err); 
+  }
 };
 
 export const deleteTask = async (req, res, next) => {
   try {
     await Task.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });
-  } catch (err) { next(err); }
+  } catch (err) { 
+    console.error("deleteTask error:", err);
+    next(err); 
+  }
 };

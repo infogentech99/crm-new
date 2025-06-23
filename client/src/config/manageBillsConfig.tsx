@@ -1,3 +1,4 @@
+import { DataTableProps } from '@components/Common/DataTable';
 import { Bill } from '@customTypes/index';
 import { Trash2, Pencil } from 'lucide-react';
 import React from 'react';
@@ -10,11 +11,11 @@ export const manageBillsConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns = [
+  const baseColumns: DataTableProps<Bill>['columns'] = [
     { key: '_id', label: 'S.NO', render: (item: Bill, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
      {
          key: 'description',
-         label: 'DESCRIPTION',
+         label: 'TITLE',
          render: (item: Bill) => <span>{item.description}</span>,
        },
        {
@@ -29,12 +30,10 @@ export const manageBillsConfig = (
     {
       key: 'actions',
       label: 'ACTIONS',
+      align: 'right',
       render: (item: Bill) => (
-        <div className="flex items-center space-x-2">
-        
-
+        <div className="flex items-center justify-end space-x-2">
           <button className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer" onClick={() => handleEditBill(item)}>
-
             <Pencil className="h-4 w-4" />
           </button>
           <button className="text-red-500 hover:text-red-700 flex items-center cursor-pointer" onClick={() => handleDeleteBill(item)}>

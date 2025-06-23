@@ -5,11 +5,15 @@ import { Button } from '@components/ui/button';
 import dayjs from 'dayjs';
 import { updateLead } from '@services/leadService';
 import { toast } from 'sonner';
+import { Pencil, Trash2 } from 'lucide-react';
+import DeleteModal from '@components/Common/DeleteModal';
+
+import { Note } from '@customTypes/index'; // Import Note interface
 
 interface LeadNotesProps {
   leadId: string;
-  notes: { message: string; createdAt?: string }[] | [];
-  onNotesUpdated: (updatedNotes: any[]) => void;
+  notes: Note[] | [];
+  onNotesUpdated: (updatedNotes: Note[]) => void;
 }
 
 export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesProps) {
@@ -17,6 +21,9 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [editingNoteIndex, setEditingNoteIndex] = useState<number | null>(null);
   const [editedNoteText, setEditedNoteText] = useState('');
+
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null); // for modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return toast.error('Note cannot be empty');
@@ -27,8 +34,8 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
       onNotesUpdated(updatedLead.notes || []);
       setNewNote('');
       toast.success('Note added successfully');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to add note');
+    } catch (err: unknown) { // Changed to unknown
+      toast.error((err as Error).message || 'Failed to add note'); // Safely access message
     } finally {
       setIsAddingNote(false);
     }
@@ -43,15 +50,12 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
       onNotesUpdated(updatedLead.notes || []);
       setEditingNoteIndex(null);
       toast.success('Note updated successfully');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update note');
+    } catch (err: unknown) { // Changed to unknown
+      toast.error((err as Error).message || 'Failed to update note'); // Safely access message
     }
   };
 
   const handleDeleteNote = async (index: number) => {
-    const confirmed = window.confirm("Are you sure you want to delete this note?");
-    if (!confirmed) return;
-
     const updatedNotes = [...notes];
     updatedNotes.splice(index, 1);
 
@@ -59,14 +63,14 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
       const updatedLead = await updateLead(leadId, { notes: updatedNotes });
       onNotesUpdated(updatedLead.notes || []);
       toast.success("Note deleted successfully");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete note");
+    } catch (err: unknown) { // Changed to unknown
+      toast.error((err as Error).message || "Failed to delete note"); // Safely access message
     }
   };
 
   return (
-    <div className="mt-6 bg-gray-50 p-4 rounded-md border">
-      <h3 className="font-semibold mb-4 text-lg">Notes</h3>
+    <div className="mt-6 bg-white p-4 rounded-md shadow-sm">
+      <h3 className="text-xl font-bold mb-4 text-gray-800">Notes</h3>
       {notes.length > 0 ? (
         <ul className="space-y-4 mb-4">
           {notes.map((note, index) => (
@@ -90,21 +94,24 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
                     <p className="text-sm text-gray-800 whitespace-pre-line">{note.message}</p>
                     <div className="flex gap-2">
                       <button
-                        className="text-blue-600 text-sm"
+                        className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer"
                         onClick={() => {
                           setEditingNoteIndex(index);
                           setEditedNoteText(note.message);
                         }}
                         title="Edit Note"
                       >
-                        ✏️
+                        <Pencil className="h-4 w-4" />
                       </button>
                       <button
-                        className="text-red-600 text-sm"
-                        onClick={() => handleDeleteNote(index)}
+                        className="text-red-500 hover:text-red-700 flex items-center cursor-pointer"
+                        onClick={() => {
+                          setDeleteIndex(index);
+                          setShowDeleteModal(true);
+                        }}
                         title="Delete Note"
                       >
-                        🗑️
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -128,10 +135,22 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
         className="w-full p-2 border rounded-md text-sm mb-2"
       />
       <div className="flex justify-end">
-        <Button onClick={handleAddNote} disabled={!newNote.trim() || isAddingNote} >
+        <Button onClick={handleAddNote} disabled={!newNote.trim() || isAddingNote}>
           Save Note
         </Button>
       </div>
+      {deleteIndex !== null && (
+        <DeleteModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            handleDeleteNote(deleteIndex);
+            setShowDeleteModal(false);
+            setDeleteIndex(null);
+          }}
+          itemLabel=" this note"
+        />
+      )}
     </div>
   );
 }

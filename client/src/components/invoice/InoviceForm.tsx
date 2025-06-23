@@ -5,7 +5,7 @@ import { Button } from '@components/ui/button';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
-import { Bill, InvoiceItem} from '@customTypes/index';
+import { Bill, InvoiceItem, Invoice } from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
 import { Input } from '@components/ui/input';
 import { getBills } from '@services/billService';
@@ -13,18 +13,23 @@ import CreatableSelect from 'react-select/creatable';
 import { createInvoice, updateInvoice } from '@services/invoiceService';
 
 interface Props {
-  data: any;
+  data: Invoice;
   mode: 'Create' | 'Edit';
+   projectId: string | null;
   onClose: () => void;
 }
 
-export default function InvoiceForm({ data, mode, onClose }: Props) {
-  console.log(data,"paras")
+interface PredefinedItem {
+  label: string;
+  value: string;
+  price: number;
+  hsn: string;
+}
+
+export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
-  const [loadingBills, setLoadingBills] = useState(true);
-  const [billError, setBillError] = useState<string | null>(null);
   const [items, setItems] = useState<InvoiceItem[]>(
     mode === 'Edit' && data?.items?.length
       ? data.items
@@ -42,7 +47,7 @@ export default function InvoiceForm({ data, mode, onClose }: Props) {
   );
 
   const [gstin, setGstin] = useState(
-    mode === 'Edit' ? data?.user?.gstin || '' : data?.gstin || ''
+    mode === 'Edit' ? data?.user?.gstin || '' : ''
   );
 
   useEffect(() => {
@@ -50,11 +55,11 @@ export default function InvoiceForm({ data, mode, onClose }: Props) {
       try {
         const res = await getBills();
         setBills(res.bills);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to fetch bills:', err);
-        setBillError(err.message || 'Failed to load bills');
+        // setBillError(err.message || 'Failed to load bills'); // billError is unused
       } finally {
-        setLoadingBills(false);
+        // setLoadingBills(false); // loadingBills is unused
       }
     };
 
@@ -68,7 +73,7 @@ export default function InvoiceForm({ data, mode, onClose }: Props) {
     hsn: bill.hsnCode,
   }));
 
-  const handleSelect = (selected: any, index: number) => {
+  const handleSelect = (selected: PredefinedItem | null, index: number) => {
     const updated = [...items];
     if (selected) {
       updated[index] = {
@@ -140,6 +145,7 @@ export default function InvoiceForm({ data, mode, onClose }: Props) {
         _id: data?.user?._id || data?._id,
         gstin,
         items,
+        projectId,
         totals: {
           taxable,
           igst,
@@ -234,7 +240,7 @@ export default function InvoiceForm({ data, mode, onClose }: Props) {
           <label className="text-sm font-medium block mb-1">Phone No</label>
           <Input
             type="text"
-            value={user?.phone || ''}
+            value={user?.phoneNumber || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -261,11 +267,15 @@ export default function InvoiceForm({ data, mode, onClose }: Props) {
                   placeholder="Search or type"
                   onChange={(selected) => handleSelect(selected, idx)}
                   value={
-                    predefinedItems.find(
+                   item.description === ''
+                      ? null
+                      : predefinedItems.find(
                       (opt) => opt.value === item.description
                     ) || {
-                      label: item.description,
-                      value: item.description,
+                      label: item.description || '',
+                      value: item.description || '',
+                      price: item.price,
+                      hsn: item.hsn,
                     }
                   }
                   isClearable

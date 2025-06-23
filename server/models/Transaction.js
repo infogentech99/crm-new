@@ -9,7 +9,7 @@ const TransactionSchema = new mongoose.Schema(
     },
     invoice: {
       type: String,
-      ref: 'NewInvoice',
+      ref: 'Invoice',
       required: true
     },
     amount: {
@@ -17,6 +17,9 @@ const TransactionSchema = new mongoose.Schema(
       required: true,
     },
     transactionId :{
+      type: String,
+    },
+     projectId :{
       type: String,
     },
     method: {
@@ -28,6 +31,13 @@ const TransactionSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+
+     createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true
+    }
   },
   { timestamps: true }
 );

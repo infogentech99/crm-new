@@ -62,14 +62,26 @@ export default function DashboardCards() {
         bgColor="bg-green-500"
       />
       <StatCard
-        title="Open Deals"
-        value={`₹${data?.openDeals || 'N/A'}`}
+        title="Total Amount of Open Deals"
+        value={`₹${data?.totalInvoicesAmount ?? '0.00'}`}
         icon="💰"
         bgColor="bg-yellow-500"
       />
+      {/* <StatCard
+        title="Total Paid of Open Deals"
+        value={`₹${data?.totalPaidInvoicesAmount ?? '0.00'}`}
+        icon="✅"
+        bgColor="bg-purple-500"
+      />
+      <StatCard
+        title="Pending Invoices"
+        value={`₹${data?.pendingAmount ?? '0.00'}`}
+        icon="⏳"
+        bgColor="bg-orange-500"
+      /> */}
       <StatCard
         title="Tasks Due"
-        value={data?.tasksDue.toLocaleString() || 'N/A'}
+        value={data?.tasksDue.toLocaleString() ?? '0'}
         icon="📅"
         bgColor="bg-red-500"
       />

@@ -13,6 +13,8 @@ import {
   deleteLead,
   uploadQuotation,
   getLeadHistory,
+  getLeadSourceSummary,
+  getLeadStatusSummary
 } from '../controllers/leadController.js';
 
 import { protect, authorize } from '../middlewares/authMiddleware.js';
@@ -31,28 +33,49 @@ const upload = multer({ storage });
 router.post(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson'),
+  authorize('superadmin', 'admin', 'salesperson','employee'),
   createLead
 );
 
 router.get(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson'),
+  authorize('superadmin', 'admin', 'salesperson','employee'),
   getLeads
 );
 
 router.get(
   '/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson'),
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
   getLead
+);
+
+router.get(
+  '/invoiceHistory/:id',
+  protect,
+  authorize('superadmin', 'admin', 'salesperson'),
+  getLeadHistory
+);
+
+router.get(
+  '/summary/status',
+  protect,
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
+  getLeadStatusSummary
+);
+
+router.get(
+  '/summary/source',
+  protect,
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
+  getLeadSourceSummary
 );
 
 router.put(
   '/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson'),
+  authorize('superadmin', 'admin', 'salesperson','employee'),
   updateLead
 );
 

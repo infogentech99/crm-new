@@ -1,3 +1,5 @@
+
+
 import express from 'express';
 import {
   getUsers,
@@ -10,23 +12,31 @@ import {
 import { protect, authorize } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
-const check = (res,req,next) =>{
-  next();
-}
+
+
 router.use(protect);
 
-router.route('/').get(getUsers);
+router.get(
+  '/',
+  getUsers
+);
 
-router.use(authorize('superadmin'));
-
-router.route('/').post(createUser);
+router.post(
+  '/',
+  authorize(['superadmin']),
+  createUser
+);
 
 router
   .route('/:id')
+  .all(authorize(['superadmin']))
   .get(getUserById)
   .put(updateUser)
   .delete(deleteUser);
-
-router.get('/:id/activities', check, getUserActivities);
+router.get(
+  '/:id/activities',
+  authorize(['superadmin']),
+  getUserActivities
+);
 
 export default router;

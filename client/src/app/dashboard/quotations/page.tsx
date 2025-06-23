@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getQuotations, deleteQuotation } from '@services/quotationService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { manageQuotationsConfig } from '@config/manageQuotationsConfig';
 import Modal from '@components/Common/Modal';
 import { Quotation } from '@customTypes/index';
@@ -16,10 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
-import {
-  Pagination, PaginationContent, PaginationItem, PaginationLink,
-  PaginationNext, PaginationPrevious
-} from '@components/ui/pagination';
+import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import QuotationForm from '@components/Quotation/QuotationForm';
@@ -37,12 +33,32 @@ const ManageQuotationsPage: React.FC = () => {
   const [isQuotationOpen, setIsQuotationOpen] = useState(false);
   const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
+  const [isMounted, setIsMounted] = useState(false);
+
+  
+  useEffect(() => {
+    document.title = "Manage Quotations – CRM Application";
+    setIsMounted(true);
+  }, []);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['allQuotations', search],
+    queryFn: () => getQuotations(1, 10000, search),
+    enabled: isMounted,
+  });
+
+  const allQuotations = data?.quotations || [];
+  const totalQuotations = allQuotations.length;
+  const totalPages = Math.ceil(totalQuotations / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const quotationsToDisplay = allQuotations.slice(startIndex, endIndex);
 
   const handleViewQuotation = useCallback((quotation: Quotation) => {
-      setSelectedQuotation(quotation);
-   if (quotation?._id) {
-    router.push(`/dashboard/quotations/${quotation._id}`)
-  }
+    setSelectedQuotation(quotation);
+    if (quotation?._id) {
+      router.push(`/dashboard/quotations/${quotation._id}`)
+    }
   }, [router]);
 
   const handleEditQuotation = useCallback((quotation: Quotation) => {
@@ -60,7 +76,7 @@ const ManageQuotationsPage: React.FC = () => {
 
     try {
       await deleteQuotation(quotationToDelete._id);
-      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['allQuotations'] });
     } catch (err) {
       console.error("Failed to delete quotation:", err);
     } finally {
@@ -69,15 +85,7 @@ const ManageQuotationsPage: React.FC = () => {
     }
   };
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['quotations', page, limit, search],
-    queryFn: () => getQuotations(page, limit, search),
-  });
-  const quotations = data?.quotations || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
-
-  const config = manageQuotationsConfig(handleViewQuotation, handleEditQuotation, handleDeleteQuotation, userRole, currentPage, limit);
+  const config = manageQuotationsConfig(handleViewQuotation, handleEditQuotation, handleDeleteQuotation, userRole, page, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -95,8 +103,12 @@ const ManageQuotationsPage: React.FC = () => {
     setPage(1);
   };
 
+  if (!isMounted) {
+    return null; 
+  }
+
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -124,57 +136,35 @@ const ManageQuotationsPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={quotations}
+          data={quotationsToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    href="#"
-                    onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(i + 1); }}
-                    isActive={currentPage === i + 1}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <PaginationComponent
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
 
-        <Modal
-          isOpen={isQuotationOpen}
-          onClose={() => setIsQuotationOpen(false)}
-          widthClass="max-w-5xl"
-        >
-          <QuotationForm
-            mode="Edit"
-            data={selectedQuotation}
-            onClose={() => {
-              setIsQuotationOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['quotations'] });
-            }}
-          />
-        </Modal>
+        {isQuotationOpen && selectedQuotation && ( // Conditionally render if selectedQuotation is not null
+          <Modal
+            isOpen={isQuotationOpen}
+            onClose={() => setIsQuotationOpen(false)}
+            widthClass="max-w-5xl"
+          >
+            <QuotationForm
+              mode="Edit"
+              data={selectedQuotation}
+              onClose={() => {
+                setIsQuotationOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['allQuotations'] });
+              }}
+            />
+          </Modal>
+        )}
 
         {quotationToDelete && (
           <DeleteModal
@@ -188,7 +178,7 @@ const ManageQuotationsPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

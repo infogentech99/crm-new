@@ -2,8 +2,8 @@
 "use client";
 
 import React from "react";
-import { X } from "lucide-react";
 import { toast } from "sonner";
+import { RxCross2 } from "react-icons/rx";
 
 interface DeleteModalProps {
   isOpen: boolean;
@@ -29,17 +29,17 @@ export default function DeleteModal({
           <h2 className="text-lg font-medium text-gray-800 no-wrap">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1 text-gray-500 hover:text-red-500 rounded-full"
+            className="p-1 text-gray-500 hover:text-red-500 rounded-full cursor-pointer"
             aria-label="Close"
           >
-            <X className="h-5 w-5" />
+            <RxCross2/>
           </button>
         </div>
         <div className="px-4 py-4">
           <p className="text-gray-700">
-            Are you sure you want to delete
+            Are you sure you want to delete &nbsp;
             <span className="font-semibold text-gray-900">
-              {itemLabel || "this item"}
+              { itemLabel || " this item"}
             </span>
             ?
           </p>
@@ -57,7 +57,7 @@ export default function DeleteModal({
               toast.success(`Deleted ${itemLabel || "item"} successfully`);
               onClose();
             }}
-            className="px-4 py-2 text-sm font-medium rounded-md bg-red-600 text-white hover:bg-red-700"
+            className="px-4 py-2 text-sm font-medium rounded-md bg-red-600 text-white hover:bg-red-700 cursor-pointer"
           >
             Delete
           </button>

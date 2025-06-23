@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getTransactions } from '@services/transactionService';
+import React, { useCallback, useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getTransactions, deleteTransaction } from '@services/transactionService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import CreateTransactionButton from '@components/Common/CreateTransactionButton';
 import { manageTransactionsConfig } from '@config/manageTransactionsConfig';
-import Modal from '@components/Common/Modal';
 import { Transaction } from '@customTypes/index';
 import { Input } from '@components/ui/input';
 import {
@@ -17,44 +14,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
-import { useSelector } from 'react-redux';
-import { RootState } from '@store/store';
-
+import { PaginationComponent } from '@components/ui/pagination';
+import Modal from '@components/Common/Modal';
+import DeleteModal from '@components/Common/DeleteModal';
+import TransactionForm from '@components/Transaction/TrasactionForm';
 const ManageTransactionsPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<Transaction | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
 
-  const userRole = useSelector((state: RootState) => state.user.role || '');
-
-  const handleViewTransaction = useCallback((transaction: Transaction) => {
-    setSelectedTransaction(transaction);
-    setIsModalOpen(true);
-  }, []);
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedTransaction(null);
-  };
-
-  const handleDeleteTransaction = useCallback((transaction: Transaction) => {
-    alert(`Delete transaction: ${transaction.description}`);
-    // Implement actual delete logic here
+ useEffect(() => {
+   document.title = "Manage Transactions – CRM Application";
+ }, []);
+  useEffect(() => {
+    setIsMounted(true);
   }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['transactions', page, limit, search],
-    queryFn: () => getTransactions(page, limit, search),
+    queryKey: ['allTransactions', search],
+    queryFn: () => getTransactions(1, 10000, search),
+    enabled: isMounted, 
   });
 
-  const transactions = data?.transactions || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
+  const allTransactions = data?.transactions || [];
+  const totalTransactions = allTransactions.length;
+  const totalPages = Math.ceil(totalTransactions / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const transactionsToDisplay = allTransactions.slice(startIndex, endIndex);
 
-  const config = manageTransactionsConfig(handleViewTransaction, handleDeleteTransaction, userRole, currentPage, limit);
+  const handleEditTransaction = useCallback((txn: Transaction) => {
+    setSelectedTransaction(txn);
+    setIsTransactionModalOpen(true);
+  }, []);
+
+  const handleDeleteTransaction = useCallback((txn: Transaction) => {
+    setTransactionToDelete(txn);
+    setIsDeleteModalOpen(true);
+  }, []);
+
+  const handleConfirmDelete = async () => {
+    if (!transactionToDelete) return;
+
+    try {
+      await deleteTransaction(transactionToDelete._id);
+      queryClient.invalidateQueries({ queryKey: ['allTransactions'] });
+    } catch (err) {
+      console.error("Failed to delete transaction:", err);
+    } finally {
+      setIsDeleteModalOpen(false);
+      setTransactionToDelete(null);
+    }
+  };
+
+  const config = manageTransactionsConfig(
+    handleEditTransaction,
+    handleDeleteTransaction,
+    page,
+    limit
+  );
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -64,25 +88,28 @@ const ManageTransactionsPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); // Reset to first page on search
+    setPage(1);
   };
 
   const handleLimitChange = (value: string) => {
     setLimit(Number(value));
-    setPage(1); // Reset to first page on limit change
+    setPage(1);
   };
 
+  if (!isMounted) {
+    return null; 
+  }
+
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
-          <CreateTransactionButton onClick={config.createTransactionButtonAction} />
         </div>
 
         <div className="flex items-center justify-between mb-4 space-x-4">
           <Input
-            placeholder="Search by description or type..."
+            placeholder="Search by transaction ID or method..."
             value={search}
             onChange={handleSearchChange}
             className="max-w-sm"
@@ -102,59 +129,49 @@ const ManageTransactionsPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={transactions}
+          data={transactionsToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    href="#"
-                    onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(i + 1); }}
-                    isActive={currentPage === i + 1}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-              </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <PaginationComponent
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
 
-        <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+        <Modal
+          isOpen={isTransactionModalOpen}
+          onClose={() => setIsTransactionModalOpen(false)}
+          widthClass="max-w-xl"
+        >
           {selectedTransaction && (
-            <div className="p-4">
-              <h2 className="text-xl font-semibold mb-2">Transaction Details</h2>
-              <p>Type: {selectedTransaction.type}</p>
-              <p>Amount: ${selectedTransaction.amount.toFixed(2)}</p>
-              <p>Date: {new Date(selectedTransaction.date).toLocaleDateString()}</p>
-              <p>Description: {selectedTransaction.description}</p>
-              {selectedTransaction.relatedInvoice && <p>Related Invoice: {selectedTransaction.relatedInvoice}</p>}
-              {selectedTransaction.relatedBill && <p>Related Bill: {selectedTransaction.relatedBill}</p>}
-              {/* Add more transaction details as needed */}
-            </div>
+            <TransactionForm
+              selectedInvoice={selectedTransaction}
+              onClose={() => {
+                setIsTransactionModalOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['allTransactions'] });
+              }}
+            />
           )}
         </Modal>
+
+        {transactionToDelete && (
+          <DeleteModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => {
+              setIsDeleteModalOpen(false);
+              setTransactionToDelete(null);
+            }}
+            onConfirm={handleConfirmDelete}
+            itemLabel={`Transaction ${transactionToDelete?.transactionId || ''}`}
+               
+          />
+        )}
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

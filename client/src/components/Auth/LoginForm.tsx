@@ -10,6 +10,8 @@ import AuthCelebration from "@components/Common/AuthCelebration";
 import { useMutation } from "@tanstack/react-query";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
+import Image from "next/image";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -31,6 +33,7 @@ export default function LoginForm() {
   const dispatch = useDispatch();
   const router = useRouter();
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -73,9 +76,11 @@ export default function LoginForm() {
       className="flex min-h-screen items-center justify-between bg-gradient-to-br from-blue-100 to-blue-300"
     >
       <div className="hidden lg:flex flex-col items-center justify-center p-4 w-1/2">
-        <img
+        <Image
           src="/assets/img/loginSubImg.png"
           alt="loginSubImg"
+          width={500}
+          height={500}
           className="max-w-full h-auto"
         />
       </div>
@@ -84,9 +89,11 @@ export default function LoginForm() {
         style={{ maxWidth: "700px" }}
       >
         <div className="text-center mb-10">
-          <img
+          <Image
             src="/assets/img/companyLogo.webp"
             alt="Company Logo"
+            width={100}
+            height={64}
             className="max-h-16 mx-auto"
           />
         </div>
@@ -121,13 +128,29 @@ export default function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="******"
-                      {...field}
-                    />
-                  </FormControl>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="******"
+                        {...field}
+                        className="pr-10"
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useCallback, useState } from 'react';
-import { useQuery,useQueryClient } from '@tanstack/react-query';
+import React, { useCallback, useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteInvoice, getInvoices } from '@services/invoiceService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { manageInvoicesConfig } from '@config/manageInvoicesConfig';
 import Modal from '@components/Common/Modal';
 import { Invoice } from '@customTypes/index';
 import { Input } from '@components/ui/input';
+import TransactionModal from '@components/Common/TransactionModal';
 import {
   Select,
   SelectContent,
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@components/ui/pagination';
+import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import { useRouter } from 'next/navigation';
@@ -26,39 +26,63 @@ import DeleteModal from '@components/Common/DeleteModal';
 const ManageInvoicesPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
-   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
-   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
+
+  useEffect(() => {
+    document.title = "Manage Invoices – CRM Application";
+    setIsMounted(true);
+  }, []);
+
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['allInvoices', search], 
+    queryFn: () => getInvoices(1, 10000, search),
+    enabled: isMounted, 
+  });
+  const allInvoices = data?.invoices || [];
+
+const totalInvoices = allInvoices.length;
+const totalPages = Math.ceil(totalInvoices / limit);
+const startIndex = (page - 1) * limit;
+const endIndex = startIndex + limit;
+const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
+
   const handleViewInvoice = useCallback((invoice: Invoice) => {
-     setSelectedInvoice(invoice);
-   if (invoice?._id) {
-    router.push(`/dashboard/invoices/${invoice._id}`)
-   }
+    setSelectedInvoice(invoice);
+    if (invoice?._id) {
+      router.push(`/dashboard/invoices/${invoice._id}`)
+    }
   }, [router]);
 
   const handleEditInvoice = useCallback((invoice: Invoice) => {
-      setSelectedInvoice(invoice);
-      setIsInvoiceOpen(true);
+    setSelectedInvoice(invoice);
+    setIsInvoiceOpen(true);
   }, []);
 
   const handleDeleteInvoice = useCallback((invoice: Invoice) => {
-   setInvoiceToDelete(invoice);
-   setIsDeleteModalOpen(true);
-     
+    setInvoiceToDelete(invoice);
+    setIsDeleteModalOpen(true);
+
   }, []);
+  const handleOpenTransactionModal = (invoice: Invoice) => {
+    setSelectedInvoice(invoice);
+    setIsTransactionModalOpen(true);
+  };
   const handleConfirmDelete = async () => {
     if (!invoiceToDelete) return;
 
     try {
       await deleteInvoice(invoiceToDelete._id);
-      queryClient.invalidateQueries({ queryKey: ['quotations'] });
+      queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
     } catch (err) {
       console.error("Failed to delete quotation:", err);
     } finally {
@@ -66,16 +90,7 @@ const ManageInvoicesPage: React.FC = () => {
       setInvoiceToDelete(null);
     }
   };
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['invoices', page, limit, search],
-    queryFn: () => getInvoices(page, limit, search),
-  });
-
-  const invoices = data?.invoices || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
-
-  const config = manageInvoicesConfig(handleViewInvoice, handleEditInvoice, handleDeleteInvoice, userRole, currentPage, limit);
+  const config = manageInvoicesConfig(handleViewInvoice, handleEditInvoice, handleDeleteInvoice, handleOpenTransactionModal, userRole, page, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -85,7 +100,7 @@ const ManageInvoicesPage: React.FC = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
-    setPage(1); 
+    setPage(1);
   };
 
   const handleLimitChange = (value: string) => {
@@ -93,8 +108,11 @@ const ManageInvoicesPage: React.FC = () => {
     setPage(1);
   };
 
+  if (!isMounted) {
+    return null; 
+  }
+
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -122,71 +140,59 @@ const ManageInvoicesPage: React.FC = () => {
 
         <DataTable
           columns={config.tableColumns}
-          data={invoices}
+          data={invoicesToDisplay}
           isLoading={isLoading}
           error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    href="#"
-                    onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(i + 1); }}
-                    isActive={currentPage === i + 1}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-              </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <PaginationComponent
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
 
-           <Modal
-          isOpen={isInvoiceOpen}
-          onClose={() => setIsInvoiceOpen(false)}
-          widthClass="max-w-5xl"
-        >
-          <InvoiceForm
-            mode="Edit"
-            data={selectedInvoice}
+        {isInvoiceOpen && selectedInvoice && ( // Conditionally render if selectedInvoice is not null
+          <Modal
+            isOpen={isInvoiceOpen}
+            onClose={() => setIsInvoiceOpen(false)}
+            widthClass="max-w-5xl"
+          >
+            <InvoiceForm
+              mode="Edit"
+              data={selectedInvoice}
+              projectId=''
+              onClose={() => {
+                setIsInvoiceOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
+              }}
+            />
+          </Modal>
+        )}
+        {isTransactionModalOpen && selectedInvoice && ( // Conditionally render if selectedInvoice is not null
+          <TransactionModal
+            selectedInvoice={selectedInvoice}
             onClose={() => {
-              setIsInvoiceOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['invoices'] });
+              setIsTransactionModalOpen(false);
+              queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
+              
             }}
           />
-        </Modal>
-          {invoiceToDelete && (
-                  <DeleteModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => {
-                      setIsDeleteModalOpen(false);
-                      setInvoiceToDelete(null);
-                      queryClient.invalidateQueries({ queryKey: ['invoices'] });
-                    }}
-                    onConfirm={handleConfirmDelete}
-                    itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}
-                  />
-                )}
+        )}
+
+        {invoiceToDelete && (
+          <DeleteModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => {
+              setIsDeleteModalOpen(false);
+              setInvoiceToDelete(null);
+            }}
+            onConfirm={handleConfirmDelete}
+            itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}
+          />
+        )}
       </div>
-    </DashboardLayout>
   );
 };
 

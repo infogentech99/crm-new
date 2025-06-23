@@ -39,13 +39,13 @@ PaginationItem.displayName = "PaginationItem"
 
 type PaginationLinkProps = {
   isActive?: boolean;
-  size?: ButtonProps["size"]; // Use the type from ButtonProps
+  size?: ButtonProps["size"];
 } & React.ComponentProps<typeof Link>;
 
 const PaginationLink = ({
   className,
   isActive,
-  size, // Remove default value here, it's handled by buttonVariants
+  size,
   ...props
 }: PaginationLinkProps) => (
   <Link
@@ -68,7 +68,7 @@ const PaginationPrevious = ({
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
     aria-label="Go to previous page"
-    size="default" // Keep default size here
+    size="default"
     className={cn("gap-1 pl-2.5", className)}
     {...props}
   >
@@ -84,7 +84,7 @@ const PaginationNext = ({
 }: React.ComponentProps<typeof PaginationLink>) => (
   <PaginationLink
     aria-label="Go to next page"
-    size="default" // Keep default size here
+    size="default"
     className={cn("gap-1 pr-2.5", className)}
     {...props}
   >
@@ -109,6 +109,85 @@ const PaginationEllipsis = ({
 )
 PaginationEllipsis.displayName = "PaginationEllipsis"
 
+interface PaginationComponentProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+const generatePaginationItems = (currentPage: number, totalPages: number) => {
+  const maxPagesToShow = 2;
+  const items: (number | string)[] = [];
+
+  if (totalPages <= maxPagesToShow) {
+    for (let i = 1; i <= totalPages; i++) {
+      items.push(i);
+    }
+  } else {
+    const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (startPage > 1) {
+      items.push(1);
+      if (startPage > 2) {
+        items.push('...');
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(i);
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        items.push('...');
+      }
+      items.push(totalPages);
+    }
+  }
+  return items;
+};
+
+const PaginationComponent: React.FC<PaginationComponentProps> = ({ currentPage, totalPages, onPageChange }) => {
+  const paginationItems = generatePaginationItems(currentPage, totalPages);
+
+  return (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            href="#"
+            onClick={(e: React.MouseEvent) => { e.preventDefault(); onPageChange(currentPage - 1); }}
+            className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+          />
+        </PaginationItem>
+        {paginationItems.map((item, index) => (
+          <PaginationItem key={index}>
+            {typeof item === 'number' ? (
+              <PaginationLink
+                href="#"
+                onClick={(e: React.MouseEvent) => { e.preventDefault(); onPageChange(item); }}
+                isActive={currentPage === item}
+              >
+                {item}
+              </PaginationLink>
+            ) : (
+              <PaginationEllipsis />
+            )}
+          </PaginationItem>
+        ))}
+        <PaginationItem>
+          <PaginationNext
+            href="#"
+            onClick={(e: React.MouseEvent) => { e.preventDefault(); onPageChange(currentPage + 1); }}
+            className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  );
+};
+
 export {
   Pagination,
   PaginationContent,
@@ -117,4 +196,5 @@ export {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationComponent,
 }

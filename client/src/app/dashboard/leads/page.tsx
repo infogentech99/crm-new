@@ -1,17 +1,19 @@
 
 "use client";
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
-import { getLeads, deleteLead } from '@services/leadService';
+import { getLeads, deleteLead, createLead } from '@services/leadService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import CreateLeadButton from '@components/Common/CreateLeadButton';
+import { exportLeadsToCSV } from '@utils/exportUtils';
+import { parseLeadsCSV } from '@utils/importUtils';
 import { manageLeadsConfig } from '@config/manageLeadsConfig';
 import { Lead } from '@customTypes/index';
 import DeleteModal from '@components/Common/DeleteModal';
 import LeadSummaryCards from '@components/Leads/LeadSummaryCards';
 import { Input } from '@components/ui/input';
+import { Button } from '@components/ui/button';
 import {
   Select,
   SelectContent,
@@ -19,24 +21,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@components/ui/select';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@components/ui/pagination';
+import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import LeadForm from '@components/Leads/Leadform';
 import Modal from '@components/Common/Modal';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 
 const ManageLeadsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,47 +44,75 @@ const ManageLeadsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
+  useEffect(() => {
+   document.title = "Manage Leads – CRM Application";
+ }, []);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["leads", page, limit, search, statusFilter],
+    queryKey: ["allLeads", search, statusFilter],
     queryFn: () => getLeads(page, limit, search, statusFilter),
+   enabled: isMounted,
   });
-  const leads = data?.leads || [];
-  const totalPages = data?.totalPages || 1;
-  const currentPage = data?.currentPage || 1;
 
-const handleViewLead = useCallback((lead: Lead) => {
-  setSelectedLead(lead);
-   if (lead?._id) {
-    router.push(`/dashboard/leads/${lead._id}`)
-  }
- }, [router]);
+  const allLeads = data?.leads || [];
+  const filteredLeads = allLeads.filter(lead => {
+    const lowerCaseSearch = search.toLowerCase();
+    const matchesSearch = (
+      (lead.name?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.companyName?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.email?.toLowerCase() || '').includes(lowerCaseSearch) ||
+      (lead.phoneNumber?.toLowerCase() || '').includes(lowerCaseSearch)
+    );
+    const matchesStatus =
+      statusFilter === undefined ||
+      lead.status === statusFilter ||
+      lead.projects?.some(project => project.status === statusFilter);
+    return matchesSearch && matchesStatus;
+  });
+
+  const totalLeads = filteredLeads.length;
+  const totalPages = Math.ceil(totalLeads / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+  const leadsToDisplay = filteredLeads.slice(startIndex, endIndex);
+
+  const handleViewLead = useCallback((lead: Lead) => {
+    setSelectedLead(lead);
+    if (lead?._id) {
+      router.push(`/dashboard/leads/${lead._id}`)
+    }
+  }, [router]);
 
   const handleEditLead = useCallback((lead: Lead) => {
     setSelectedLead(lead);
     setIsModalOpen(true);
   }, []);
 
- const handleCreateLead = () => {
-  setSelectedLead(null);
-  setIsModalOpen(true);
-};
+  const handleCreateLead = () => {
+    setSelectedLead(null);
+    setIsModalOpen(true);
+  };
 
   const handleDeleteLead = useCallback((lead: Lead) => {
     setLeadToDelete(lead);
     setIsDeleteModalOpen(true);
   }, []);
 
- 
-   const handleConfirmDelete = async () => {
+
+  const handleConfirmDelete = async () => {
     if (!leadToDelete) return;
 
     try {
       await deleteLead(leadToDelete._id);
-      queryClient.invalidateQueries({ queryKey: ["leads"] });
+      queryClient.invalidateQueries({ queryKey: ["allLeads"] });
     } catch (err) {
       console.error("Failed to delete lead:", err);
     } finally {
@@ -95,20 +121,75 @@ const handleViewLead = useCallback((lead: Lead) => {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const { leads: allLeads } = await getLeads(1, 9999, search, statusFilter);
+      exportLeadsToCSV(allLeads);
+      toast.success('Exported leads successfully');
+    } catch (err) {
+      console.error("Export all failed:", err);
+      toast.error('Export failed');
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      const text = ev.target?.result as string;
+      const parsedLeads = parseLeadsCSV(text);
+      let duplicateCount = 0;
+      let successCount = 0;
+      for (const leadData of parsedLeads) {
+        try {
+          await createLead(leadData as Lead);
+          successCount++;
+        } catch (err: unknown) {
+          let msg = 'An unknown error occurred';
+          if (err instanceof Error) {
+            msg = err.message;
+          } else if (typeof err === 'object' && err !== null && 'response' in err && (err as { response: { data?: { message?: string } } }).response?.data?.message) {
+            msg = (err as { response: { data: { message: string } } }).response.data.message;
+          }
+          if (msg.includes('E11000') || msg.includes('duplicate key')) {
+            duplicateCount++;
+          } else {
+            console.error('Import error:', err);
+          }
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      if (duplicateCount > 0) {
+        toast.error(`Skipped ${duplicateCount} duplicate email${duplicateCount > 1 ? 's' : ''}`);
+      } else {
+        toast.success(`Imported ${successCount} lead${successCount > 1 ? 's' : ''} successfully`);
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const config = manageLeadsConfig(
     handleViewLead,
     handleEditLead,
     handleDeleteLead,
     userRole,
-    currentPage,
+    page,
     limit
   );
- 
+
   config.createLeadButtonAction = handleCreateLead;
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPage(newPage);
+    } else if (newPage < 1) {
+      setPage(1);
+    } else if (newPage > totalPages) {
+      setPage(totalPages);
     }
   };
 
@@ -118,7 +199,7 @@ const handleViewLead = useCallback((lead: Lead) => {
   };
 
   const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value);
+    setStatusFilter(value === 'all' ? undefined : value);
     setPage(1);
   };
 
@@ -129,9 +210,8 @@ const handleViewLead = useCallback((lead: Lead) => {
 
   const statusOptions = [
     { value: 'all', label: 'All Status' },
-    { value: 'pending_approval', label: 'Pending Approval' },
-    { value: 'denied', label: 'Denied' },
     { value: 'approved', label: 'Approved' },
+    { value: 'pending_approval', label: 'Pending Approval' },
     { value: 'quotation_submitted', label: 'Quotation Submitted' },
     { value: 'quotation_rejected', label: 'Quotation Rejected' },
     { value: 'quotation_approved', label: 'Quotation Approved' },
@@ -142,12 +222,11 @@ const handleViewLead = useCallback((lead: Lead) => {
     { value: 'new', label: 'New' },
     { value: 'contacted', label: 'Contacted' },
     { value: 'qualified', label: 'Qualified' },
-    { value: 'lost', label: 'Lost' },
+    // { value: 'denied', label: 'Denied' },
   ];
 
 
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <LeadSummaryCards />
 
@@ -155,88 +234,86 @@ const handleViewLead = useCallback((lead: Lead) => {
           <h1 className="text-2xl font-semibold text-gray-800">
             {config.pageTitle}
           </h1>
-        <CreateLeadButton onClick={handleCreateLead} />
+        <div className="flex space-x-2">
+          {userRole === 'superadmin' && (
+            <>
+              <Button onClick={handleImportClick}>
+                Import CSV
+              </Button>
+              <Button onClick={handleExport}>
+                Export CSV
+              </Button>
+            </>
+          )}
+          <CreateLeadButton onClick={handleCreateLead} />
+        </div>
         </div>
 
-        <div className="flex items-center justify-between mb-4 space-x-4">
+        <input
+          type="file"
+          accept=".csv"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+        />
+
+        <div className="flex items-center justify-between mb-4">
           <Input
-            placeholder="Search by name..."
+            placeholder="Search by name,or company..."
             value={search}
             onChange={handleSearchChange}
             className="max-w-sm"
           />
-          <Select onValueChange={handleStatusFilterChange} value={statusFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select onValueChange={handleLimitChange} value={String(limit)}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Limit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center space-x-4">
+            <Select onValueChange={handleStatusFilterChange} value={statusFilter || 'all'}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select onValueChange={handleLimitChange} value={String(limit)}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <DataTable
           columns={config.tableColumns}
-          data={leads}
+          data={leadsToDisplay}
           isLoading={isLoading}
-           error={isError ? error?.message || 'Unknown error' : null}
+          error={isError ? error?.message || 'Unknown error' : null}
         />
 
         <div className="mt-4 flex justify-end">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href="#"
-                  onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage - 1); }}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i}>
-                  <PaginationLink
-                    href="#"
-                     onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(i + 1); }}
-                    isActive={currentPage === i + 1}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  href="#"
-                   onClick={(e: React.MouseEvent) => { e.preventDefault(); handlePageChange(currentPage + 1); }}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
+          <PaginationComponent
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         </div>
-     
+
         <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setSelectedLead(null); }} widthClass="max-w-3xl">
           <LeadForm
             initialData={selectedLead || undefined}
             mode={selectedLead ? "Edit" : "Create"}
-            onClose={() => { setIsModalOpen(false); setSelectedLead(null); }}
+            onClose={() => { setIsModalOpen(false); setSelectedLead(null); queryClient.invalidateQueries({ queryKey: ["allLeads"] }); }}
+
           />
         </Modal>
-
         {leadToDelete && (
           <DeleteModal
             isOpen={isDeleteModalOpen}
@@ -249,7 +326,6 @@ const handleViewLead = useCallback((lead: Lead) => {
           />
         )}
       </div>
-    </DashboardLayout>
   );
 };
 

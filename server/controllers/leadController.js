@@ -10,11 +10,84 @@ export const createLead = async (req, res) => {
 
     res.status(201).json(newLead);
   } catch (err) {
+    console.error("createLead error:", err);
     res.status(400).json({ message: err.message });
   }
 };
 
-// GET Leads (filtered based on roles, with search, status, and pagination)
+export const getLeadSourceSummary = async (req, res) => {
+  try {
+    let query = {};
+    if (req.user.role !== 'superadmin') {
+      query.createdBy = req.user._id;
+    }
+
+    const sourceSummary = await Lead.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$source',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          source: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+
+    const formattedSummary = sourceSummary.reduce((acc, item) => {
+      acc[item.source] = item.count;
+      return acc;
+    }, {});
+
+    res.status(200).json(formattedSummary);
+  } catch (err) {
+    console.error("getLeadSourceSummary error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getLeadStatusSummary = async (req, res) => {
+  try {
+    let query = {};
+    if (req.user.role !== 'superadmin') {
+      query.createdBy = req.user._id;
+    }
+
+    const statusSummary = await Lead.aggregate([
+      { $match: query },
+      { $unwind: '$projects' },
+      {
+        $group: {
+          _id: '$projects.status',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          status: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+
+    const formattedSummary = statusSummary.reduce((acc, item) => {
+      acc[item.status] = item.count;
+      return acc;
+    }, {});
+
+    res.status(200).json(formattedSummary);
+  } catch (err) {
+    console.error("getLeadStatusSummary error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 export const getLeads = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -24,19 +97,23 @@ export const getLeads = async (req, res) => {
 
     let query = {};
 
-    if (req.user.role !== 'superadmin') {
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
       query.createdBy = req.user._id;
     }
 
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
-        { company: { $regex: search, $options: 'i' } },
+        { companyName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phoneNumber: { $regex: search, $options: 'i' } },
+        { industry: { $regex: search, $options: 'i' } },
+        { projects: { $elemMatch: { title: { $regex: search, $options: 'i' } } } }, // ✅ Added
       ];
     }
 
     if (status) {
-      query.status = status;
+      query['projects.status'] = status; // Filter by status within the projects array
     }
 
     const total = await Lead.countDocuments(query);
@@ -53,11 +130,12 @@ export const getLeads = async (req, res) => {
       totalLeads: total,
     });
   } catch (err) {
+    console.error("getLeads error:", err);
     res.status(500).json({ message: err.message });
   }
 };
 
-// GET Single Lead (only creator or superadmin can access)
+
 export const getLead = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id).populate('createdBy', 'name email role');
@@ -75,11 +153,11 @@ export const getLead = async (req, res) => {
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error("getLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
 
-// UPDATE Lead (similar permission logic as above)
 export const updateLead = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id);
@@ -95,8 +173,13 @@ export const updateLead = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden: not your lead' });
     }
 
-    const { notes, ...otherUpdates } = req.body;
+    const { notes, projects, jobTitle, ...otherUpdates } = req.body; // Destructure jobTitle
     Object.assign(lead, otherUpdates);
+
+    if (jobTitle !== undefined) { // Update jobTitle if provided
+      lead.jobTitle = jobTitle;
+    }
+
     if (notes && Array.isArray(notes)) {
       lead.notes = notes.map((note) => ({
         message: note.message,
@@ -105,14 +188,18 @@ export const updateLead = async (req, res) => {
       }));
     }
 
+    if (projects && Array.isArray(projects)) {
+      lead.projects = projects;
+    }
     await lead.save();
-
     res.status(200).json(lead);
   } catch (err) {
-    console.error(err);
+    console.error("updateLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
+
+
 
 export const approveLead = async (req, res) => {
   try {
@@ -128,6 +215,7 @@ export const approveLead = async (req, res) => {
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error("approveLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -146,6 +234,7 @@ export const denyLead = async (req, res) => {
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error("denyLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -158,6 +247,7 @@ export const deleteLead = async (req, res) => {
     }
     res.status(200).json({ message: 'Lead deleted' });
   } catch (err) {
+    console.error("deleteLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -180,7 +270,7 @@ export const uploadQuotation = async (req, res) => {
 
     res.status(200).json({ quotationUrl: lead.quotationUrl });
   } catch (err) {
-    console.error(err);
+    console.error("uploadQuotation error:", err);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -188,7 +278,7 @@ export const uploadQuotation = async (req, res) => {
 export const getLeadHistory = async (req, res) => {
   try {
     console.log('Fetching lead history for ID:', req.params.id);
-    const lead = await Invoice.find({ user: req.params.id }).populate('items').populate('transactions'); 
+    const lead = await Invoice.find({ user: req.params.id }).populate('items').populate('transactions');
     if (!lead) {
       return res.status(404).json({ message: 'Lead not found' });
     }
@@ -201,6 +291,7 @@ export const getLeadHistory = async (req, res) => {
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error("getLeadHistory error:", err);
     res.status(500).json({ message: err.message });
   }
 };

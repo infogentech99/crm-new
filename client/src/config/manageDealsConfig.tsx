@@ -1,3 +1,4 @@
+import { DataTableProps } from '@components/Common/DataTable';
 import { Deal } from '@customTypes/index';
 import { Eye, Trash2, Pencil } from 'lucide-react';
 import React from 'react';
@@ -10,7 +11,7 @@ export const manageDealsConfig = (
   currentPage: number,
   limit: number
 ) => {
-  const baseColumns = [
+  const baseColumns: DataTableProps<Deal>['columns'] = [
     { key: '_id', label: 'S.NO', render: (item: Deal, index?: number) => <span>{index !== undefined ? (currentPage - 1) * limit + index + 1 : ''}</span> },
     { key: 'dealName', label: 'DEAL NAME' },
     { key: 'amount', label: 'AMOUNT', render: (item: Deal) => <span>₹{item.amount.toFixed(2)}</span> },
@@ -21,8 +22,9 @@ export const manageDealsConfig = (
     {
       key: 'actions',
       label: 'ACTIONS',
+      align: 'right',
       render: (item: Deal) => (
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-end space-x-2">
           <button className="text-gray-500 hover:text-gray-700 flex items-center" onClick={() => handleViewDeal(item)}>
             <Eye className="h-4 w-4" />
           </button>

@@ -3,14 +3,16 @@ import mongoose from 'mongoose';
 const LeadSchema = new mongoose.Schema({
   name:      { type: String, required: true },
   email:     { type: String, required: true, unique: true },
-  phone:     { type: String, required: true },
+  phoneNumber: { type: String, required: true },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  company:   String,
+  companyName:   String, // Changed from 'company' to 'companyName'
   jobTitle:  String,
+  description: String, // Removed as it's now part of notes
+  position:  String, // Removed as it's mapped to jobTitle
   address:   String,
   city:      String,
   state:     String,
@@ -18,7 +20,7 @@ const LeadSchema = new mongoose.Schema({
   zipCode:   String,
   website:   String,
   linkedIn:  String,
-  source:    { type: String, enum: ['Website','Referral','LinkedIn','Cold Call'], default: 'Website' },
+  source:    { type: String, enum: ['Website','Referral','LinkedIn','Cold Call','Facebook','Google','Instagram','Twitter','Advertisement','Event','Partnership','Other'], default: 'Website' },
   industry:  { type: String, enum: ['IT','Retail','Manufacturing','Other'], default: 'Other' },
   notes: [
   {
@@ -31,21 +33,24 @@ const LeadSchema = new mongoose.Schema({
   }
 ],
 
-  status:    {
-    type: String,
-    enum: [
-      'pending_approval','denied','approved',
-      'quotation_submitted','quotation_rejected','quotation_approved',
-      'invoice_issued','invoice_accepted','completed',  'processing_payments', 
-      'new','contacted','qualified','lost'
-    ],
-    default: 'pending_approval'
-  },
   gstin: { type: String},
   bestTimeToCall: { type: String },
   callResponse:  { type: String, enum: ["Picked", "Not Response", "Talk to later"], default: 'Picked' },
   denialReason: String,
   remark: { type: String },
+  transactions: [
+  {
+    type: Object, 
+    default: []
+  }
+],
+projects: [
+  {
+    type: Object, 
+    default: []
+  }
+],
+
 }, { timestamps: true });
 
 const Lead = mongoose.models.Lead || mongoose.model('Lead', LeadSchema);

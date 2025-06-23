@@ -12,14 +12,14 @@ const router = express.Router();
 
 router
   .route('/')
-  .get(protect, authorize(['superadmin','admin', 'manager', 'employee']), getAllMeetings) // Add authorize
-  .post(protect, authorize(['superadmin','admin', 'manager', 'employee']), createMeeting); // Add authorize
+  .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getAllMeetings) // Add authorize
+  .post(protect, authorize('superadmin','admin', 'salesperson', 'employee'), createMeeting); // Add authorize
 
 router
   .route('/:id')
-  .get(protect, authorize(['superadmin','admin', 'manager', 'employee']), getMeeting) // Add authorize
-  .put(protect, authorize(['superadmin','admin', 'manager']), updateMeeting) // Add authorize
-  .patch(protect, authorize(['superadmin','admin', 'manager']), updateMeeting) // Add authorize
-  .delete(protect, authorize(['superadmin','admin', 'manager']), deleteMeeting); // Add authorize
+  .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getMeeting) // Add authorize
+  .put(protect, authorize('superadmin','admin', 'salesperson'), updateMeeting) // Add authorize
+  .patch(protect, authorize('superadmin','admin', 'salesperson'), updateMeeting) // Add authorize
+  .delete(protect, authorize('superadmin','admin', 'salesperson'), deleteMeeting); // Add authorize
 
 export default router;
