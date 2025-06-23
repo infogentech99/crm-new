@@ -46,7 +46,6 @@ export default function LeadDetailsPage() {
             try {
                 const data = await getLeadById(id as string);
                 setLead(data);
-                console.log(data, "updated")
 
             } catch (err: any) {
                 setError(err.message || 'Failed to fetch lead');
