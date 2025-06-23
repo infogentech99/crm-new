@@ -276,7 +276,25 @@ export default function LeadDetailsPage() {
             >
                 <QuotationForm
                     mode="Create"
-                    data={lead}
+                    data={{
+                        _id: '', // Placeholder, will be generated on creation
+                        quotationNumber: '', // Placeholder
+                        clientName: lead.name || '',
+                        clientEmail: lead.email || '',
+                        items: [], // Start with empty items
+                        totalAmount: 0,
+                        issueDate: dayjs().format('YYYY-MM-DD'), // Current date
+                        validUntil: dayjs().add(30, 'days').format('YYYY-MM-DD'), // 30 days from now
+                        createdBy: lead.createdBy,
+                        createdAt: dayjs().toISOString(),
+                        updatedAt: dayjs().toISOString(),
+                        user: lead, // Pass the lead object as the 'user' property
+                        totals: {
+                            taxable: 0,
+                            igst: 0,
+                            total: 0,
+                        },
+                    }}
                     onClose={() => {
                         setIsQuotationOpen(false);
                     }}
@@ -289,7 +307,40 @@ export default function LeadDetailsPage() {
             >
                 <InvoiceForm
                     mode="Create"
-                    data={lead!}
+                    data={{
+                        _id: '', // Placeholder, will be generated on creation
+                        invoiceNumber: '', // Placeholder
+                        clientName: lead.name || '',
+                        clientEmail: lead.email || '',
+                        clientPhone: lead.phoneNumber || '',
+                        items: [], // Start with empty items
+                        totalAmount: 0,
+                        paidAmount: 0,
+                        status: 'Pending',
+                        issueDate: dayjs().format('YYYY-MM-DD'), // Current date
+                        dueDate: dayjs().add(30, 'days').format('YYYY-MM-DD'), // 30 days from now
+                        createdBy: lead.createdBy,
+                        createdAt: dayjs().toISOString(),
+                        updatedAt: dayjs().toISOString(),
+                        user: { // Map lead properties to a User-like object for the 'user' field
+                            _id: lead._id,
+                            name: lead.name || '',
+                            email: lead.email || '',
+                            role: 'client', // Assuming a default role for the client
+                            phone: lead.phoneNumber || '',
+                            address: lead.address || '',
+                            city: lead.city || '',
+                            zipCode: lead.zipCode || '',
+                            gstin: lead.gstin || '',
+                            phoneNumber: lead.phoneNumber || '',
+                            createdAt: lead.createdAt,
+                        },
+                        totals: {
+                            taxable: 0,
+                            igst: 0,
+                            total: 0,
+                        },
+                    }}
                     projectId={lead!.projects?.[selectedProject]?._id || null}
                     onClose={() => {
                         setIsInvoiceOpen(false);

@@ -39,23 +39,39 @@ export const parseLeadsCSV = (csvText: string): Partial<Lead>[] => {
     headers.forEach((header, idx) => {
       const raw = cols[idx] ?? "";
 
-      switch (header) {
+      // Use a type assertion to ensure 'header' is a valid key of 'Lead'
+      const key = header as keyof Lead;
+
+      switch (key) {
         case "notes":
+          try {
+            lead.notes = JSON.parse(raw) as Lead['notes'];
+          } catch {
+            lead.notes = [];
+          }
+          break;
         case "projects":
           try {
-            (lead as any)[header] = JSON.parse(raw);
+            lead.projects = JSON.parse(raw) as Lead['projects'];
           } catch {
-            (lead as any)[header] = [];
+            lead.projects = [];
           }
           break;
 
         case "createdAt":
+          lead.createdAt = raw;
+          break;
         case "updatedAt":
-          (lead as any)[header] = raw;
+          lead.updatedAt = raw;
           break;
 
         default:
-          (lead as any)[header] = raw;
+          // Assign directly, asserting the type of the property
+          // This is the most direct way to avoid 'any' while maintaining type safety
+          // for known keys. If 'key' is not a valid property of 'Lead', this will
+          // result in a TypeScript error.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (lead as Record<keyof Lead, any>)[key] = raw;
       }
     });
 

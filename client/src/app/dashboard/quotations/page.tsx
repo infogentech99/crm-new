@@ -149,20 +149,22 @@ const ManageQuotationsPage: React.FC = () => {
           />
         </div>
 
-        <Modal
-          isOpen={isQuotationOpen}
-          onClose={() => setIsQuotationOpen(false)}
-          widthClass="max-w-5xl"
-        >
-          <QuotationForm
-            mode="Edit"
-            data={selectedQuotation}
-            onClose={() => {
-              setIsQuotationOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['allQuotations'] });
-            }}
-          />
-        </Modal>
+        {isQuotationOpen && selectedQuotation && ( // Conditionally render if selectedQuotation is not null
+          <Modal
+            isOpen={isQuotationOpen}
+            onClose={() => setIsQuotationOpen(false)}
+            widthClass="max-w-5xl"
+          >
+            <QuotationForm
+              mode="Edit"
+              data={selectedQuotation}
+              onClose={() => {
+                setIsQuotationOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['allQuotations'] });
+              }}
+            />
+          </Modal>
+        )}
 
         {quotationToDelete && (
           <DeleteModal

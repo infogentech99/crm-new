@@ -15,8 +15,6 @@ import {
   SelectValue,
 } from '@components/ui/select';
 import { PaginationComponent } from '@components/ui/pagination';
-import { useSelector } from 'react-redux';
-import { RootState } from '@store/store';
 import Modal from '@components/Common/Modal';
 import DeleteModal from '@components/Common/DeleteModal';
 import TransactionForm from '@components/Transaction/TrasactionForm';
@@ -31,7 +29,6 @@ const ManageTransactionsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isMounted, setIsMounted] = useState(false);
 
-  const userRole = useSelector((state: RootState) => state.user.role || '');
  useEffect(() => {
    document.title = "Manage Transactions – CRM Application";
  }, []);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,11 +11,7 @@ import { RootState } from "@store/store";
 import {
   LayoutDashboard,
   Users,
-  ClipboardList,
-  MessageSquare,
   FileText,
-  Receipt,
-  Repeat,
   Calendar,
   ListChecks,
   LogOut,
@@ -103,12 +99,18 @@ const sidebarItems: SidebarItem[] = [
   }
 ];
 
+
 export default function Sidebar() {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const role = useSelector((state: RootState) => state.user.role);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = () => {
     dispatch(removeToken());
@@ -126,7 +128,7 @@ export default function Sidebar() {
   return (
     <div className="fixed top-0 left-0 h-screen w-16 bg-gray-800 text-gray-200 flex flex-col  shadow-lg z-50">
       <div className="flex flex-col h-full ">
-        {filteredItems.map(item => (
+        {mounted && filteredItems.map(item => (
           <Link href={item.href} key={item.id}>
             <div
               className={`relative py-4 space-y-2 flex justify-center items-center cursor-pointer rounded ${

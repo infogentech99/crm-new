@@ -36,7 +36,7 @@ export default function AddProjectModal({
   isOpen: boolean;
   onClose: () => void;
   leadId: string;
-  onProjectAdded: (updatedLead: any) => void;
+  onProjectAdded: (updatedLead: Lead) => void; // Changed type to Lead
 }) {
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('new');

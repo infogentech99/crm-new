@@ -14,7 +14,6 @@ import {
 import { PaginationComponent } from '@components/ui/pagination';
 import { manageProjectsConfig } from '@src/config/manageProjectsConfig';
 import { getLeads } from '@services/leadService';
-import { FlattenedProject } from '@customTypes/index';
 
 const ManageProjectsPage: React.FC = () => {
   const [page, setPage] = useState(1);

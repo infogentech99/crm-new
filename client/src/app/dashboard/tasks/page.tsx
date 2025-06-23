@@ -51,9 +51,10 @@ const ManageTasksPage: React.FC = () => {
     (
       Array.isArray(task.assignee)
         ? task.assignee.some(
-            (assignee: any) =>
-              (typeof assignee === 'object' && 'name' in assignee && (assignee.name?.toLowerCase() || '').includes(search.toLowerCase())) ||
-              (typeof assignee === 'string' && assignee.toLowerCase().includes(search.toLowerCase()))
+            (assignee) => {
+              const assigneeName = typeof assignee === 'object' && 'name' in assignee ? assignee.name : assignee;
+              return (assigneeName?.toLowerCase() || '').includes(search.toLowerCase());
+            }
           )
         : false
     )

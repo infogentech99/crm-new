@@ -2,7 +2,6 @@
 "use client";
 
 import React from "react";
-import { X } from "lucide-react";
 import { toast } from "sonner";
 import { RxCross2 } from "react-icons/rx";
 

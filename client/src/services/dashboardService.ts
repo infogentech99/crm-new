@@ -1,4 +1,4 @@
-import { DashboardSummary, RecentActivity, Lead } from '@customTypes/index';
+import { DashboardSummary, RecentActivity, Lead, MeetingSummary } from '@customTypes/index';
 
 const API_URL = '/api'; // Base URL for all API endpoints
 
@@ -95,6 +95,16 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
     monthlyRevenue: monthlyRevenueData,
     taskStatusSummary: taskStatusSummaryData,
   };
+};
+
+export const fetchMeetingSummary = async (): Promise<MeetingSummary> => {
+  const headers = getAuthHeaders();
+  const response = await fetch(`${API_URL}/meetings/summary`, { headers }); // Assuming this endpoint exists
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to fetch meeting summary');
+  }
+  return response.json();
 };
 
 export const fetchRecentActivities = async (): Promise<RecentActivity[]> => {

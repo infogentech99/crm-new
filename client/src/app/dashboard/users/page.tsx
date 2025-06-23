@@ -22,7 +22,6 @@ import {
   SelectItem,
 } from "@components/ui/select";
 import { PaginationComponent } from '@components/ui/pagination';
-import { Button } from "@components/ui/button";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@store/store";
@@ -145,8 +144,8 @@ export default function ManageUsersPage() {
           <div className="flex items-center space-x-4">
             <Select
               value={roleFilter}
-              onValueChange={(val) => {
-                setRoleFilter(val as any);
+              onValueChange={(val: "all" | "admin" | "salesperson") => {
+                setRoleFilter(val);
                 setPage(1);
               }}
             >

@@ -8,9 +8,10 @@ import { Button } from "@components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@components/ui/select";
 import { RxCross2 } from "react-icons/rx";
 import { createUser, updateUser } from "@services/userService";
+import { User } from "@customTypes/index";
 
 interface Props {
-  data?: any;
+  data?: User;
   mode: "Create" | "Edit";
   onClose: () => void;
 }
@@ -34,7 +35,7 @@ export default function CustomForm({ data, mode, onClose }: Props) {
     setSubmitting(true);
     try {
       if (mode === "Edit" && data?._id) {
-        const payload: any = {
+        const payload: { name: string; email: string; role: string; password?: string } = {
           name: formData.name,
           email: formData.email,
           role: formData.role,

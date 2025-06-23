@@ -2,13 +2,26 @@
 
 import React from 'react';
 import { RxCross2 } from 'react-icons/rx';
+import { Meeting, User, Contact, Lead } from '@customTypes/index'; // Import necessary types
 
 interface ViewMeetingProps {
-    data: any;
+    data: Meeting; // Changed type to Meeting
     onClose: () => void;
 }
 
 export default function ViewMeeting({ data, onClose }: ViewMeetingProps) {
+    const getParticipantDisplay = (participant: string | User | Contact | Lead) => {
+        if (typeof participant === 'object' && participant !== null) {
+            if ('name' in participant && typeof participant.name === 'string') {
+                return participant.name;
+            }
+            if ('email' in participant && typeof participant.email === 'string') {
+                return participant.email;
+            }
+        }
+        return String(participant); // Ensure it's always a string
+    };
+
     return (
         <>
        
@@ -53,8 +66,8 @@ export default function ViewMeeting({ data, onClose }: ViewMeetingProps) {
                     value={
                         data?.participants?.length ? (
                             <ul className="list-disc pl-5">
-                                {data.participants.map((email: string, idx: number) => (
-                                    <li key={idx}>{email}</li>
+                                {data.participants.map((p, idx: number) => (
+                                    <li key={idx}>{getParticipantDisplay(p)}</li>
                                 ))}
                             </ul>
                         ) : (
@@ -68,7 +81,11 @@ export default function ViewMeeting({ data, onClose }: ViewMeetingProps) {
                 />
                 <LabelValue
                     label="Created By"
-                    value={`${data?.createdBy?.name} (${data?.createdBy?.email})`}
+                    value={
+                        data?.createdBy && typeof data.createdBy === 'object' && 'name' in data.createdBy
+                            ? `${data.createdBy.name} (${data.createdBy.email})`
+                            : 'N/A'
+                    }
                 />
             </div>
              </>

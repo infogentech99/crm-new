@@ -62,6 +62,7 @@ export interface User {
   gstin?: string;
   phoneNumber?: string;
   projects?: { _id: string; title: string; status: string }[];
+  createdAt: string; // Added createdAt
 }
 
 export interface Lead {
@@ -120,6 +121,7 @@ export interface Task {
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  repeat?: 'None' | 'Daily' | 'Weekly' | 'Monthly'; // Added repeat property
 }
 
 export interface Transaction {
@@ -142,12 +144,15 @@ export interface Meeting {
   _id: string;
   title: string;
   date: string; 
-  duration: string; 
+  duration: number; // Changed to number
   status: 'Scheduled' | 'Completed' | 'Cancelled';
   participants?: (string | User | Contact | Lead)[];
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  platform?: string; // Added platform
+  meetlink?: string; // Added meetlink
+  description?: string; // Added description
 }
 
 export interface Bill {
@@ -268,7 +273,6 @@ export interface InvoiceItem {
 }
 
 export interface Quotation {
-  data?: Record<string, unknown>;
   _id: string;
   quotationNumber: string;
   clientName: string;
@@ -281,7 +285,12 @@ export interface Quotation {
   createdAt: string;
   updatedAt: string;
   user: Lead;
-  totals: QuotationItem;
+  totals: {
+    taxable: number;
+    igst: number;
+    total: number;
+  };
+  date?: string; // Added date as it's used in page.tsx
 }
 
 export type LeadStatus =
@@ -330,4 +339,11 @@ export interface MeetingEmailData {
   meetlink: string;
   description: string;
   participants: string[];
+}
+
+export interface MeetingSummary {
+  totalMeetings: number;
+  upcomingMeetings: number;
+  completedMeetings: number;
+  cancelledMeetings: number;
 }
