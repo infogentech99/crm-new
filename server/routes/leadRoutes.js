@@ -45,24 +45,10 @@ router.get(
 );
 
 router.get(
-  '/invoiceHistory/:id',
-  protect,
-  authorize('superadmin', 'admin', 'salesperson'),
-  getLeadHistory
-);
-
-router.get(
-  '/summary/status',
+  '/:id',
   protect,
   authorize('superadmin', 'admin', 'salesperson', 'employee'),
-  getLeadStatusSummary
-);
-
-router.get(
-  '/summary/source',
-  protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee'),
-  getLeadSourceSummary
+  getLead
 );
 
 router.get(
