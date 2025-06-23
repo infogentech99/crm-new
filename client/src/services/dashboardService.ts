@@ -18,13 +18,15 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   const totalLeadsData = await totalLeadsResponse.json();
   const totalLeads = totalLeadsData?.totalLeads || 0;
 
-  // As per user feedback, "leads equals to contacts", so newContacts will be totalLeads
-  const newContacts = totalLeads;
+  // Fetch total contacts
+  const totalContactsResponse = await fetch(`${API_URL}/contacts?limit=1`, { headers });
+  const totalContactsData = await totalContactsResponse.json();
+  const newContacts = totalContactsData?.totalContacts || 0;
 
-  // Fetch total deals value summary
-  const totalDealsValueSummaryResponse = await fetch(`${API_URL}/deals/summary/total-value`, { headers });
-  const totalDealsValueSummaryData = await totalDealsValueSummaryResponse.json();
-  const totalDealsValue = totalDealsValueSummaryData?.totalDealsValue.toFixed(2) || "0.00";
+  // Fetch open deals summary
+  const openDealsSummaryResponse = await fetch(`${API_URL}/deals/summary/open-deals`, { headers });
+  const openDealsSummaryData = await openDealsSummaryResponse.json();
+  const openDeals = openDealsSummaryData?.totalOpenDealsValue.toFixed(2) || "0.00";
 
   // Fetch tasks due summary
   const tasksDueSummaryResponse = await fetch(`${API_URL}/tasks/summary/due`, { headers });
@@ -72,7 +74,7 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   return {
     totalLeads,
     newContacts,
-    openDeals: totalDealsValue, // Use the new totalDealsValue
+    openDeals,
     tasksDue,
     approvedQuotations,
     approvedInvoices,

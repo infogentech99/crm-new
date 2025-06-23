@@ -112,7 +112,7 @@ export const getPendingInvoiceAmountSummary = async (req, res, next) => {
       {
         $group: {
           _id: null,
-          totalPendingAmount: { $sum: { $subtract: ['$totals.total', { $ifNull: ['$paidAmount', 0] }] } }
+          totalPendingAmount: { $sum: { $subtract: ['$totalAmount', { $ifNull: ['$paidAmount', 0] }] } }
         }
       }
     ]);
