@@ -134,21 +134,17 @@ export default function LeadDetailsPage() {
     if (loading) return <LeadDetailsShimmer />;
     if (error) {
         return (
-            <DashboardLayout>
                 <div className="text-red-500 text-center p-6 rounded-lg shadow-md">
                     Error loading lead: {error}
                 </div>
-            </DashboardLayout>
         );
     }
 
     if (!lead) {
         return (
-            <DashboardLayout>
                 <div className="text-gray-600 text-center p-6 rounded-lg shadow-md">
                     No lead found with this ID.
                 </div>
-            </DashboardLayout>
         );
     }
 

@@ -1,5 +1,5 @@
 import express from 'express';
-import { genrate, getAllInvoices, getInvoiceById, updateInvoice, deleteInvoice, getMonthlyRevenueSummary, getPendingInvoiceAmountSummary } from "../controllers/invoiceController.js";
+import { genrate, getAllInvoices, getInvoiceById, updateInvoice, deleteInvoice, getTotalPaidInvoicesAmount,getMonthlyRevenueSummary, getPendingInvoiceAmountSummary,getTotalInvoicesAmount, } from "../controllers/invoiceController.js";
 import { protect, authorize } from '../middlewares/authMiddleware.js'; // Import middleware
 
 const router = express.Router();
@@ -22,6 +22,20 @@ router.get(
   protect,
   authorize(['superadmin', 'admin', 'manager', 'employee']),
   getPendingInvoiceAmountSummary
+);
+
+router.get(
+  '/summary/total-amount',
+  protect,
+  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  getTotalInvoicesAmount
+);
+
+router.get(
+  '/summary/total-paid-amount',
+  protect,
+  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  getTotalPaidInvoicesAmount
 );
 
 export default router;

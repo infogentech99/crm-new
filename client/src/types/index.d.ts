@@ -23,6 +23,8 @@ export interface DashboardSummary {
   approvedInvoices: number;
   lostLeads: number;
   pendingAmount: string;
+  totalInvoicesAmount: string;
+  totalPaidInvoicesAmount: string;
   leadStatusSummary: { [key: string]: number };
   leadSourceSummary: { [key: string]: number };
   monthlyRevenue: { name: string; revenue: number }[];

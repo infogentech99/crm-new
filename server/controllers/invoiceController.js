@@ -101,6 +101,52 @@ export const getMonthlyRevenueSummary = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const getTotalInvoicesAmount = async (req, res, next) => {
+  try {
+    const totalAmountResult = await Invoice.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalInvoicesAmount: { $sum: '$totals.total' }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      totalInvoicesAmount: totalAmountResult.length > 0 ? totalAmountResult[0].totalInvoicesAmount : 0
+    });
+  } catch (err) {
+    console.error('getTotalInvoicesAmount error:', err);
+    next(err);
+  }
+};
+
+export const getTotalPaidInvoicesAmount = async (req, res, next) => {
+  try {
+    const totalPaidAmountResult = await Invoice.aggregate([
+      {
+        $match: {
+          status: 'Paid'
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalPaidInvoicesAmount: { $sum: '$totals.total' }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      totalPaidInvoicesAmount: totalPaidAmountResult.length > 0 ? totalPaidAmountResult[0].totalPaidInvoicesAmount : 0
+    });
+  } catch (err) {
+    console.error('getTotalPaidInvoicesAmount error:', err);
+    next(err);
+  }
+};
+
 export const getPendingInvoiceAmountSummary = async (req, res, next) => {
   try {
     const pendingAmountResult = await Invoice.aggregate([

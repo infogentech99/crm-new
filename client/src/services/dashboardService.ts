@@ -69,6 +69,16 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   console.log('Pending Invoice Amount Data:', pendingInvoiceAmountData);
   const pendingAmount = pendingInvoiceAmountData?.totalPendingAmount.toFixed(2) || "0.00";
 
+  // Fetch total invoices amount
+  const totalInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-amount`, { headers });
+  const totalInvoicesAmountData = await totalInvoicesAmountResponse.json();
+  const totalInvoicesAmount = totalInvoicesAmountData?.totalInvoicesAmount.toFixed(2) || "0.00";
+
+  // Fetch total paid invoices amount
+  const totalPaidInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-paid-amount`, { headers });
+  const totalPaidInvoicesAmountData = await totalPaidInvoicesAmountResponse.json();
+  const totalPaidInvoicesAmount = totalPaidInvoicesAmountData?.totalPaidInvoicesAmount.toFixed(2) || "0.00";
+
   return {
     totalLeads,
     newContacts,
@@ -78,6 +88,8 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
     approvedInvoices,
     lostLeads,
     pendingAmount,
+    totalInvoicesAmount,
+    totalPaidInvoicesAmount,
     leadStatusSummary: leadStatusSummaryData,
     leadSourceSummary: leadSourceSummaryData,
     monthlyRevenue: monthlyRevenueData,

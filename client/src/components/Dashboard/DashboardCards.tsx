@@ -62,40 +62,28 @@ export default function DashboardCards() {
         bgColor="bg-green-500"
       />
       <StatCard
-        title="Total Amount"
-        value={`₹${data?.openDeals || 'N/A'}`} // 'openDeals' now holds totalDealsValue
+        title="Total Amount of Open Deals"
+        value={`₹${data?.totalInvoicesAmount ?? '0.00'}`}
         icon="💰"
         bgColor="bg-yellow-500"
       />
-      <StatCard
-        title="Tasks Due"
-        value={data?.tasksDue.toLocaleString() || 'N/A'}
-        icon="📅"
-        bgColor="bg-red-500"
-      />
-      <StatCard
-        title="Approved Quotations"
-        value={data?.approvedQuotations.toLocaleString() || 'N/A'}
+      {/* <StatCard
+        title="Total Paid of Open Deals"
+        value={`₹${data?.totalPaidInvoicesAmount ?? '0.00'}`}
         icon="✅"
         bgColor="bg-purple-500"
       />
       <StatCard
-        title="Approved Invoices"
-        value={data?.approvedInvoices.toLocaleString() || 'N/A'}
-        icon="📄"
-        bgColor="bg-indigo-500"
-      />
-      <StatCard
-        title="Lost Leads"
-        value={data?.lostLeads.toLocaleString() || 'N/A'}
-        icon="❌"
-        bgColor="bg-gray-500"
-      />
-      <StatCard
-        title="Pending Amount"
-        value={`₹${data?.pendingAmount || 'N/A'}`}
+        title="Pending Invoices"
+        value={`₹${data?.pendingAmount ?? '0.00'}`}
         icon="⏳"
         bgColor="bg-orange-500"
+      /> */}
+      <StatCard
+        title="Tasks Due"
+        value={data?.tasksDue.toLocaleString() ?? '0'}
+        icon="📅"
+        bgColor="bg-red-500"
       />
     </div>
   );
