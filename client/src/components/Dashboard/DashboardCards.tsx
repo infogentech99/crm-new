@@ -62,8 +62,8 @@ export default function DashboardCards() {
         bgColor="bg-green-500"
       />
       <StatCard
-        title="Open Deals"
-        value={`₹${data?.openDeals || 'N/A'}`}
+        title="Total Amount"
+        value={`₹${data?.openDeals || 'N/A'}`} // 'openDeals' now holds totalDealsValue
         icon="💰"
         bgColor="bg-yellow-500"
       />

@@ -5,7 +5,7 @@ import Lead    from '../models/Lead.js';
 // Create
 export const genrate = async (req, res) => {
   try {
-    const { _id, totals, items, gstin, projectId } = req.body;
+    const { _id, totals, items, gstin, projectId, status } = req.body; // Added status
     if (!_id || !totals || !items) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -14,6 +14,7 @@ export const genrate = async (req, res) => {
       user:      _id,
       totals,
       projectId,
+      status: status || 'Draft', // Set status, default to 'Draft'
       createdBy: req.user._id
     });
 
@@ -111,7 +112,7 @@ export const getPendingInvoiceAmountSummary = async (req, res, next) => {
       {
         $group: {
           _id: null,
-          totalPendingAmount: { $sum: { $subtract: ['$totalAmount', { $ifNull: ['$paidAmount', 0] }] } }
+          totalPendingAmount: { $sum: { $subtract: ['$totals.total', { $ifNull: ['$paidAmount', 0] }] } }
         }
       }
     ]);
@@ -204,7 +205,7 @@ export const getInvoiceById = async (req, res) => {
 export const updateInvoice = async (req, res) => {
   try {
     const { id } = req.params;
-    const { totals, items, gstin } = req.body;
+    const { totals, items, gstin, status } = req.body; // Added status
     if (!totals || !items) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -228,6 +229,9 @@ export const updateInvoice = async (req, res) => {
     }
 
     invoice.totals = totals;
+    if (status) {
+      invoice.status = status; // Update status if provided
+    }
 
     const user = await Lead.findById(invoice.user);
     if (gstin && user) {

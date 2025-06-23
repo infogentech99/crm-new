@@ -9,19 +9,18 @@ export const createDeal = async (req, res, next) => {
   }
 };
 
-export const getOpenDealsSummary = async (req, res, next) => {
+export const getTotalDealsValueSummary = async (req, res, next) => {
   try {
-    const openDeals = await Deal.aggregate([
-      { $match: { status: 'open' } },
+    const totalDeals = await Deal.aggregate([
       { $group: { _id: null, totalValue: { $sum: '$value' }, count: { $sum: 1 } } }
     ]);
 
     res.status(200).json({
-      totalOpenDealsValue: openDeals.length > 0 ? openDeals[0].totalValue : 0,
-      totalOpenDealsCount: openDeals.length > 0 ? openDeals[0].count : 0,
+      totalDealsValue: totalDeals.length > 0 ? totalDeals[0].totalValue : 0,
+      totalDealsCount: totalDeals.length > 0 ? totalDeals[0].count : 0,
     });
   } catch (err) {
-    console.error('getOpenDealsSummary error:', err);
+    console.error('getTotalDealsValueSummary error:', err);
     next(err);
   }
 };

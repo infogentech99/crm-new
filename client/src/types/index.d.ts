@@ -66,6 +66,9 @@ export interface Lead {
   _id: string;
   name: string;
   email: string;
+  phone?: string; // Added
+  position?: string; // Added
+  company?: string; // Added (assuming this is the field used in the UI)
   phoneNumber?: string;
   createdBy: string | User; 
   companyName?: string; 
@@ -79,11 +82,7 @@ export interface Lead {
   linkedIn?: string;
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
-  notes?: {
-    message?: string;
-    createdAt?: string;
-    createdBy?: string;
-  }[];
+  notes?: Note[]; // Changed to use Note interface
   status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
   gstin?: string;
   bestTimeToCall?: string;
@@ -92,11 +91,20 @@ export interface Lead {
   remark?: string;
   createdAt: string;
   updatedAt: string;
-   projects: {
-    _id: string;
-    title: string;
-    status: string;
-  }[];
+  projects: Project[]; // Changed to use Project interface
+  transactions?: Transaction[]; // Added
+}
+
+export interface Project { // New interface for Project
+  _id: string;
+  title: string;
+  status: string;
+}
+
+export interface Note { // New interface for Note
+  message: string; // Made required
+  createdAt?: string;
+  createdBy?: string;
 }
 
 export interface Task {
@@ -117,14 +125,15 @@ export interface Transaction {
   method: string
   amount: number;
   transactionId: string
-  invoiceId: string,
-  leadId: string,
+  invoiceId: string;
+  leadId: string;
+  projectId?: string; // Added projectId
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
   user: User;
-  invoice: Invoice,
-  transactionDate: string
+  invoice: Invoice;
+  transactionDate: string;
 }
 
 export interface Meeting {

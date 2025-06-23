@@ -113,7 +113,7 @@ export const getLeads = async (req, res) => {
     }
 
     if (status) {
-      query.status = status;
+      query['projects.status'] = status; // Filter by status within the projects array
     }
 
     const total = await Lead.countDocuments(query);

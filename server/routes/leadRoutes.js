@@ -45,6 +45,13 @@ router.get(
 );
 
 router.get(
+  '/:id',
+  protect,
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
+  getLead
+);
+
+router.get(
   '/invoiceHistory/:id',
   protect,
   authorize('superadmin', 'admin', 'salesperson'),
