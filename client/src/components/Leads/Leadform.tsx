@@ -55,7 +55,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       position: "",
       website: "",
       createdBy: "",
-      projects: [], 
+      projects: [],
     },
   });
 
@@ -70,7 +70,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
   const mutation = useMutation({
 
     mutationFn: (data: FormData) =>
-      
+
       mode === "Edit" && initialData?._id
         ? updateLead(initialData._id, data)
         : createLead(data),
@@ -108,58 +108,53 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
           {["name", "phoneNumber", "email", "companyName", "address", "city", "state", "zipCode", "country", "source", "industry", "callResponse", "description", "remark", "position", "website"].map((field) => (
             <FormField
-  key={field}
-  control={form.control}
-  name={field as keyof FormData}
-  rules={
-    ["name", "phoneNumber", "email", "companyName","city"].includes(field)
-      ? { required: `${field.replace(/([A-Z])/g, ' $1')} is required` }
-      : undefined
-  }
-  render={({ field: f }) => (
-    <FormItem>
-      <RequiredLabel required={["name", "phoneNumber", "email", "companyName","city"].includes(field)}>
-        {field.replace(/([A-Z])/g, ' $1')}
-      </RequiredLabel>
-      <FormControl>
-        {(field === "source" || field === "industry" || field === "callResponse") ? (
-          <Select
-            key={f.value as string}
-            value={f.value as string}
-            onValueChange={f.onChange}
-          >
-            <SelectTrigger>
-              <SelectValue>{(f.value as string) || `Select ${field}`}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {field === "source" &&
-                ["LinkedIn", "Website", "Referral", "Cold Call", "Other"].map(val => (
-                  <SelectItem key={val} value={val}>{val}</SelectItem>
-                ))}
-              {field === "industry" &&
-                ["IT", "Retail", "Manufacturing", "Other"].map(val => (
-                  <SelectItem key={val} value={val}>{val}</SelectItem>
-                ))}
-              {field === "callResponse" &&
-                ["Picked", "Not Response", "Talk to later"].map(val => (
-                  <SelectItem key={val} value={val}>{val}</SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input type="text" {...f} value={f.value as string} />
-        )}
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+              key={field}
+              control={form.control}
+              name={field as keyof FormData}
+              rules={
+                ["name", "phoneNumber", "email", "companyName", "city"].includes(field)
+                  ? { required: `${field.replace(/([A-Z])/g, ' $1')} is required` }
+                  : undefined
+              }
+              render={({ field: f }) => (
+                <FormItem>
+                  <RequiredLabel required={["name", "phoneNumber", "email", "companyName", "city"].includes(field)}>
+                    {field.replace(/([A-Z])/g, ' $1')}
+                  </RequiredLabel>
+                  <FormControl>
+                    {(field === "source" || field === "industry" || field === "callResponse") ? (
+                      <Select
+                        key={f.value as string}
+                        value={f.value as string}
+                        onValueChange={f.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue>{(f.value as string) || `Select ${field}`}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {field === "source" &&
+                            ["LinkedIn", "Website", "Referral", "Cold Call", "Other"].map(val => (
+                              <SelectItem key={val} value={val}>{val}</SelectItem>
+                            ))}
+                          {field === "industry" &&
+                            ["IT", "Retail", "Manufacturing", "Other"].map(val => (
+                              <SelectItem key={val} value={val}>{val}</SelectItem>
+                            ))}
+                          {field === "callResponse" &&
+                            ["Picked", "Not Response", "Talk to later"].map(val => (
+                              <SelectItem key={val} value={val}>{val}</SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input type="text" {...f} value={f.value as string} />
+                    )}
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           ))}
-
-
-
-
-
 
           <div className="col-span-2 mt-4 flex justify-end gap-3">
             <Button
