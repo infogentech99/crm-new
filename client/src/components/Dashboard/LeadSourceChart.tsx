@@ -5,7 +5,12 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { useQuery } from '@tanstack/react-query';
 import { fetchDashboardSummary } from '@services/dashboardService';
 
-const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#FF8042', '#0088FE'];
+const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#FF8042', '#0088FE', '#A4DE6C', '#D0ED57', '#83A6ED', '#8DD1E1', '#82CA9D', '#C1F0F6', '#FFC0CB'];
+
+const ALL_LEAD_SOURCES = [
+  'Website', 'Referral', 'LinkedIn', 'Cold Call', 'Facebook', 'Google',
+  'Instagram', 'Twitter', 'Advertisement', 'Event', 'Partnership', 'Other'
+];
 
 export default function LeadSourceChart() {
   const { data, isLoading, isError, error } = useQuery({
@@ -31,12 +36,18 @@ export default function LeadSourceChart() {
   }
 
   const summaryData = data?.leadSourceSummary || {};
-  const chartData = Object.keys(summaryData).map(source => ({
+  
+  // Create chartData ensuring all sources are present, even if count is 0
+  const chartData = ALL_LEAD_SOURCES.map((source, index) => ({
     name: source,
-    value: summaryData[source],
+    value: summaryData[source] || 0,
+    color: COLORS[index % COLORS.length], // Assign a color to each bar
   }));
 
-  if (chartData.length === 0) {
+  // Only show "No lead source data available" if all counts are zero
+  const hasData = chartData.some(item => item.value > 0);
+
+  if (!hasData) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md h-80 flex items-center justify-center">
         <p className="text-gray-500">No lead source data available.</p>
@@ -62,7 +73,7 @@ export default function LeadSourceChart() {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="value" fill={COLORS[0]} />
+          <Bar dataKey="value" fill="color" /> {/* Use the 'color' property from chartData */}
         </BarChart>
       </ResponsiveContainer>
     </div>
