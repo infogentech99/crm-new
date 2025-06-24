@@ -30,9 +30,6 @@ export const getAllBills = async (req, res) => {
 
     const filter = {};
     
-    // if (req.user.role !== 'superadmin') {
-    //   filter.createdBy = req.user._id;
-    // }
 
     if (search) {
       filter.$or = [
@@ -67,11 +64,6 @@ export const getBillById = async (req, res) => {
     return res.status(404).json({ error: 'bill not found' });
     }
 
-    // Ownership check
-    if (req.user.role !== 'superadmin' &&
-        !bill.createdBy._id.equals(req.user._id)) {
-      return res.status(403).json({ message: 'Forbidden' });
-    }
 
     res.json({ data: bill });
   } catch (err) {
@@ -93,11 +85,6 @@ export const updateBill = async (req, res) => {
       return res.status(404).json({ message: 'Bill not found' });
     }
 
-    // Ownership check
-    if (req.user.role !== 'superadmin' &&
-        !bill.createdBy.equals(req.user._id)) {
-      return res.status(403).json({ message: 'Forbidden' });
-    }
 
     bill.description = description;
     bill.hsnCode     = hsnCode;
@@ -119,11 +106,6 @@ export const deleteBill = async (req, res) => {
       return res.status(404).json({ message: 'Bill not found' });
     }
 
-    // Ownership check
-    if (req.user.role !== 'superadmin' &&
-        !bill.createdBy.equals(req.user._id)) {
-      return res.status(403).json({ message: 'Forbidden' });
-    }
 
     await bill.deleteOne();
     res.json({ message: 'Billdeleted' });
