@@ -5,12 +5,14 @@ import { createEmail } from "@services/emailService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
+// import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { QuotationItem } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
 import dayjs from "dayjs";
 import { toWords } from "number-to-words";
+import { getQuotationById } from "@services/quotationService";
+
 
 export default function Page() {
   const params = useParams();
@@ -87,7 +89,8 @@ export default function Page() {
             price: it.price,
             hsn: it.hsn,
           })),
-          invoiceDate: dayjs(q.date || q.createdAt).format("DD-MM-YYYY"),
+          // invoiceDate: dayjs(q.date || q.createdAt).format("DD-MM-YYYY"),
+           invoiceDate: q.date || q.createdAt, // just raw string
           totals: { taxable, cgst, sgst, igst, total },
         });
       })
@@ -152,7 +155,7 @@ export default function Page() {
     .replace(/(^\w|\s\w)/g, m => m.toUpperCase())} Rupees Only`;
 
   return (
-    <DashboardLayout>
+    <>
       <div className="bg-gray-50 py-10">
         <div className="max-w-7xl mx-auto px-6">
           {/* A4 Invoice Container */}
@@ -459,6 +462,6 @@ export default function Page() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

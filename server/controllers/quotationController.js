@@ -86,6 +86,31 @@ export const getAllQuotations = async (req, res) => {
   }
 };
 
+// // Get one by ID
+// export const getQuotationById = async (req, res) => {
+//   try {
+//     const quotation = await Quotation.findById(req.params.id)
+//       .populate('user')
+//       .populate('items')
+//       .populate('createdBy', 'name role');
+//     if (!quotation) {
+//       return res.status(404).json({ message: 'Quotation not found' });
+//     }
+
+//     // enforce per-role access
+//     if (req.user.role !== 'superadmin' &&
+//         !quotation.createdBy.equals(req.user._id)) {
+//       return res.status(403).json({ message: 'Forbidden' });
+//     }
+
+//     res.json({ data: quotation });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: 'Failed to fetch quotation' });
+//   }
+// };
+
+
 // Get one by ID
 export const getQuotationById = async (req, res) => {
   try {

@@ -3,11 +3,16 @@
 import LeadDetailsShimmer from "@components/ui/LeadDetailsShimmer";
 import { createEmail } from "@services/emailService";
 import { getInvoiceById } from "@services/invoiceService";
+import { getTransactionsByInvoiceId } from "@services/transactionService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import { InvoiceItem, CustomerData, InvoiceResponse } from "@customTypes/index";
+// import DashboardLayout from "@components/Dashboard/DashboardLayout";
+import { InvoiceItem,
+  CustomerData,
+  InvoiceResponse,
+//   Transaction,
+} from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
 import dayjs from "dayjs";
@@ -20,30 +25,33 @@ export default function Page() {
 
   const [sending, setSending] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [error, setError] = useState("");
-  const [data, setData] = useState({
+//   const [invoiceError, setInvoiceError] = useState<string | null>(null);
+//   const [paymentsError, setPaymentsError] = useState<string | null>(null);
+
+//   const [payments, setPayments] = useState<Transaction[]>([]);
+  const [data, setData] = useState<{
+    order: { id: string; totalAmount: number };
+    customer: CustomerData;
+    items: InvoiceItem[];
+    invoiceDate: string;
+    totals: { taxable: number; cgst: number; sgst: number; igst: number; total: number };
+  }>({
     order: { id: "", totalAmount: 0 },
-    customer: {
-      name: "",
-      address: "",
-      city: "",
-      postalCode: "",
-      email: "",
-      phone: "",
-      gstn: ""
-    } as CustomerData,
-    items: [] as InvoiceItem[],
+    customer: { name: "", address: "", city: "", postalCode: "", email: "", phone: "", gstn: "" },
+    items: [],
     invoiceDate: "",
     totals: { taxable: 0, cgst: 0, sgst: 0, igst: 0, total: 0 },
   });
 
+
   useEffect(() => {
     if (!id) return;
 
-    const fetchInvoice = async () => {
+    const fetchInvoiceAndPayments = async () => {
       try {
         const response: InvoiceResponse = await getInvoiceById(id);
         const invoice = response.data;
+
         const taxable = invoice.totals?.taxable || 0;
         let cgst = 0, sgst = 0, igst = 0;
 
@@ -65,26 +73,39 @@ export default function Page() {
             postalCode: invoice.user?.zipCode || "",
             email: invoice.user?.email || "",
             phone: invoice.user?.phone || "",
-            gstn: invoice.user?.gstin || ""
+            gstn: invoice.user?.gstin || "",
           },
           items: (invoice.items || []).map((it: InvoiceItem) => ({
             description: it.description,
             quantity: it.quantity,
             price: it.price,
-            hsn: it.hsn
+            hsn: it.hsn,
           })),
           invoiceDate: dayjs(invoice.date || invoice.createdAt).format("DD-MM-YYYY"),
-          totals: { taxable, cgst, sgst, igst, total }
+          totals: { taxable, cgst, sgst, igst, total },
         });
       } catch (err) {
         console.error("Failed to fetch invoice:", err);
         setError("Failed to load invoice.");
-      }
+    //     setInvoiceError(err.message || "Failed to load invoice.");
+    //     return; // stop before fetching payments
+    //   }
+
+    //   // Fetch payments
+    //   try {
+    //     const invoicePayments = await getTransactionsByInvoiceId(id);
+    //     setPayments(invoicePayments);
+    //   } catch (err: any) {
+    //     console.error("Payments fetch error:", err);
+    //     setPaymentsError(err.message || "Failed to load payments.");
+    //     toast.error(`Couldn’t load payments: ${err.message}`);
+    }
     };
 
-    fetchInvoice();
+    fetchInvoiceAndPayments();
   }, [id]);
 
+  // Set page title
   useEffect(() => {
     document.title = "Invoice Details – CRM Application";
   }, []);
@@ -123,7 +144,14 @@ export default function Page() {
     }
   };
 
-  if (!id) {
+//   if (!id || invoiceError) {
+//     return (
+//       <p className="p-4 text-center text-red-500">
+//         {invoiceError || <LeadDetailsShimmer />}
+//       </p>
+//     );
+//   }
+ if (!id) {
     return <p className="p-4 text-center"><LeadDetailsShimmer /></p>;
   }
 
@@ -136,7 +164,7 @@ export default function Page() {
   const amountInWords = `${toWords(Math.round(totals.total)).replace(/(^\w|\s\w)/g, m => m.toUpperCase())} Rupees Only`;
 
   return (
-    <DashboardLayout>
+    <>
       <div className="bg-gray-50 py-10">
         <div className="max-w-7xl mx-auto px-6">
          {/* A4 Invoice Container */}
@@ -336,9 +364,39 @@ export default function Page() {
             </tfoot>
           </table>
 
+            {/* Payment History */}
+            {/* <div className="mb-6">
+              <h6 className="font-semibold mb-2">Payment History</h6>
+              {payments.length===0?
+                <p className="text-sm italic">No payments recorded for this invoice.</p>
+              :
+                <table className="w-full text-sm border">
+                  <thead className="bg-gray-100 text-left">
+                    <tr>
+                      <th className="p-2">#</th>
+                      <th className="p-2">Date</th>
+                      <th className="p-2">Txn. ID</th>
+                      <th className="p-2">Amount (₹)</th>
+                      <th className="p-2">Method</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {payments.map((pmt,idx)=>(
+                      <tr key={pmt._id} className="border-t">
+                        <td className="p-2">{idx+1}</td>
+                        <td className="p-2">{dayjs(pmt.transactionDate).format("DD-MM-YYYY")}</td>
+                        <td className="p-2">{pmt.transactionId}</td>
+                        <td className="p-2">₹{pmt.amount.toLocaleString("en-IN")}</td>
+                        <td className="p-2">{pmt.method}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              }
+            </div> */}
 
-            {/* Terms, Bank & Signature */}
-<div className="grid grid-cols-2 border border-black text-[10px]">
+            {/* Terms & Bank & Sig */}
+            <div className="grid grid-cols-2 border border-black text-[10px]">
   {/* Terms & Conditions */}
   <div className="p-3 border-r border-black leading-snug space-y-2">
     <p className="font-semibold uppercase mb-1">Terms &amp; Conditions</p>
@@ -434,6 +492,6 @@ export default function Page() {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -17,6 +17,13 @@ export interface TransactionInput {
   leadId: string;
   projectId?: string; // Made projectId optional
 }
+
+export interface PaginatedTransactions {
+  transactions: Transaction[];
+  totalPages: number;
+  currentPage: number;
+  totalTransactions: number;
+}
 export const getTransactions = async (
   page: number = 1,
   limit: number = 10,
@@ -89,4 +96,26 @@ export const deleteTransaction = async (id: string): Promise<{ message: string }
     throw new Error(errorData.message || `Failed to delete transaction with ID ${id}`);
   }
   return response.json();
+};
+export const getTransactionsByInvoiceId = async (
+  invoiceId: string
+): Promise<Transaction[]> => {
+  const response = await fetch(`${API_URL}/${invoiceId}/transactions`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    // try to extract a JSON error, or fallback to text
+    const text = await response.text();
+    try {
+      const err = JSON.parse(text);
+      throw new Error(err.error || err.message || "Failed to fetch payments");
+    } catch {
+      throw new Error(text || "Failed to fetch payments");
+    }
+  }
+
+  // Response body is JSON: { data: Transaction[] }
+  const payload: { data?: Transaction[]; transactions?: Transaction[] } = await response.json();
+  return payload.data || payload.transactions || [];
 };
