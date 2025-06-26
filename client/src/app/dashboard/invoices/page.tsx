@@ -4,7 +4,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { deleteInvoice, getInvoices } from '@services/invoiceService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { manageInvoicesConfig } from '@config/manageInvoicesConfig';
 import Modal from '@components/Common/Modal';
 import { Invoice } from '@customTypes/index';
@@ -30,7 +29,6 @@ const ManageInvoicesPage: React.FC = () => {
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -39,11 +37,9 @@ const ManageInvoicesPage: React.FC = () => {
   const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
-   useEffect(() => {
-     document.title = "Manage Invoices – CRM Application";
-   }, []);
 
   useEffect(() => {
+    document.title = "Manage Invoices – CRM Application";
     setIsMounted(true);
   }, []);
 
@@ -52,7 +48,6 @@ const ManageInvoicesPage: React.FC = () => {
     queryFn: () => getInvoices(1, 10000, search),
     enabled: isMounted, 
   });
-  console.log("Invoices Data:", data);
   const allInvoices = data?.invoices || [];
 
 const totalInvoices = allInvoices.length;
@@ -118,7 +113,6 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
   }
 
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -159,22 +153,24 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
           />
         </div>
 
-        <Modal
-          isOpen={isInvoiceOpen}
-          onClose={() => setIsInvoiceOpen(false)}
-          widthClass="max-w-5xl"
-        >
-          <InvoiceForm
-            mode="Edit"
-            data={selectedInvoice}
-            projectId=''
-            onClose={() => {
-              setIsInvoiceOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
-            }}
-          />
-        </Modal>
-        {isTransactionModalOpen && (
+        {isInvoiceOpen && selectedInvoice && ( // Conditionally render if selectedInvoice is not null
+          <Modal
+            isOpen={isInvoiceOpen}
+            onClose={() => setIsInvoiceOpen(false)}
+            widthClass="max-w-5xl"
+          >
+            <InvoiceForm
+              mode="Edit"
+              data={selectedInvoice}
+              projectId=''
+              onClose={() => {
+                setIsInvoiceOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
+              }}
+            />
+          </Modal>
+        )}
+        {isTransactionModalOpen && selectedInvoice && ( // Conditionally render if selectedInvoice is not null
           <TransactionModal
             selectedInvoice={selectedInvoice}
             onClose={() => {
@@ -197,7 +193,6 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
           />
         )}
       </div>
-    </DashboardLayout>
   );
 };
 

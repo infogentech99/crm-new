@@ -11,9 +11,10 @@ import { createTask, updateTask } from '@services/taskService';
 import { fetchUsers } from '@services/userService';
 import { RxCross2 } from 'react-icons/rx';
 import { TaskEmailSender } from './TaskEmailSender';
+import { Task, User } from '@customTypes/index';
 
 interface Props {
-  data?: any;
+  data?: Task;
   mode: 'Create' | 'Edit';
   onClose: () => void;
 }
@@ -39,19 +40,23 @@ export default function TaskForm({ data, mode, onClose }: Props) {
     const loadUsers = async () => {
       try {
         const response = await fetchUsers();
-        const formatted = response.users.map((user: any) => ({
+        const formatted = response.users.map((user: User) => ({
           label: `${user.name} (${user.email})`,
           value: user.email,
         }));
         setUsers(formatted);
         if (mode === 'Edit') {
-          const allAssignees = data?.assignee || [];
+          const initialAssignees = data?.assignee || [];
+          const assigneeEmails = initialAssignees.map((assignee) =>
+            typeof assignee === 'string' ? assignee : assignee.email
+          );
+
           const selected = formatted.filter((user) =>
-            allAssignees.includes(user.value)
+            assigneeEmails.includes(user.value)
           );
           setSelectedUsers(selected);
-          const manualEmails = allAssignees.filter(
-            (email: string) => !selected.find((u) => u.value === email)
+          const manualEmails = assigneeEmails.filter(
+            (email) => !selected.find((u) => u.value === email)
           );
           setFormData((prev) => ({
             ...prev,

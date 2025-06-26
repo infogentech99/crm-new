@@ -4,7 +4,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getTasks, deleteTask } from '@services/taskService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import NewTaskButton from '@components/Common/NewTaskButton';
 import { manageTasksConfig } from '@config/manageTasksConfig';
 import Modal from '@components/Common/Modal';
@@ -35,10 +34,9 @@ const ManageTasksPage: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
- useEffect(() => {
-   document.title = "Manage Tasks – CRM Application";
- }, []);
+
   useEffect(() => {
+    document.title = "Manage Tasks – CRM Application";
     setIsMounted(true);
   }, []);
 
@@ -53,9 +51,10 @@ const ManageTasksPage: React.FC = () => {
     (
       Array.isArray(task.assignee)
         ? task.assignee.some(
-            (assignee: any) =>
-              (typeof assignee === 'object' && 'name' in assignee && (assignee.name?.toLowerCase() || '').includes(search.toLowerCase())) ||
-              (typeof assignee === 'string' && assignee.toLowerCase().includes(search.toLowerCase()))
+            (assignee) => {
+              const assigneeName = typeof assignee === 'object' && 'name' in assignee ? assignee.name : assignee;
+              return (assigneeName?.toLowerCase() || '').includes(search.toLowerCase());
+            }
           )
         : false
     )
@@ -125,7 +124,7 @@ const ManageTasksPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -199,7 +198,7 @@ const ManageTasksPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

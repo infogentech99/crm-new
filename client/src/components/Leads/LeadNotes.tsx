@@ -8,10 +8,12 @@ import { toast } from 'sonner';
 import { Pencil, Trash2 } from 'lucide-react';
 import DeleteModal from '@components/Common/DeleteModal';
 
+import { Note } from '@customTypes/index'; // Import Note interface
+
 interface LeadNotesProps {
   leadId: string;
-  notes: { message: string; createdAt?: string }[] | [];
-  onNotesUpdated: (updatedNotes: any[]) => void;
+  notes: Note[] | [];
+  onNotesUpdated: (updatedNotes: Note[]) => void;
 }
 
 export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesProps) {
@@ -32,8 +34,8 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
       onNotesUpdated(updatedLead.notes || []);
       setNewNote('');
       toast.success('Note added successfully');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to add note');
+    } catch (err: unknown) { // Changed to unknown
+      toast.error((err as Error).message || 'Failed to add note'); // Safely access message
     } finally {
       setIsAddingNote(false);
     }
@@ -48,8 +50,8 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
       onNotesUpdated(updatedLead.notes || []);
       setEditingNoteIndex(null);
       toast.success('Note updated successfully');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to update note');
+    } catch (err: unknown) { // Changed to unknown
+      toast.error((err as Error).message || 'Failed to update note'); // Safely access message
     }
   };
 
@@ -61,8 +63,8 @@ export default function LeadNotes({ leadId, notes, onNotesUpdated }: LeadNotesPr
       const updatedLead = await updateLead(leadId, { notes: updatedNotes });
       onNotesUpdated(updatedLead.notes || []);
       toast.success("Note deleted successfully");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete note");
+    } catch (err: unknown) { // Changed to unknown
+      toast.error((err as Error).message || "Failed to delete note"); // Safely access message
     }
   };
 

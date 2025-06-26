@@ -1,6 +1,15 @@
 "use client";
 import clsx from "clsx";
 import { Pencil, Trash2 } from "lucide-react";
+import { Project } from "@customTypes/index"; // Import Project interface
+
+interface ProjectSelectorProps {
+  projects: Project[];
+  selectedProjectIndex: number;
+  onSelect: (index: number) => void;
+  onEdit: (index: number) => void;
+  onDelete: (index: number) => void;
+}
 
 export default function ProjectSelector({
   projects = [],
@@ -8,7 +17,7 @@ export default function ProjectSelector({
   onSelect,
   onEdit,
   onDelete,
-}) {
+}: ProjectSelectorProps) {
   if (!projects.length) return null;
 
   return (

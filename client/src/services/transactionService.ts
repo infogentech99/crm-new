@@ -15,7 +15,7 @@ export interface TransactionInput {
   transactionId: string;
   invoiceId: string;
   leadId: string;
-  projectId:string
+  projectId?: string; // Made projectId optional
 }
 export const getTransactions = async (
   page: number = 1,
@@ -51,7 +51,7 @@ export const getTransactionById = async (id: string): Promise<Transaction> => {
 
 export const createTransaction = async (
   transactionData: TransactionInput
-): Promise<any> => {
+): Promise<Transaction> => {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: getAuthHeaders(),

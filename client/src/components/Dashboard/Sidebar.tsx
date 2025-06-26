@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,14 +11,16 @@ import { RootState } from "@store/store";
 import {
   LayoutDashboard,
   Users,
-  ClipboardList,
-  MessageSquare,
   FileText,
-  Receipt,
-  Repeat,
   Calendar,
   ListChecks,
   LogOut,
+  FolderOpenDot,
+  Phone,
+  Wallet,
+  ScrollText,
+  Landmark,
+  ChartNoAxesCombined,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -44,19 +46,19 @@ const sidebarItems: SidebarItem[] = [
   {
     id: "leads",
     href: "/dashboard/leads",
-    icon: <ClipboardList size={24} />,
+    icon: <ChartNoAxesCombined size={24} />,
     label: "All Leads",
   },
   {
     id: "contacts",
     href: "/dashboard/contacts",
-    icon: <MessageSquare size={24} />,
+    icon: <Phone  size={24}/>,
     label: "Contacts",
   },
   {
     id: "projects",
     href: "/dashboard/projects",
-    icon: <ClipboardList size={24} />,
+    icon: <FolderOpenDot  size={24}/>,
     label: "Projects",
   },
   {
@@ -68,19 +70,19 @@ const sidebarItems: SidebarItem[] = [
   {
     id: "invoices",
     href: "/dashboard/invoices",
-    icon: <Receipt size={24} />,
+    icon: <Wallet size={24}/>,
     label: "Invoices",
   },
   {
     id: "bills",
     href: "/dashboard/bills",
-    icon: <ListChecks size={24} />,
+    icon: <ScrollText size={24}/>,
     label: "Deals Bill",
   },
   {
     id: "transactions",
     href: "/dashboard/transactions",
-    icon: <Repeat size={24} />,
+    icon: <Landmark size={24} />,
     label: "Transactions",
   },
   {
@@ -97,12 +99,18 @@ const sidebarItems: SidebarItem[] = [
   }
 ];
 
+
 export default function Sidebar() {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const role = useSelector((state: RootState) => state.user.role);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = () => {
     dispatch(removeToken());
@@ -119,11 +127,11 @@ export default function Sidebar() {
 
   return (
     <div className="fixed top-0 left-0 h-screen w-16 bg-gray-800 text-gray-200 flex flex-col  shadow-lg z-50">
-      <div className="flex flex-col h-full py-4 ">
-        {filteredItems.map(item => (
+      <div className="flex flex-col h-full ">
+        {mounted && filteredItems.map(item => (
           <Link href={item.href} key={item.id}>
             <div
-              className={`relative py-4 space-y-2 flex justify-center items-center p-2 cursor-pointer rounded ${
+              className={`relative py-4 space-y-2 flex justify-center items-center cursor-pointer rounded ${
                 pathname === item.href ? "bg-gray-700" : "hover:bg-red-600"
               }`}
               onMouseEnter={() => setHoveredItemId(item.id)}
@@ -147,7 +155,7 @@ export default function Sidebar() {
         >
           <LogOut size={24} />
           {hoveredItemId === "logout" && (
-            <span className="absolute left-full ml-3 whitespace-nowrap bg-gray-700 text-white text-xs px-3 py-4 rounded">
+            <span className="absolute left-full ml-3 whitespace-nowrap bg-gray-700 text-white text-xs px-3  rounded">
               Logout
             </span>
           )}

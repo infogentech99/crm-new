@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { fetchUserById, fetchUserActivities } from "@services/userService";
 import { deleteLead } from "@services/leadService";
 import DataTable from "@components/Common/DataTable";
@@ -30,11 +29,9 @@ export default function UserDetailsPage() {
   const { id } = useParams();
   const router = useRouter();
 
-  // Deletion modal state
   const [deleting, setDeleting] = useState<RecentActivity | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  // View/Delete handlers
   const onView = useCallback(
     (act: RecentActivity) => router.push(`/dashboard/leads/${act.id}`),
     [router]
@@ -44,7 +41,6 @@ export default function UserDetailsPage() {
     setIsDeleteOpen(true);
   }, []);
 
-  // User & activities
   const [user, setUser] = useState<User | null>(null);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [tab, setTab] = useState<"Leads" | "Meetings" | "Tasks">("Leads");
@@ -52,12 +48,11 @@ export default function UserDetailsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  // Filters & pagination
+
   const [search, setSearch] = useState<string>("");
   const [limit, setLimit] = useState<number>(10);
   const [page, setPage] = useState<number>(1);
 
-  // Fetch data
   const load = useCallback(async () => {
     if (!id) return;
     const userId = Array.isArray(id) ? id[0] : id;
@@ -69,30 +64,28 @@ export default function UserDetailsPage() {
       ]);
       setUser(u);
       setActivities(acts);
-    } catch (e: any) {
-      setError(e.message || "Unable to load");
+    } catch (e: unknown) { // Changed to unknown
+      setError((e as Error).message || "Unable to load"); // Safely access message
     } finally {
       setLoading(false);
     }
   }, [id]);
 
-   useEffect(() => {
-     document.title = "User Details – CRM Application";
-   }, []);
 
   useEffect(() => {
+    document.title = "User Details – CRM Application";
     load();
   }, [load]);
 
-  // Confirm delete
+
   const handleConfirmDelete = async () => {
     if (!deleting) return;
     try {
       await deleteLead(String(deleting.id));
       toast.success("Activity deleted");
       await load();
-    } catch (e: any) {
-      toast.error(e.message || "Delete failed");
+    } catch (e: unknown) { // Changed to unknown
+      toast.error((e as Error).message || "Delete failed"); // Safely access message
     } finally {
       setIsDeleteOpen(false);
       setDeleting(null);
@@ -102,15 +95,15 @@ export default function UserDetailsPage() {
   if (loading) return <UserDetailsShimmer />;
   if (error)
     return (
-      <DashboardLayout>
+      <>
         <div className="p-6 text-red-500 text-center">{error}</div>
-      </DashboardLayout>
+      </>
     );
   if (!user)
     return (
-      <DashboardLayout>
+      <>
         <div className="p-6 text-gray-600 text-center">User not found.</div>
-      </DashboardLayout>
+      </>
     );
 
   const filtered = activities
@@ -142,7 +135,7 @@ export default function UserDetailsPage() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="mb-4 bg-white shadow-sm rounded-md px-8 py-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">User Details</h2>
@@ -153,7 +146,7 @@ export default function UserDetailsPage() {
             <p><strong>Name:</strong> {user.name}</p>
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>Role:</strong> {user.role}</p>
-            <p><strong>Joined:</strong> {new Date((user as any).createdAt).toLocaleDateString()}</p>
+            <p><strong>Joined:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
           </div>
         </div>
       </div>
@@ -162,16 +155,12 @@ export default function UserDetailsPage() {
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Recent Activity</h3>
           <div className="flex space-x-2">
-            {[
-              "Leads",
-              "Meetings",
-              "Tasks",
-            ].map((t) => (
+            {(["Leads", "Meetings", "Tasks"] as const).map((t) => (
               <Button
                 key={t}
                 variant={tab === t ? "default" : "outline"}
                 onClick={() => {
-                  setTab(t as any);
+                  setTab(t);
                   setPage(1);
                   setSearch("");
                 }}
@@ -226,8 +215,8 @@ export default function UserDetailsPage() {
       {/* Edit User Modal */}
       <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} widthClass="max-w-3xl">
         <UserForm
-          initialData={user!}
-          mode="edit"
+          data={user} // Removed '!' as user is already checked for null
+          mode="Edit"
           onClose={() => { setIsEditOpen(false); toast.success("Saved"); }}
         />
       </Modal>
@@ -238,9 +227,9 @@ export default function UserDetailsPage() {
           isOpen={isDeleteOpen}
           onClose={() => setIsDeleteOpen(false)}
           onConfirm={handleConfirmDelete}
-          itemLabel={deleting.name}
+          itemLabel={deleting.name || 'this activity'} // Added fallback for itemLabel
         />
       )}
-    </DashboardLayout>
+    </>
   );
 }

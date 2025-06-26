@@ -7,7 +7,12 @@ interface UserState {
   role: string | null;
 }
 
-const initialState: UserState = {
+const storedUser =
+  typeof window !== 'undefined'
+    ? JSON.parse(localStorage.getItem('userData') || 'null')
+    : null;
+
+const initialState: UserState = storedUser || {
   id: null,
   name: null,
   email: null,
@@ -23,15 +28,24 @@ const userSlice = createSlice({
       state.name = action.payload.name;
       state.email = action.payload.email;
       state.role = action.payload.role;
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('userData', JSON.stringify(action.payload));
+      }
     },
     removeUser: (state) => {
       state.id = null;
       state.name = null;
       state.email = null;
       state.role = null;
+
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userData');
+      }
     },
   },
 });
 
 export const { addUser, removeUser } = userSlice.actions;
 export default userSlice.reducer;
+

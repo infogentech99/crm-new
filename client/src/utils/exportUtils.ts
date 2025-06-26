@@ -1,7 +1,7 @@
 // src/utils/exportUtils.ts
-import { Lead } from "@customTypes/index";
+import { Lead, User } from "@customTypes/index";
 
-function escapeCSV(value: any): string {
+function escapeCSV(value: unknown): string {
   if (value == null) return "";
   const str = String(value);
   const escaped = str.replace(/"/g, '""');
@@ -46,7 +46,7 @@ export const exportLeadsToCSV = (leads: Lead[]) => {
     // Created By → name
     const creator =
       typeof lead.createdBy === "object" && lead.createdBy
-        ? (lead.createdBy as any).name
+        ? (lead.createdBy as User).name
         : lead.createdBy;
 
     // Latest project title

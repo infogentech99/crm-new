@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLead, updateLead } from "@services/leadService";
@@ -10,7 +10,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage
 } from "@components/ui/form";
 import {
@@ -47,7 +46,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       state: "",
       zipCode: "",
       country: "",
-      source: "LinkedIn",
+      source: "Website",
       industry: "IT",
       callResponse: "Picked",
       description: "",
@@ -133,7 +132,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
             </SelectTrigger>
             <SelectContent>
               {field === "source" &&
-                ["LinkedIn", "Website", "Referral", "Cold Call", "Other"].map(val => (
+                ["Website", "Referral", "LinkedIn", "Cold Call", "Facebook", "Google", "Instagram", "Twitter", "Advertisement", "Event", "Partnership", "Other"].map(val => (
                   <SelectItem key={val} value={val}>{val}</SelectItem>
                 ))}
               {field === "industry" &&

@@ -5,7 +5,8 @@ import {
   getDeals,
   getDeal, // Import new functions
   updateDeal, // Import new functions
-  deleteDeal // Import new functions
+  deleteDeal, // Import new functions
+  getTotalDealsValueSummary // Import new function
 } from '../controllers/dealController.js';
 
 const router = express.Router();
@@ -13,6 +14,8 @@ const router = express.Router();
 router.route('/')
   .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getDeals) // Add authorize
   .post(protect, authorize('superadmin','admin', 'salesperson', 'employee'), createDeal); // Add authorize
+
+router.get('/summary/total-value', protect, authorize(['superadmin','admin', 'manager', 'employee']), getTotalDealsValueSummary); // New route for total deals value summary
 
 router.route('/:id')
   .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getDeal) // Add new route with authorize

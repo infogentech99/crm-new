@@ -2,7 +2,6 @@
 
 import LeadDetailsShimmer from "@components/ui/LeadDetailsShimmer";
 import { createEmail } from "@services/emailService";
-import { getQuotationById } from "@services/quotationService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";

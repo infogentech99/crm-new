@@ -1,18 +1,20 @@
 'use client';
 
 import clsx from 'clsx';
-import { Check, CheckCircle, FileText, ReceiptText } from 'lucide-react';
+import { Check, CheckCheck, CheckCircle, CheckLine, FilePen, FileText, HandCoins, ReceiptText, X } from 'lucide-react';
 import { Button } from '@components/ui/button';
 
-const PIPELINE_STEPS = [
+const MAIN_PIPELINE_STEPS = [
   { value: 'new', label: 'New Lead', icon: FileText },
   { value: 'quotation_submitted', label: 'Quotation Issued', icon: FileText },
-  { value: 'quotation_approved', label: 'Quotation Approved', icon: FileText },
+  { value: 'quotation_approved', label: 'Quotation Approved', icon: CheckLine },
   { value: 'invoice_issued', label: 'Invoice Issued', icon: ReceiptText },
-  { value: 'invoice_accepted', label: 'Invoice Accepted', icon: ReceiptText },
-  { value: 'processing_payments', label: 'Processing Payments', icon: ReceiptText },
+  { value: 'invoice_accepted', label: 'Invoice Accepted', icon: CheckCheck  },
+  { value: 'processing_payments', label: 'Processing Payments', icon: HandCoins },
   { value: 'completed', label: 'Project Completed', icon: CheckCircle },
 ];
+
+const DENIED_STEP = { value: 'denied', label: 'Denied', icon: X };
 
 interface PipelineStepperProps {
   currentStatus: string;
@@ -28,8 +30,9 @@ export default function PipelineStepper({
   onCreateInvoice,
 }: PipelineStepperProps) {
   const getStatus = (stepValue: string) => {
-    const activeIndex = PIPELINE_STEPS.findIndex((s) => s.value === currentStatus);
-    const currentIndex = PIPELINE_STEPS.findIndex((s) => s.value === stepValue);
+    const activeIndex = MAIN_PIPELINE_STEPS.findIndex((s) => s.value === currentStatus);
+    const currentIndex = MAIN_PIPELINE_STEPS.findIndex((s) => s.value === stepValue);
+    if (currentStatus === 'denied') return 'inactive'; 
     if (currentIndex < activeIndex) return 'done';
     if (currentIndex === activeIndex) return 'active';
     return 'pending';
@@ -37,14 +40,13 @@ export default function PipelineStepper({
 
   return (
     <div className="w-full px-4 bg-white overflow-x-auto">
-      <div className="relative flex items-start justify-between max-w-7xl mx-auto pt-8">
+      <div className="relative flex items-start justify-start max-w-7xl mx-auto pt-8 gap-4">
 
-        {PIPELINE_STEPS.map((step, index) => {
+        {MAIN_PIPELINE_STEPS.map((step, index) => {
           const status = getStatus(step.value);
           const Icon = step.icon;
-          const isLast = index === PIPELINE_STEPS.length - 1;
-
-          const nextStepStatus = !isLast ? getStatus(PIPELINE_STEPS[index + 1].value) : null;
+          const isLast = index === MAIN_PIPELINE_STEPS.length - 1;
+          const nextStepStatus = !isLast ? getStatus(MAIN_PIPELINE_STEPS[index + 1].value) : null;
 
           return (
             <div key={step.value} className="relative flex flex-col items-center w-40 z-10">
@@ -73,6 +75,7 @@ export default function PipelineStepper({
               >
                 {status === 'done' ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
               </div>
+
               <span
                 className={clsx('text-sm font-medium text-center mt-1', {
                   'text-gray-800': status !== 'pending',
@@ -81,31 +84,50 @@ export default function PipelineStepper({
               >
                 {step.label}
               </span>
+
               {(step.value === 'quotation_submitted' && currentStatus === 'quotation_submitted') && (
                 <div className="mt-2 w-full flex justify-center">
                   <Button
-                    className="text-xs w-32 bg-green-600 hover:bg-green-700 text-white"
+                    className="text-xs w-34 bg-green-600 hover:bg-green-700 text-white"
                     onClick={onCreateQuotation}
                   >
-                    📄 Create Quotation
+                   <FilePen /> Create Quotation
                   </Button>
                 </div>
               )}
+
               {(step.value === 'invoice_issued' && currentStatus === 'invoice_issued') && (
                 <div className="mt-2 w-full flex justify-center">
                   <Button
-                    className="text-xs w-32 bg-green-600 hover:bg-green-700 text-white"
+                    className="text-xs w-34 bg-green-600 hover:bg-green-700 text-white"
                     onClick={onCreateInvoice}
                   >
-                    🧾 Create Invoice
+                     <FilePen /> Create Invoice
                   </Button>
                 </div>
               )}
             </div>
           );
         })}
+
+        <div className="flex flex-col items-center w-40 z-10 ml-6">
+          <div
+            onClick={() => onStatusChange(DENIED_STEP.value)}
+            className={clsx(
+              'w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 cursor-pointer',
+              {
+                'bg-red-600 text-white': currentStatus === 'denied',
+                'bg-gray-300 text-white': currentStatus !== 'denied',
+              }
+            )}
+          >
+            <DENIED_STEP.icon className="w-5 h-5" />
+          </div>
+          <span className="text-sm font-medium text-center mt-1 text-red-600">
+            {DENIED_STEP.label}
+          </span>
+        </div>
       </div>
     </div>
   );
 }
-

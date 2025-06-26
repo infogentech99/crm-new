@@ -5,7 +5,6 @@ import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getLeads, deleteLead, createLead } from '@services/leadService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from '@components/Dashboard/DashboardLayout';
 import CreateLeadButton from '@components/Common/CreateLeadButton';
 import { exportLeadsToCSV } from '@utils/exportUtils';
 import { parseLeadsCSV } from '@utils/importUtils';
@@ -45,7 +44,7 @@ const ManageLeadsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
@@ -59,7 +58,7 @@ const ManageLeadsPage: React.FC = () => {
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["allLeads", search, statusFilter],
-    queryFn: () => getLeads(1, 10000, search, statusFilter),
+    queryFn: () => getLeads(page, limit, search, statusFilter),
    enabled: isMounted,
   });
 
@@ -73,8 +72,8 @@ const ManageLeadsPage: React.FC = () => {
       (lead.phoneNumber?.toLowerCase() || '').includes(lowerCaseSearch)
     );
     const matchesStatus =
-      statusFilter === '' ||
-      statusFilter === 'all' ||
+      statusFilter === undefined ||
+      lead.status === statusFilter ||
       lead.projects?.some(project => project.status === statusFilter);
     return matchesSearch && matchesStatus;
   });
@@ -149,8 +148,13 @@ const ManageLeadsPage: React.FC = () => {
         try {
           await createLead(leadData as Lead);
           successCount++;
-        } catch (err: any) {
-          const msg = err?.response?.data?.message || err.message;
+        } catch (err: unknown) {
+          let msg = 'An unknown error occurred';
+          if (err instanceof Error) {
+            msg = err.message;
+          } else if (typeof err === 'object' && err !== null && 'response' in err && (err as { response: { data?: { message?: string } } }).response?.data?.message) {
+            msg = (err as { response: { data: { message: string } } }).response.data.message;
+          }
           if (msg.includes('E11000') || msg.includes('duplicate key')) {
             duplicateCount++;
           } else {
@@ -195,7 +199,7 @@ const ManageLeadsPage: React.FC = () => {
   };
 
   const handleStatusFilterChange = (value: string) => {
-    setStatusFilter(value);
+    setStatusFilter(value === 'all' ? undefined : value);
     setPage(1);
   };
 
@@ -206,9 +210,8 @@ const ManageLeadsPage: React.FC = () => {
 
   const statusOptions = [
     { value: 'all', label: 'All Status' },
-    { value: 'pending_approval', label: 'Pending Approval' },
-    { value: 'denied', label: 'Denied' },
     { value: 'approved', label: 'Approved' },
+    { value: 'pending_approval', label: 'Pending Approval' },
     { value: 'quotation_submitted', label: 'Quotation Submitted' },
     { value: 'quotation_rejected', label: 'Quotation Rejected' },
     { value: 'quotation_approved', label: 'Quotation Approved' },
@@ -219,12 +222,11 @@ const ManageLeadsPage: React.FC = () => {
     { value: 'new', label: 'New' },
     { value: 'contacted', label: 'Contacted' },
     { value: 'qualified', label: 'Qualified' },
-    { value: 'lost', label: 'Lost' },
+    // { value: 'denied', label: 'Denied' },
   ];
 
 
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <LeadSummaryCards />
 
@@ -263,7 +265,7 @@ const ManageLeadsPage: React.FC = () => {
             className="max-w-sm"
           />
           <div className="flex items-center space-x-4">
-            <Select onValueChange={handleStatusFilterChange} value={statusFilter}>
+            <Select onValueChange={handleStatusFilterChange} value={statusFilter || 'all'}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
@@ -324,7 +326,6 @@ const ManageLeadsPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
   );
 };
 

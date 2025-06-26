@@ -1,4 +1,4 @@
-import { Task } from '@customTypes/index';
+import { Task, User } from '@customTypes/index';
 import BadgeDot from '@components/BadgeDot';
 import { Trash2, Pencil } from 'lucide-react';
 import React from 'react';
@@ -32,12 +32,12 @@ export const manageTasksConfig = (
             return <span>N/A</span>;
           }
           if (typeof assignee[0] === 'object' && assignee[0] !== null && 'name' in assignee[0]) {
-            return <span>{assignee.map((user: any) => user.name).join(', ')}</span>;
+            return <span>{(assignee as User[]).map((user: User) => user.name).join(', ')}</span>;
           } else {
-            return <span>{assignee.join(', ')}</span>;
+            return <span>{(assignee as string[]).join(', ')}</span>;
           }
         } else if (typeof assignee === 'object' && assignee !== null && 'name' in assignee) {
-          return <span>{(assignee as any).name}</span>;
+          return <span>{(assignee as User).name}</span>;
         } else {       
           return <span>{assignee}</span>;
         }

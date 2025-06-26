@@ -7,10 +7,12 @@ import { createBill, updateBill } from '@services/billService';
 import { toast } from 'sonner';
 import { RxCross2 } from 'react-icons/rx';
 import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input'; 
-import RequiredLabel from '@components/ui/RequiredLabel'; // Assuming this is the correct path for RequiredLabel]
+import { Input } from '@components/ui/input';
+import RequiredLabel from '@components/ui/RequiredLabel';
+import { Bill } from '@customTypes/index'; // Import Bill interface
+
 interface Props {
-  data: any;
+  data?: Bill; // Use Bill interface and make it optional
   mode: 'Create' | 'Edit';
   onClose: () => void;
 }
@@ -21,33 +23,41 @@ export default function BillForm({ data, mode, onClose }: Props) {
   const [form, setForm] = useState({
     description: data?.description || '',
     hsnCode: data?.hsnCode || '',
-    amount: data?.amount || '',
+    amount: data?.amount?.toString() || '', // Store as string for input
   });
 
   const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
-const isDescriptionInvalid = touched.description && !form.description;
-const isAmountInvalid = touched.amount && !form.amount;
+  const isDescriptionInvalid = touched.description && !form.description;
+  const isAmountInvalid = touched.amount && (!form.amount || isNaN(Number(form.amount)));
 
-const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-  setTouched((prev) => ({ ...prev, [e.target.name]: true }));
-};
-
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched((prev) => ({ ...prev, [e.target.name]: true }));
+  };
 
   const [submitting, setSubmitting] = useState(false);
 
   const { mutate } = useMutation({
     mutationFn: async () => {
-      const payload = {
+      const basePayload = {
         description: form.description,
         hsnCode: form.hsnCode,
-        amount: form.amount,
+        amount: Number(form.amount), // Convert to number here
       };
 
       try {
-        if (data?._id) {
-          return await updateBill(data._id, payload);
+        if (mode === 'Edit' && data?._id) {
+          return await updateBill(data._id, basePayload);
         } else {
-          return await createBill(payload);
+          // Provide dummy/placeholder values for required fields for creation
+          const createPayload = {
+            ...basePayload,
+            billNumber: `BILL-${Date.now()}`, // Placeholder
+            vendorName: 'Unknown Vendor', // Placeholder
+            status: 'Pending' as const, // Placeholder, explicitly cast to literal type
+            issueDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+          };
+          return await createBill(createPayload);
         }
       } catch (error) {
         console.error("Error in mutationFn:", error);
@@ -72,11 +82,14 @@ const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
   };
 
   const handleSubmit = () => {
-  setTouched({ description: true, amount: true });
-  if (!form.description || !form.amount) return;
-  setSubmitting(true);
-  mutate();
-};
+    setTouched({ description: true, amount: true });
+    if (!form.description || !form.amount || isNaN(Number(form.amount))) {
+      toast.error('Please fill all required fields correctly.');
+      return;
+    }
+    setSubmitting(true);
+    mutate();
+  };
 
   return (
     <div>
@@ -95,19 +108,19 @@ const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
 
       <div className="grid grid-cols-1 gap-4 mb-6">
         <div>
-        <RequiredLabel required>Description</RequiredLabel>
-  <Input
-    type="text"
-    name="description"
-    value={form.description}
-    onChange={handleChange}
-    onBlur={handleBlur}
-    aria-invalid={isDescriptionInvalid}
-    className={`w-full border rounded px-3 py-2 ${isDescriptionInvalid ? 'border-red-500' : ''}`}
-  />
-  {isDescriptionInvalid && (
-    <span className="text-xs text-red-500">Description is required</span>
-  )}
+          <RequiredLabel required>Description</RequiredLabel>
+          <Input
+            type="text"
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            aria-invalid={isDescriptionInvalid}
+            className={`w-full border rounded px-3 py-2 ${isDescriptionInvalid ? 'border-red-500' : ''}`}
+          />
+          {isDescriptionInvalid && (
+            <span className="text-xs text-red-500">Description is required</span>
+          )}
         </div>
 
         <div>
@@ -122,19 +135,19 @@ const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         </div>
 
         <div>
-           <RequiredLabel required>Amount (₹)</RequiredLabel>
-  <Input
-    type="number"
-    name="amount"
-    value={form.amount}
-    onChange={handleChange}
-    onBlur={handleBlur}
-    aria-invalid={isAmountInvalid}
-    className={`w-full border rounded px-3 py-2 ${isAmountInvalid ? 'border-red-500' : ''}`}
-  />
-  {isAmountInvalid && (
-    <span className="text-xs text-red-500">Amount is required</span>
-  )}
+          <RequiredLabel required>Amount (₹)</RequiredLabel>
+          <Input
+            type="number"
+            name="amount"
+            value={form.amount}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            aria-invalid={isAmountInvalid}
+            className={`w-full border rounded px-3 py-2 ${isAmountInvalid ? 'border-red-500' : ''}`}
+          />
+          {isAmountInvalid && (
+            <span className="text-xs text-red-500">Amount is required</span>
+          )}
         </div>
       </div>
 

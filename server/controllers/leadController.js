@@ -10,7 +10,81 @@ export const createLead = async (req, res) => {
 
     res.status(201).json(newLead);
   } catch (err) {
+    console.error("createLead error:", err);
     res.status(400).json({ message: err.message });
+  }
+};
+
+export const getLeadSourceSummary = async (req, res) => {
+  try {
+    let query = {};
+    if (req.user.role !== 'superadmin') {
+      query.createdBy = req.user._id;
+    }
+
+    const sourceSummary = await Lead.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: '$source',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          source: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+
+    const formattedSummary = sourceSummary.reduce((acc, item) => {
+      acc[item.source] = item.count;
+      return acc;
+    }, {});
+
+    res.status(200).json(formattedSummary);
+  } catch (err) {
+    console.error("getLeadSourceSummary error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getLeadStatusSummary = async (req, res) => {
+  try {
+    let query = {};
+    if (req.user.role !== 'superadmin') {
+      query.createdBy = req.user._id;
+    }
+
+    const statusSummary = await Lead.aggregate([
+      { $match: query },
+      { $unwind: '$projects' },
+      {
+        $group: {
+          _id: '$projects.status',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          status: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+
+    const formattedSummary = statusSummary.reduce((acc, item) => {
+      acc[item.status] = item.count;
+      return acc;
+    }, {});
+
+    res.status(200).json(formattedSummary);
+  } catch (err) {
+    console.error("getLeadStatusSummary error:", err);
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -38,8 +112,8 @@ export const getLeads = async (req, res) => {
       ];
     }
 
-    if (status && status !== 'all') {
-      query['projects'] = { $elemMatch: { status: status } };
+    if (status) {
+      query['projects.status'] = status; // Filter by status within the projects array
     }
 
     const total = await Lead.countDocuments(query);
@@ -56,6 +130,7 @@ export const getLeads = async (req, res) => {
       totalLeads: total,
     });
   } catch (err) {
+    console.error("getLeads error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -78,6 +153,7 @@ export const getLead = async (req, res) => {
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error("getLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -118,7 +194,7 @@ export const updateLead = async (req, res) => {
     await lead.save();
     res.status(200).json(lead);
   } catch (err) {
-    console.error(err);
+    console.error("updateLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -139,6 +215,7 @@ export const approveLead = async (req, res) => {
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error("approveLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -157,6 +234,7 @@ export const denyLead = async (req, res) => {
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error("denyLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -169,6 +247,7 @@ export const deleteLead = async (req, res) => {
     }
     res.status(200).json({ message: 'Lead deleted' });
   } catch (err) {
+    console.error("deleteLead error:", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -191,7 +270,7 @@ export const uploadQuotation = async (req, res) => {
 
     res.status(200).json({ quotationUrl: lead.quotationUrl });
   } catch (err) {
-    console.error(err);
+    console.error("uploadQuotation error:", err);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -212,6 +291,7 @@ export const getLeadHistory = async (req, res) => {
 
     res.status(200).json(lead);
   } catch (err) {
+    console.error("getLeadHistory error:", err);
     res.status(500).json({ message: err.message });
   }
 };

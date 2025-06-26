@@ -5,7 +5,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { getBills, deleteBill } from "@services/billService";
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import CreateBillButton from '@components/Common/CreateBillButton';
 import { manageBillsConfig } from '@config/manageBillsConfig';
 import Modal from '@components/Common/Modal';
@@ -37,11 +36,9 @@ const ManageBillsPage: React.FC = () => {
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
-   useEffect(() => {
-     document.title = "Manage Bills – CRM Application";
-   }, []);
 
   useEffect(() => {
+    document.title = "Manage Bills – CRM Application";
     setIsMounted(true);
   }, []);
 
@@ -127,7 +124,6 @@ const ManageBillsPage: React.FC = () => {
   }
 
   return (
-    <DashboardLayout>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
 
@@ -204,7 +200,6 @@ const ManageBillsPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
   );
 };
 

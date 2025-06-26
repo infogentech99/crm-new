@@ -5,7 +5,7 @@ import Lead    from '../models/Lead.js';
 // Create
 export const genrate = async (req, res) => {
   try {
-    const { _id, totals, items, gstin, projectId } = req.body;
+    const { _id, totals, items, gstin, projectId, status } = req.body; // Added status
     if (!_id || !totals || !items) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -14,6 +14,7 @@ export const genrate = async (req, res) => {
       user:      _id,
       totals,
       projectId,
+      status: status || 'Draft', // Set status, default to 'Draft'
       createdBy: req.user._id
     });
 
@@ -34,12 +35,143 @@ export const genrate = async (req, res) => {
 
     res.status(201).json({ message: 'Invoice generated', data: invoice });
   } catch (err) {
-    console.error(err);
+    console.error("genrate error:", err);
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-// List & search
+export const getMonthlyRevenueSummary = async (req, res) => {
+  try {
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11); // Go back 11 months to include current month
+
+    let query = {
+      createdAt: { $gte: twelveMonthsAgo },
+      // Assuming 'Paid' status for revenue calculation
+      // You might need to adjust this based on your Invoice schema's status field
+      // For example, if status is 'Paid' or 'invoice_accepted'
+      // status: 'Paid' 
+    };
+
+    // If you want to filter by user, add this:
+    // if (req.user.role !== 'superadmin') {
+    //   query.createdBy = req.user._id;
+    // }
+
+    const monthlyRevenue = await Invoice.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+          },
+          totalRevenue: { $sum: '$totals.total' }, // Assuming 'total' field in 'totals' object
+        },
+      },
+      {
+        $sort: {
+          '_id.year': 1,
+          '_id.month': 1,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: {
+            $dateToString: {
+              format: '%Y-%m',
+              date: {
+                $dateFromParts: {
+                  year: '$_id.year',
+                  month: '$_id.month',
+                  day: 1,
+                },
+              },
+            },
+          },
+          revenue: '$totalRevenue',
+        },
+      },
+    ]);
+
+    res.status(200).json(monthlyRevenue);
+  } catch (err) {
+    console.error("getMonthlyRevenueSummary error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getTotalInvoicesAmount = async (req, res, next) => {
+  try {
+    const totalAmountResult = await Invoice.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalInvoicesAmount: { $sum: '$totals.total' }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      totalInvoicesAmount: totalAmountResult.length > 0 ? totalAmountResult[0].totalInvoicesAmount : 0
+    });
+  } catch (err) {
+    console.error('getTotalInvoicesAmount error:', err);
+    next(err);
+  }
+};
+
+export const getTotalPaidInvoicesAmount = async (req, res, next) => {
+  try {
+    const totalPaidAmountResult = await Invoice.aggregate([
+      {
+        $match: {
+          status: 'Paid'
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalPaidInvoicesAmount: { $sum: '$totals.total' }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      totalPaidInvoicesAmount: totalPaidAmountResult.length > 0 ? totalPaidAmountResult[0].totalPaidInvoicesAmount : 0
+    });
+  } catch (err) {
+    console.error('getTotalPaidInvoicesAmount error:', err);
+    next(err);
+  }
+};
+
+export const getPendingInvoiceAmountSummary = async (req, res, next) => {
+  try {
+    const pendingAmountResult = await Invoice.aggregate([
+      {
+        $match: {
+          status: { $in: ['Pending', 'Overdue'] }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          totalPendingAmount: { $sum: { $subtract: ['$totals.total', { $ifNull: ['$paidAmount', 0] }] } }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      totalPendingAmount: pendingAmountResult.length > 0 ? pendingAmountResult[0].totalPendingAmount : 0
+    });
+  } catch (err) {
+    console.error('getPendingInvoiceAmountSummary error:', err);
+    next(err);
+  }
+};
+
 export const getAllInvoices = async (req, res) => {
   try {
     const page   = parseInt(req.query.page)  || 1;
@@ -111,7 +243,7 @@ export const getInvoiceById = async (req, res) => {
 
     res.json({ data: invoice });
   } catch (err) {
-    console.error('getInvoiceById error:', err);
+    console.error("getInvoiceById error:", err);
     res.status(500).json({ error: 'Failed to fetch invoice' });
   }
 };
@@ -119,7 +251,7 @@ export const getInvoiceById = async (req, res) => {
 export const updateInvoice = async (req, res) => {
   try {
     const { id } = req.params;
-    const { totals, items, gstin } = req.body;
+    const { totals, items, gstin, status } = req.body; // Added status
     if (!totals || !items) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
@@ -143,6 +275,9 @@ export const updateInvoice = async (req, res) => {
     }
 
     invoice.totals = totals;
+    if (status) {
+      invoice.status = status; // Update status if provided
+    }
 
     const user = await Lead.findById(invoice.user);
     if (gstin && user) {
@@ -153,7 +288,7 @@ export const updateInvoice = async (req, res) => {
     await invoice.save();
     res.json({ message: 'Invoice updated successfully', data: invoice });
   } catch (err) {
-    console.error('UpdateInvoice error:', err);
+    console.error('updateInvoice error:', err);
     res.status(500).json({ message: 'Server error' });
   }
 };

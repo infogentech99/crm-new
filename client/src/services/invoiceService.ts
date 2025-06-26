@@ -1,4 +1,4 @@
-import { Invoice, InvoiceItem, QuotationItem, InvoiceResponse } from '@customTypes/index';
+import { Invoice, InvoiceItem, InvoiceResponse } from '@customTypes/index';
 
 const API_URL = '/api/invoice'; 
 
@@ -45,13 +45,14 @@ export const createInvoice = async (
     _id: string;
     gstin: string;
     items: InvoiceItem[];
+    projectId: string | null;
     totals: {
       taxable: number;
       igst: number;
       total: number;
     };
   }
-): Promise<any> => {
+): Promise<{ message: string; data: Invoice }> => {
   const response = await fetch(`${API_URL}/genrate`, {
     method: 'POST',
     headers: {

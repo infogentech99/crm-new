@@ -4,7 +4,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getQuotations, deleteQuotation } from '@services/quotationService';
 import DataTable from '@components/Common/DataTable';
-import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { manageQuotationsConfig } from '@config/manageQuotationsConfig';
 import Modal from '@components/Common/Modal';
 import { Quotation } from '@customTypes/index';
@@ -36,17 +35,16 @@ const ManageQuotationsPage: React.FC = () => {
   const userRole = useSelector((state: RootState) => state.user.role || '');
   const [isMounted, setIsMounted] = useState(false);
 
-   useEffect(() => {
-     document.title = "Manage Quotations – CRM Application";
-   }, []);
+  
   useEffect(() => {
+    document.title = "Manage Quotations – CRM Application";
     setIsMounted(true);
   }, []);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allQuotations', search],
     queryFn: () => getQuotations(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted,
   });
 
   const allQuotations = data?.quotations || [];
@@ -106,11 +104,11 @@ const ManageQuotationsPage: React.FC = () => {
   };
 
   if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
+    return null; 
   }
 
   return (
-    <DashboardLayout>
+    <>
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
@@ -151,20 +149,22 @@ const ManageQuotationsPage: React.FC = () => {
           />
         </div>
 
-        <Modal
-          isOpen={isQuotationOpen}
-          onClose={() => setIsQuotationOpen(false)}
-          widthClass="max-w-5xl"
-        >
-          <QuotationForm
-            mode="Edit"
-            data={selectedQuotation}
-            onClose={() => {
-              setIsQuotationOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['allQuotations'] });
-            }}
-          />
-        </Modal>
+        {isQuotationOpen && selectedQuotation && ( // Conditionally render if selectedQuotation is not null
+          <Modal
+            isOpen={isQuotationOpen}
+            onClose={() => setIsQuotationOpen(false)}
+            widthClass="max-w-5xl"
+          >
+            <QuotationForm
+              mode="Edit"
+              data={selectedQuotation}
+              onClose={() => {
+                setIsQuotationOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['allQuotations'] });
+              }}
+            />
+          </Modal>
+        )}
 
         {quotationToDelete && (
           <DeleteModal
@@ -178,7 +178,7 @@ const ManageQuotationsPage: React.FC = () => {
           />
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 };
 

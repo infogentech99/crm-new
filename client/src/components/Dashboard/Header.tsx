@@ -15,7 +15,7 @@ export default function Header() {
         <Image
           src={logoSrc}
           alt="Your Company Name"
-          width={120}      
+          width={180}      
           height={40}
           className="cursor-pointer"
           onClick={() => window.location.href = '/dashboard'}
