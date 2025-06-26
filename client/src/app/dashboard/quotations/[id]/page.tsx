@@ -319,19 +319,6 @@ export default function Page() {
               </tbody>
 
               {/* Amount in Words row */}
-              {/* <tbody>
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="border border-black px-2 py-1 text-left font-semibold"
-                  >
-                    Amount in Words:
-                  </td>
-                  <td className="border border-black px-2 py-1">
-                    {amountInWords}
-                  </td>
-                </tr>
-              </tbody> */}
 
               <tfoot>
                 {[
