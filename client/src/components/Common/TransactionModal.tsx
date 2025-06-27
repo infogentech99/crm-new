@@ -5,6 +5,7 @@ import { createTransaction, TransactionInput } from "@services/transactionServic
 import { toast } from "sonner";
 import { RxCross2 } from "react-icons/rx";
 import { Input } from "@components/ui/input";
+import { Transaction } from "@customTypes/index";
 import {
   Select,
   SelectTrigger,
@@ -15,19 +16,19 @@ import {
 import { Button } from "@components/ui/button";
 import { useRouter } from "next/navigation";
 
-import { Invoice } from "@customTypes/index"; // Import Invoice type
 
 export default function TransactionModal({
   selectedInvoice,
   onClose,
 }: {
-  selectedInvoice: Invoice; // Use Invoice type
+  selectedInvoice: any;
   onClose: () => void;
 }) {
   const [loading, setLoading] = useState(false);
   const [method, setMethod] = useState("");
   const router = useRouter();
   if (!selectedInvoice) return null;
+  console.log("Selected Invoice:", selectedInvoice);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -51,7 +52,8 @@ export default function TransactionModal({
       method,
       transactionId,
       invoiceId: selectedInvoice._id,
-      leadId: selectedInvoice.user._id, // Access the _id of the user object
+      leadId: selectedInvoice.user,
+      projectId: selectedInvoice.projectId
     };
 
     try {
@@ -129,6 +131,30 @@ export default function TransactionModal({
           </div>
         </form>
 
+        {selectedInvoice.transactions?.length > 0 && (
+          <div className="mt-6">
+            <h4 className="text-sm font-semibold mb-2">Previous Transactions</h4>
+
+            <div className="grid grid-cols-4 text-xs font-medium text-gray-500 px-2 pb-1 border-b">
+              <span>Date</span>
+              <span>Txn ID</span>
+              <span>Method</span>
+              <span className="text-right">Amount</span>
+            </div>
+
+            <ul className="text-sm max-h-40 overflow-y-auto divide-y">
+              {selectedInvoice.transactions.map((txn: Transaction) => (
+                <li key={txn._id} className="grid grid-cols-4 py-1 px-2 items-center">
+                  <span>{new Date(txn.createdAt).toLocaleDateString()}</span>
+                  <span className="truncate" title={txn.transactionId}>{txn.transactionId || '-'}</span>
+                  <span>{txn.method}</span>
+                  <span className="text-right">₹{txn.amount}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+        )}
       </div>
     </div>
   );

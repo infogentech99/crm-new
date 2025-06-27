@@ -15,14 +15,7 @@ export interface TransactionInput {
   transactionId: string;
   invoiceId: string;
   leadId: string;
-  projectId?: string; // Made projectId optional
-}
-
-export interface PaginatedTransactions {
-  transactions: Transaction[];
-  totalPages: number;
-  currentPage: number;
-  totalTransactions: number;
+  projectId:string
 }
 export const getTransactions = async (
   page: number = 1,
@@ -58,7 +51,7 @@ export const getTransactionById = async (id: string): Promise<Transaction> => {
 
 export const createTransaction = async (
   transactionData: TransactionInput
-): Promise<Transaction> => {
+): Promise<any> => {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -96,26 +89,4 @@ export const deleteTransaction = async (id: string): Promise<{ message: string }
     throw new Error(errorData.message || `Failed to delete transaction with ID ${id}`);
   }
   return response.json();
-};
-export const getTransactionsByInvoiceId = async (
-  invoiceId: string
-): Promise<Transaction[]> => {
-  const response = await fetch(`${API_URL}/${invoiceId}/transactions`, {
-    headers: getAuthHeaders(),
-  });
-
-  if (!response.ok) {
-    // try to extract a JSON error, or fallback to text
-    const text = await response.text();
-    try {
-      const err = JSON.parse(text);
-      throw new Error(err.error || err.message || "Failed to fetch payments");
-    } catch {
-      throw new Error(text || "Failed to fetch payments");
-    }
-  }
-
-  // Response body is JSON: { data: Transaction[] }
-  const payload: { data?: Transaction[]; transactions?: Transaction[] } = await response.json();
-  return payload.data || payload.transactions || [];
 };

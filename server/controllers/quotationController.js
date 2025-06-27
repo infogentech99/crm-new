@@ -7,15 +7,15 @@ export const genrate = async (req, res) => {
   try {
     const { _id, totals, items ,gstin} = req.body;
 
-    if (!_id || !totals || !items) {
-      return res.status(400).json({ message: 'Missing required fields' });
+    if (!_id || typeof _id !== 'string') {
+      return res.status(400).json({ message: 'Missing or invalid lead ID (_id).' });
     }
-
-    const quotation = await Quotation.create({
-      user: _id,
-      totals,
-       createdBy: req.user._id
-    });
+    if (!totals || typeof totals !== 'object' || Array.isArray(totals)) {
+      return res.status(400).json({ message: 'Missing or invalid totals.' });
+    }
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Items array is required and must not be empty.' });
+    }
 
     const user = await Lead.findById(_id);
     if (!user) {
@@ -26,13 +26,30 @@ export const genrate = async (req, res) => {
       await user.save();
     }
 
-    for (const itemData of items) {
+    const quotation = new Quotation({
+      user: _id,
+      totals,
+      createdBy: req.user?._id, // Use optional chaining for safety
+      items: []
+    });
+
+    // Validate and create item documents
+    for (const [idx, itemData] of items.entries()) {
+      // Validate required item fields (customize as needed)
+      if (
+        !itemData.description ||
+        typeof itemData.price !== 'number' ||
+        typeof itemData.quantity !== 'number'
+      ) {
+        return res.status(400).json({ message: `Invalid item at index ${idx}` });
+      }
       const newItem = await Item.create(itemData);
       quotation.items.push(newItem._id);
     }
 
     await quotation.save();
-    res.status(201).json({ message: 'Quotation generated', data: quotation });
+    await quotation.populate('items');
+    return res.status(201).json({ message: 'Quotation generated', data: quotation });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

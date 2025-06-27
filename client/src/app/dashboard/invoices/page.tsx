@@ -29,6 +29,7 @@ const ManageInvoicesPage: React.FC = () => {
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -153,7 +154,6 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
           />
         </div>
 
-        {isInvoiceOpen && selectedInvoice && ( // Conditionally render if selectedInvoice is not null
           <Modal
             isOpen={isInvoiceOpen}
             onClose={() => setIsInvoiceOpen(false)}
@@ -169,8 +169,7 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
               }}
             />
           </Modal>
-        )}
-        {isTransactionModalOpen && selectedInvoice && ( // Conditionally render if selectedInvoice is not null
+        {isTransactionModalOpen && (
           <TransactionModal
             selectedInvoice={selectedInvoice}
             onClose={() => {

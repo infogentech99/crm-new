@@ -86,7 +86,9 @@ export interface Lead {
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
   notes?: Note[]; // Changed to use Note interface
-  status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
+  status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'payments_complete' | 'final_invoice' | 'contacted' | 'qualified' | 'cancelled' | 'lost';
+
+   
   gstin?: string;
   bestTimeToCall?: string;
   callResponse?: 'Picked' | 'Not Response' | 'Talk to later';
@@ -292,18 +294,18 @@ export interface Quotation {
   };
   date?: string; // Added date as it's used in page.tsx
 }
-
 export type LeadStatus =
-  | 'pending_approval'
-  | 'denied'
-  | 'approved'
+  | 'new'
   | 'quotation_submitted'
-  | 'quotation_rejected'
   | 'quotation_approved'
   | 'invoice_issued'
   | 'invoice_accepted'
   | 'processing_payments'
-  | 'completed';
+  | 'payments_complete'
+  | 'final_invoice'
+  | 'completed'
+  | 'cancelled'
+  | 'denied';
 
 export interface FormData {
   name: string;

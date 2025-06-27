@@ -48,6 +48,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
   const [gstin, setGstin] = useState(
     mode === 'Edit' ? data?.user?.gstin || '' : ''
   );
+  const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
     const fetchBills = async () => {
@@ -136,14 +137,40 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
   );
   const igst = +(taxable * 0.18).toFixed(2);
   const total = +(taxable + igst).toFixed(2);
+  const user = data?.user || data;
+  const leadId = user?._id || data?._id;
 
   const handleSubmit = async () => {
+    setValidationError('');
     setSubmitting(true);
+
+    // Validation for items
+    if (!leadId) {
+      setValidationError('Lead (client) is required.');
+      setSubmitting(false);
+      return;
+    }
+    if (!items.length || items.some(i => !i.description || !i.price)) {
+      setValidationError('Each item must have description and price.');
+      setSubmitting(false);
+      return;
+    }
+    if (!taxable) {
+      setValidationError('At least one item with valid amount required.');
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const payload = {
-        clientId: data?.user?._id || data?._id,
+        _id: leadId,          // <--- THIS FIELD IS REQUIRED BY BACKEND!
         gstin,
-        items,
+        items: items.map(i => ({
+          description: i.description,
+          quantity: Number(i.quantity),
+          price: Number(i.price),
+          hsn: i.hsn || '',
+        })),
         totals: {
           taxable,
           igst,
@@ -168,8 +195,6 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
       setSubmitting(false);
     }
   };
-
-  const user = data?.user || data;
 
   return (
     <div>
@@ -354,6 +379,11 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Show any error */}
+      {validationError && (
+        <div className="text-red-600 mt-2 text-right">{validationError}</div>
+      )}
 
       <div className="col-span-2 mt-6 flex justify-end gap-3">
         <Button

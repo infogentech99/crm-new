@@ -13,7 +13,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@components/ui/select';
-import { Lead } from '@customTypes/index';
+import { Lead, Project } from '@customTypes/index';
 
 const projectStatuses = [
   'new',
@@ -31,12 +31,14 @@ export default function AddProjectModal({
   isOpen,
   onClose,
   leadId,
+  existingProjects, // <-- this prop is the existing array of projects
   onProjectAdded,
 }: {
   isOpen: boolean;
   onClose: () => void;
   leadId: string;
-  onProjectAdded: (updatedLead: Lead) => void; // Changed type to Lead
+  existingProjects: { _id: string; title: string; status: string }[]; // strictly typed for clarity
+  onProjectAdded: (updatedLead: Lead) => void;
 }) {
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('new');
@@ -53,13 +55,14 @@ export default function AddProjectModal({
     try {
       setLoading(true);
       const newProject = {
-        _id: Date.now().toString(), 
+        _id: Date.now().toString(),
         title,
         status,
       };
 
+      // --- APPEND to the existing list ---
       const payload: Partial<Lead> = {
-        projects: [newProject],
+        projects: [...existingProjects, newProject],
       };
 
       const updated = await updateLead(leadId, payload);

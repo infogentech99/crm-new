@@ -250,6 +250,7 @@ export default function LeadDetailsPage() {
                 isOpen={isProjectModalOpen}
                 onClose={() => setIsProjectModalOpen(false)}
                 leadId={lead._id}
+                existingProjects={lead.projects || []}
                 onProjectAdded={(updatedLead) => setLead(updatedLead)}
             />
             <Modal

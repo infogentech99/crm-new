@@ -11,6 +11,8 @@ const MAIN_PIPELINE_STEPS = [
   { value: 'invoice_issued', label: 'Invoice Issued', icon: ReceiptText },
   { value: 'invoice_accepted', label: 'Invoice Accepted', icon: CheckCheck  },
   { value: 'processing_payments', label: 'Processing Payments', icon: HandCoins },
+  { value: 'payments_complete', label: 'Payment Complete', icon: HandCoins },
+  { value: 'final_invoice', label: 'Final Invoice', icon: HandCoins },
   { value: 'completed', label: 'Project Completed', icon: CheckCircle },
 ];
 
@@ -21,6 +23,8 @@ interface PipelineStepperProps {
   onStatusChange: (status: string) => void;
   onCreateQuotation?: () => void;
   onCreateInvoice?: () => void;
+  project: any;
+  onUpdateProject: (project: any) => void;
 }
 
 export default function PipelineStepper({
@@ -29,6 +33,8 @@ export default function PipelineStepper({
   onCreateQuotation,
   onCreateInvoice,
 }: PipelineStepperProps) {
+
+
   const getStatus = (stepValue: string) => {
     const activeIndex = MAIN_PIPELINE_STEPS.findIndex((s) => s.value === currentStatus);
     const currentIndex = MAIN_PIPELINE_STEPS.findIndex((s) => s.value === stepValue);
@@ -38,8 +44,9 @@ export default function PipelineStepper({
     return 'pending';
   };
 
+ 
   return (
-    <div className="w-full px-4 bg-white overflow-x-auto">
+    <div className="w-full px-4 ">
       <div className="relative flex items-start justify-start max-w-7xl mx-auto pt-8 gap-4">
 
         {MAIN_PIPELINE_STEPS.map((step, index) => {
@@ -84,6 +91,7 @@ export default function PipelineStepper({
               >
                 {step.label}
               </span>
+            
 
               {(step.value === 'quotation_submitted' && currentStatus === 'quotation_submitted') && (
                 <div className="mt-2 w-full flex justify-center">

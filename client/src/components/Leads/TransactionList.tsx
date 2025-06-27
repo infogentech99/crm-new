@@ -3,11 +3,20 @@
 import dayjs from 'dayjs';
 import React from 'react';
 
-import { Transaction, Project } from '@customTypes/index'; // Import Transaction and Project interfaces
+interface Transaction {
+  transaction: string;
+  invoiceId: string;
+  date: string;
+  amount: number;
+  method: string;
+  projectId: string;
+  projectTitle?: string;
+  projectStatus?: string;
+}
 
 interface Props {
   transactions: Transaction[];
-  projects: Project[]; // Use the imported Project interface
+  projects: { _id: string; title: string; status: string }[];
 }
 
 export default function TransactionList({ transactions, projects }: Props) {
@@ -36,17 +45,17 @@ export default function TransactionList({ transactions, projects }: Props) {
         mergedTransactions.map((txn) => (
 
           <div
-            key={txn.transactionId} // Use transactionId
+            key={txn.transaction}
             className="flex justify-between px-4 py-3 border-b text-sm hover:bg-gray-50"
           >
             <span className="flex-1">{txn.invoiceId}</span>
-            <span className="flex-1 text-gray-800">{txn.transactionId}</span> {/* Use transactionId */}
+            <span className="flex-1 text-gray-800">{txn.transaction}</span>
             <span className="flex-1">{txn.projectTitle}</span>
 
             <span className="flex-1">{txn.method}</span>
             <span className="flex-1 text-green-700">₹{txn.amount}</span>
             <span className="flex-1 text-gray-600 text-right">
-             {dayjs(txn.transactionDate).format('D MMM YYYY, hh:mm A')} {/* Use transactionDate */}
+             {dayjs(txn.date).format('D MMM YYYY, hh:mm A')}
             </span>
           </div>
         ))
