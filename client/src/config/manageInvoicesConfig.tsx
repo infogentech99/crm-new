@@ -37,7 +37,6 @@ export const manageInvoicesConfig = (
       key: 'projectId',
       label: 'PROJECT TITLE',
       render: (item: Invoice) => {
-        // find the one project that matches this invoice
         const project = item.user?.projects?.find(
           (p) => p._id === item.projectId
         );
@@ -60,16 +59,14 @@ export const manageInvoicesConfig = (
     {
       key: 'dueAmount',
       label: 'DUE AMOUNT',
-      render: (item: Invoice) => (
-        <span>
-          ₹
-          {(
-            (item.totals?.total || 0) -
-            (item.paidAmount || 0)
-          ).toFixed(2)}{' '}
-          Rs
-        </span>
-      ),
+      render: (item: Invoice) => {
+        const dueAmount = (item.totals?.total || 0) - (item.paidAmount || 0);
+        return (
+          <span className={dueAmount === 0 ? 'bg-green-200 px-2 py-1 rounded' : ''}>
+            ₹{dueAmount.toFixed(2)} Rs
+          </span>
+        );
+      },
     },
     {
       key: 'actions',

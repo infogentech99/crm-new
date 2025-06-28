@@ -110,7 +110,7 @@ export default function TransactionModal({ selectedInvoice, onClose }: Props) {
           <h2 className="text-xl font-semibold text-blue-600">Add Transaction</h2>
           <button
             onClick={onClose}
-            className="text-gray-200 p-1 text-2xl hover:text-gray-500"
+            className="text-gray-200 p-1 text-2xl hover:text-gray-500 cursor-pointer"
             aria-label="Close"
           >
             <RxCross2 />
