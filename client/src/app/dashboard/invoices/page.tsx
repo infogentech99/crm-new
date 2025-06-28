@@ -50,7 +50,7 @@ const ManageInvoicesPage: React.FC = () => {
     enabled: isMounted, 
   });
   const allInvoices = data?.invoices || [];
-
+console.log("All Invoices:", data);
 const totalInvoices = allInvoices.length;
 const totalPages = Math.ceil(totalInvoices / limit);
 const startIndex = (page - 1) * limit;

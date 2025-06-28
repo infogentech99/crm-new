@@ -3,7 +3,7 @@
 import LeadDetailsShimmer from "@components/ui/LeadDetailsShimmer";
 import { createEmail } from "@services/emailService";
 import { getInvoiceById } from "@services/invoiceService";
-import { getTransactionsByInvoiceId } from "@services/transactionService";
+// import { getTransactionsByInvoiceId } from "@services/transactionService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
@@ -397,39 +397,39 @@ export default function Page() {
 
             {/* Terms & Bank & Sig */}
             <div className="grid grid-cols-2 border border-black text-[10px]">
-  {/* Terms & Conditions */}
-  <div className="p-3 border-r border-black leading-snug space-y-2">
-    <p className="font-semibold uppercase mb-1">Terms &amp; Conditions</p>
-    <div className="space-y-1">
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    Payment shall be made via Bank Transfer/Check/Online only.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    No direct UPI payments to employees.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    InfoGentech is not liable for personal account payments.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    3% late fee applies after 15 days on unpaid balances.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    Company may terminate services if payment is not made on time.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    Payment due within 5 days from the invoice date.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    All disputes are subject to Delhi jurisdiction.
-  </p>
-</div>
+                {/* Terms & Conditions */}
+                <div className="p-3 border-r border-black leading-snug space-y-2">
+                  <p className="font-semibold uppercase mb-1">Terms &amp; Conditions</p>
+                  <div className="space-y-1">
+                <p className="flex items-start">
+                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                  Payment shall be made via Bank Transfer/Check/Online only.
+                </p>
+                <p className="flex items-start">
+                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                  No direct UPI payments to employees.
+                </p>
+                <p className="flex items-start">
+                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                  InfoGentech is not liable for personal account payments.
+                </p>
+                <p className="flex items-start">
+                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                  3% late fee applies after 15 days on unpaid balances.
+                </p>
+                <p className="flex items-start">
+                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                  Company may terminate services if payment is not made on time.
+                </p>
+                <p className="flex items-start">
+                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                  Payment due within 5 days from the invoice date.
+                </p>
+                <p className="flex items-start">
+                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                  All disputes are subject to Delhi jurisdiction.
+                </p>
+          </div>
 
   </div>
 

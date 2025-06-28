@@ -23,8 +23,7 @@ interface PipelineStepperProps {
   onStatusChange: (status: string) => void;
   onCreateQuotation?: () => void;
   onCreateInvoice?: () => void;
-  project: any;
-  onUpdateProject: (project: any) => void;
+  onCreateFinalInvoice?: () => void;
 }
 
 export default function PipelineStepper({
@@ -32,6 +31,7 @@ export default function PipelineStepper({
   onStatusChange,
   onCreateQuotation,
   onCreateInvoice,
+  onCreateFinalInvoice,
 }: PipelineStepperProps) {
 
 
@@ -69,8 +69,18 @@ export default function PipelineStepper({
                 />
               )}
 
+              {/* Circle + click handler */}
               <div
-                onClick={() => onStatusChange(step.value)}
+                onClick={() => {
+                  if (step.value === 'final_invoice') {
+                    // 1) advance the pipeline
+                    onStatusChange('final_invoice');
+                    // 2) open the final‐invoice modal
+                    onCreateFinalInvoice?.();
+                  } else {
+                    onStatusChange(step.value);
+                  }
+                }}
                 className={clsx(
                   'w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 cursor-pointer z-10',
                   {
@@ -111,6 +121,16 @@ export default function PipelineStepper({
                     onClick={onCreateInvoice}
                   >
                      <FilePen /> Create Invoice
+                  </Button>
+                </div>
+              )}
+              {(step.value === 'final_invoice' && currentStatus === 'final_invoice') && (
+                <div className="mt-2 w-full flex justify-center">
+                  <Button
+                    className="text-xs w-34 bg-green-600 hover:bg-green-700 text-white"
+                    onClick={onCreateFinalInvoice}
+                  >
+                     <FilePen /> Final Invoice
                   </Button>
                 </div>
               )}
