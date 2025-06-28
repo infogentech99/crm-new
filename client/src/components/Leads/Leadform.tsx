@@ -24,8 +24,9 @@ import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { RxCross2 } from "react-icons/rx";
 import { FormData } from "@customTypes/index";
-import RequiredLabel from '@components/ui/RequiredLabel'; // Assuming this is the correct path for RequiredLabel
+import RequiredLabel from '@components/ui/RequiredLabel'; 
 import { Textarea } from "@components/ui/Component";
+import { INDIA_STATES_AND_UTS } from "./StateOption";
 
 interface LeadFormProps {
   initialData?: Partial<FormData> & { _id?: string };
@@ -136,7 +137,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
                       {field.replace(/([A-Z])/g, ' $1')}
                     </RequiredLabel>
                     <FormControl>
-                      {(field === "source" || field === "industry" || field === "callResponse") ? (
+                      {(field === "source" || field === "industry" || field === "callResponse" || field === "state") ? (
                         <Select
                           key={f.value as string}
                           value={f.value as string}
@@ -146,6 +147,10 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
                             <SelectValue>{(f.value as string) || `Select ${field}`}</SelectValue>
                           </SelectTrigger>
                           <SelectContent>
+                            {field === "state" &&
+                              INDIA_STATES_AND_UTS.map(val => (
+                                <SelectItem key={val} value={val}>{val}</SelectItem>
+                              ))}
                             {field === "source" &&
                               ["Website", "Referral", "LinkedIn", "Cold Call", "Facebook", "Google", "Instagram", "Twitter", "Advertisement", "Event", "Partnership", "Other"].map(val => (
                                 <SelectItem key={val} value={val}>{val}</SelectItem>

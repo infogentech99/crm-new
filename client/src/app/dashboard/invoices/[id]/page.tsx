@@ -8,10 +8,11 @@ import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
 // import DashboardLayout from "@components/Dashboard/DashboardLayout";
-import { InvoiceItem,
+import {
+  InvoiceItem,
   CustomerData,
   InvoiceResponse,
-//   Transaction,
+  //   Transaction,
 } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
@@ -25,10 +26,10 @@ export default function Page() {
 
   const [sending, setSending] = useState(false);
   const [downloading, setDownloading] = useState(false);
-//   const [invoiceError, setInvoiceError] = useState<string | null>(null);
-//   const [paymentsError, setPaymentsError] = useState<string | null>(null);
+  //   const [invoiceError, setInvoiceError] = useState<string | null>(null);
+  //   const [paymentsError, setPaymentsError] = useState<string | null>(null);
 
-//   const [payments, setPayments] = useState<Transaction[]>([]);
+  //   const [payments, setPayments] = useState<Transaction[]>([]);
   const [data, setData] = useState<{
     order: { id: string; totalAmount: number };
     customer: CustomerData;
@@ -55,7 +56,7 @@ export default function Page() {
         const taxable = invoice.totals?.taxable || 0;
         let cgst = 0, sgst = 0, igst = 0;
 
-        if ((invoice.user?.city || "").trim().toLowerCase() === "delhi") {
+        if ((invoice.user?.city || "").trim().toLowerCase() === "Delhi") {
           cgst = taxable * 0.09;
           sgst = taxable * 0.09;
         } else {
@@ -86,19 +87,19 @@ export default function Page() {
         });
       } catch (err) {
         console.error("Failed to fetch invoice:", err);
-    //     setInvoiceError(err.message || "Failed to load invoice.");
-    //     return; // stop before fetching payments
-    //   }
+        //     setInvoiceError(err.message || "Failed to load invoice.");
+        //     return; // stop before fetching payments
+        //   }
 
-    //   // Fetch payments
-    //   try {
-    //     const invoicePayments = await getTransactionsByInvoiceId(id);
-    //     setPayments(invoicePayments);
-    //   } catch (err: any) {
-    //     console.error("Payments fetch error:", err);
-    //     setPaymentsError(err.message || "Failed to load payments.");
-    //     toast.error(`Couldn’t load payments: ${err.message}`);
-    }
+        //   // Fetch payments
+        //   try {
+        //     const invoicePayments = await getTransactionsByInvoiceId(id);
+        //     setPayments(invoicePayments);
+        //   } catch (err: any) {
+        //     console.error("Payments fetch error:", err);
+        //     setPaymentsError(err.message || "Failed to load payments.");
+        //     toast.error(`Couldn’t load payments: ${err.message}`);
+      }
     };
 
     fetchInvoiceAndPayments();
@@ -143,14 +144,14 @@ export default function Page() {
     }
   };
 
-//   if (!id || invoiceError) {
-//     return (
-//       <p className="p-4 text-center text-red-500">
-//         {invoiceError || <LeadDetailsShimmer />}
-//       </p>
-//     );
-//   }
- if (!id) {
+  //   if (!id || invoiceError) {
+  //     return (
+  //       <p className="p-4 text-center text-red-500">
+  //         {invoiceError || <LeadDetailsShimmer />}
+  //       </p>
+  //     );
+  //   }
+  if (!id) {
     return <p className="p-4 text-center"><LeadDetailsShimmer /></p>;
   }
 
@@ -160,13 +161,13 @@ export default function Page() {
     ...items,
     ...Array.from({ length: Math.max(0, MIN_ROWS - items.length) }, () => null),
   ];
-const amountInWords = `${toWords(Math.round(totals.total)).replace(/(^\w|\s\w)/g, (m: string) => m.toUpperCase())} Rupees Only`;
+  const amountInWords = `${toWords(Math.round(totals.total)).replace(/(^\w|\s\w)/g, (m: string) => m.toUpperCase())} Rupees Only`;
 
   return (
     <>
       <div className="bg-gray-50 py-10">
         <div className="max-w-7xl mx-auto px-6">
-         {/* A4 Invoice Container */}
+          {/* A4 Invoice Container */}
           <article
             ref={invoiceRef}
             className="
@@ -320,8 +321,8 @@ const amountInWords = `${toWords(Math.round(totals.total)).replace(/(^\w|\s\w)/g
                     <td className="border-l border-r border-black px-3 py-2 leading-snug">
                       {it
                         ? `₹${(it.price * (it.quantity || 0)).toLocaleString(
-                            "en-IN"
-                          )}`
+                          "en-IN"
+                        )}`
                         : ""}
                     </td>
                   </tr>
@@ -337,31 +338,31 @@ const amountInWords = `${toWords(Math.round(totals.total)).replace(/(^\w|\s\w)/g
                   ["SGST (9%) (₹)", totals.sgst],
                   ["IGST (18%) (₹)", totals.igst],
                   ["Total Invoice Value (₹)", totals.total],
-              ].map(([label, val], i) => (
-                <tr key={i} className={i === 4 ? "bg-gray-100" : ""}>
-                  <td
-                    colSpan={5}
-                    className="border border-black px-2 py-1 text-right font-semibold"
-                  >
-                    {label}
-                  </td>
-                  <td className="border border-black px-2 py-1 font-semibold">
-                    ₹{(val as number).toLocaleString("en-IN")}
+                ].map(([label, val], i) => (
+                  <tr key={i} className={i === 4 ? "bg-gray-100" : ""}>
+                    <td
+                      colSpan={5}
+                      className="border border-black px-2 py-1 text-right font-semibold"
+                    >
+                      {label}
+                    </td>
+                    <td className="border border-black px-2 py-1 font-semibold">
+                      ₹{(val as number).toLocaleString("en-IN")}
+                    </td>
+                  </tr>
+                ))}
+
+                {/* Amount in Words */}
+                <tr>
+                  <td colSpan={6} className="border border-black p-0">
+                    <div className="px-2 py-1 flex justify-between items-start text-xs font-semibold">
+                      <span>Amount in Words:</span>
+                      <span>{amountInWords}</span>
+                    </div>
                   </td>
                 </tr>
-              ))}
-
-              {/* Amount in Words */}
-              <tr>
-                <td colSpan={6} className="border border-black p-0">
-                  <div className="px-2 py-1 flex justify-between items-start text-xs font-semibold">
-                    <span>Amount in Words:</span>
-                    <span>{amountInWords}</span>
-                  </div>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+              </tfoot>
+            </table>
 
             {/* Payment History */}
             {/* <div className="mb-6">
@@ -396,86 +397,86 @@ const amountInWords = `${toWords(Math.round(totals.total)).replace(/(^\w|\s\w)/g
 
             {/* Terms & Bank & Sig */}
             <div className="grid grid-cols-2 border border-black text-[10px]">
-                {/* Terms & Conditions */}
-                <div className="p-3 border-r border-black leading-snug space-y-2">
-                  <p className="font-semibold uppercase mb-1">Terms &amp; Conditions</p>
+              {/* Terms & Conditions */}
+              <div className="p-3 border-r border-black leading-snug space-y-2">
+                <p className="font-semibold uppercase mb-1">Terms &amp; Conditions</p>
+                <div className="space-y-1">
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    Payment shall be made via Bank Transfer/Check/Online only.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    No direct UPI payments to employees.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    InfoGentech is not liable for personal account payments.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    3% late fee applies after 15 days on unpaid balances.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    Company may terminate services if payment is not made on time.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    Payment due within 5 days from the invoice date.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    All disputes are subject to Delhi jurisdiction.
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Bank Details + QR in two columns, then Signature */}
+              <div className="p-3 leading-snug space-y-4">
+                {/* Bank & QR side-by-side */}
+                <div className="grid grid-cols-2 gap-x-2">
+                  {/* Left: Bank Details */}
                   <div className="space-y-1">
-                <p className="flex items-start">
-                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-                  Payment shall be made via Bank Transfer/Check/Online only.
-                </p>
-                <p className="flex items-start">
-                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-                  No direct UPI payments to employees.
-                </p>
-                <p className="flex items-start">
-                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-                  InfoGentech is not liable for personal account payments.
-                </p>
-                <p className="flex items-start">
-                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-                  3% late fee applies after 15 days on unpaid balances.
-                </p>
-                <p className="flex items-start">
-                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-                  Company may terminate services if payment is not made on time.
-                </p>
-                <p className="flex items-start">
-                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-                  Payment due within 5 days from the invoice date.
-                </p>
-                <p className="flex items-start">
-                  <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-                  All disputes are subject to Delhi jurisdiction.
-                </p>
-          </div>
+                    <p className="font-semibold uppercase mb-0">Bank Details</p>
+                    <p className="mb-0">InfoGentech Softwares LLP</p>
+                    <p className="mb-0">Kotak Mahindra Bank, Model Town III, Delhi 110009</p>
+                    <p className="mb-0">Current Account: 1049022633</p>
+                    <p className="mb-0">IFSC: KKBK0004626</p>
+                  </div>
+                  {/* Right: QR Code + UPI ID */}
+                  <div className="text-center space-y-1">
+                    <img
+                      src="/assets/img/qr.webp"
+                      alt="UPI QR"
+                      className="h-[20mm] mx-auto"
+                    />
+                    <p className="font-semibold mt-1 mb-0">
+                      UPI ID: infogentechsoftwares@kotak
+                    </p>
+                  </div>
+                </div>
 
-  </div>
+                {/* Signature Panel */}
+                <div className="pt-3 border-t border-black text-center space-y-1">
+                  <p className="font-semibold uppercase mb-0">
+                    For InfoGentech Softwares LLP
+                  </p>
+                  <img
+                    src="/assets/img/sign.webp"
+                    alt="Signature"
+                    className="h-[12mm] mx-auto"
+                  />
+                  <p className="font-semibold mb-0">Authorised Signatory</p>
+                </div>
+              </div>
 
-  {/* Bank Details + QR in two columns, then Signature */}
-  <div className="p-3 leading-snug space-y-4">
-    {/* Bank & QR side-by-side */}
-    <div className="grid grid-cols-2 gap-x-2">
-      {/* Left: Bank Details */}
-      <div className="space-y-1">
-        <p className="font-semibold uppercase mb-0">Bank Details</p>
-        <p className="mb-0">InfoGentech Softwares LLP</p>
-        <p className="mb-0">Kotak Mahindra Bank, Model Town III, Delhi 110009</p>
-        <p className="mb-0">Current Account: 1049022633</p>
-        <p className="mb-0">IFSC: KKBK0004626</p>
-      </div>
-      {/* Right: QR Code + UPI ID */}
-      <div className="text-center space-y-1">
-        <img
-          src="/assets/img/qr.webp"
-          alt="UPI QR"
-          className="h-[20mm] mx-auto"
-        />
-        <p className="font-semibold mt-1 mb-0">
-          UPI ID: infogentechsoftwares@kotak
-        </p>
-      </div>
-    </div>
-
-    {/* Signature Panel */}
-    <div className="pt-3 border-t border-black text-center space-y-1">
-      <p className="font-semibold uppercase mb-0">
-        For InfoGentech Softwares LLP
-      </p>
-      <img
-        src="/assets/img/sign.webp"
-        alt="Signature"
-        className="h-[12mm] mx-auto"
-      />
-      <p className="font-semibold mb-0">Authorised Signatory</p>
-    </div>
-  </div>
-
-  {/* E. & O.E. footer */}
-  <div className="col-span-2 border-t border-black py-1 text-center font-semibold">
-    E. &amp; O.E.
-  </div>
-</div>
+              {/* E. & O.E. footer */}
+              <div className="col-span-2 border-t border-black py-1 text-center font-semibold">
+                E. &amp; O.E.
+              </div>
+            </div>
 
 
 
