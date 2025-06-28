@@ -60,7 +60,7 @@ const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error
         </thead>
         <tbody className="divide-y divide-gray-200">
           {data.map((item, i) => (
-            <tr key={item._id} className="bg-white bg-opacity-50 hover:bg-opacity-70 transition-colors duration-200">
+            <tr key={item._id || `row-${i}`} className="bg-white bg-opacity-50 hover:bg-opacity-70 transition-colors duration-200">
               {columns.map((column) => (
                 <td
                   key={`${item._id}-${column.key}`}

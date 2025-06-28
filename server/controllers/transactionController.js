@@ -27,6 +27,16 @@ export const createTransaction = async (req, res, next) => {
     invoice.paidAmount = (invoice.paidAmount || 0) + amount;
     invoice.transactions = invoice.transactions || [];
     invoice.transactions.push(txn._id);
+
+    // 4) Auto-advance only if it was accepted
+    if (invoice.status === 'invoice_accepted') {
+      if (invoice.paidAmount >= invoice.totalAmount) {
+        invoice.status = 'payments_complete';
+      } else {
+        invoice.status = 'processing_payments';
+      }
+    }
+
     await invoice.save();
 
     await Lead.findByIdAndUpdate(leadId, {
@@ -37,12 +47,11 @@ export const createTransaction = async (req, res, next) => {
           date: new Date(),
           amount,
           method,
-          projectId
         }
       }
     });
 
-    res.status(201).json(txn);
+    return res.status(201).json({ txn, invoice });
   } catch (err) {
     next(err);
   }

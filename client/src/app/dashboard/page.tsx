@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import DashboardCards from "@components/Dashboard/DashboardCards";
 import RecentActivityTable from "@components/Dashboard/RecentActivityTable";
+import LeadStatusChart from "@components/Dashboard/LeadStatusChart";
+import LeadSourceChart from "@components/Dashboard/LeadSourceChart";
+import RevenueChart from "@components/Dashboard/RevenueChart";
+import TaskStatusChart from "@components/Dashboard/TaskStatusChart";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -28,6 +32,12 @@ export default function DashboardPage() {
       <h1 className="text-3xl font-bold text-gray-800 mb-6 select-none">Welcome to your Dashboard!</h1>
       <p className="text-gray-600 mb-8 select-none">Here&#39;s a quick overview of your CRM activities.</p>
       <DashboardCards />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <LeadStatusChart />
+        <TaskStatusChart />
+        <LeadSourceChart />
+        <RevenueChart />
+      </div>
       <RecentActivityTable />
     </>
   );

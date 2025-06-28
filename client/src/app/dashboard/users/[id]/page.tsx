@@ -64,8 +64,8 @@ export default function UserDetailsPage() {
       ]);
       setUser(u);
       setActivities(acts);
-    } catch (e: any) {
-      setError(e.message || "Unable to load");
+    } catch (e: unknown) { // Changed to unknown
+      setError((e as Error).message || "Unable to load"); // Safely access message
     } finally {
       setLoading(false);
     }
@@ -84,8 +84,8 @@ export default function UserDetailsPage() {
       await deleteLead(String(deleting.id));
       toast.success("Activity deleted");
       await load();
-    } catch (e: any) {
-      toast.error(e.message || "Delete failed");
+    } catch (e: unknown) { // Changed to unknown
+      toast.error((e as Error).message || "Delete failed"); // Safely access message
     } finally {
       setIsDeleteOpen(false);
       setDeleting(null);
@@ -146,7 +146,7 @@ export default function UserDetailsPage() {
             <p><strong>Name:</strong> {user.name}</p>
             <p><strong>Email:</strong> {user.email}</p>
             <p><strong>Role:</strong> {user.role}</p>
-            <p><strong>Joined:</strong> {new Date((user as any).createdAt).toLocaleDateString()}</p>
+            <p><strong>Joined:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
           </div>
         </div>
       </div>
@@ -155,16 +155,12 @@ export default function UserDetailsPage() {
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium">Recent Activity</h3>
           <div className="flex space-x-2">
-            {[
-              "Leads",
-              "Meetings",
-              "Tasks",
-            ].map((t) => (
+            {(["Leads", "Meetings", "Tasks"] as const).map((t) => (
               <Button
                 key={t}
                 variant={tab === t ? "default" : "outline"}
                 onClick={() => {
-                  setTab(t as any);
+                  setTab(t);
                   setPage(1);
                   setSearch("");
                 }}
@@ -219,7 +215,7 @@ export default function UserDetailsPage() {
       {/* Edit User Modal */}
       <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} widthClass="max-w-3xl">
         <UserForm
-          data={user!}
+          data={user} // Removed '!' as user is already checked for null
           mode="Edit"
           onClose={() => { setIsEditOpen(false); toast.success("Saved"); }}
         />
@@ -231,7 +227,7 @@ export default function UserDetailsPage() {
           isOpen={isDeleteOpen}
           onClose={() => setIsDeleteOpen(false)}
           onConfirm={handleConfirmDelete}
-          itemLabel={deleting.name}
+          itemLabel={deleting.name || 'this activity'} // Added fallback for itemLabel
         />
       )}
     </>

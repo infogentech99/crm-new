@@ -50,7 +50,7 @@ const ManageInvoicesPage: React.FC = () => {
     enabled: isMounted, 
   });
   const allInvoices = data?.invoices || [];
-
+console.log("All Invoices:", data);
 const totalInvoices = allInvoices.length;
 const totalPages = Math.ceil(totalInvoices / limit);
 const startIndex = (page - 1) * limit;
@@ -154,21 +154,21 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
           />
         </div>
 
-        <Modal
-          isOpen={isInvoiceOpen}
-          onClose={() => setIsInvoiceOpen(false)}
-          widthClass="max-w-5xl"
-        >
-          <InvoiceForm
-            mode="Edit"
-            data={selectedInvoice}
-            projectId=''
-            onClose={() => {
-              setIsInvoiceOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
-            }}
-          />
-        </Modal>
+          <Modal
+            isOpen={isInvoiceOpen}
+            onClose={() => setIsInvoiceOpen(false)}
+            widthClass="max-w-5xl"
+          >
+            <InvoiceForm
+              mode="Edit"
+              data={selectedInvoice}
+              projectId=''
+              onClose={() => {
+                setIsInvoiceOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
+              }}
+            />
+          </Modal>
         {isTransactionModalOpen && (
           <TransactionModal
             selectedInvoice={selectedInvoice}

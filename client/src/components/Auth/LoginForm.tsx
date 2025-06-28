@@ -10,6 +10,7 @@ import AuthCelebration from "@components/Common/AuthCelebration";
 import { useMutation } from "@tanstack/react-query";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
+import Image from "next/image";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import {
   Form,
@@ -75,9 +76,11 @@ export default function LoginForm() {
       className="flex min-h-screen items-center justify-between bg-gradient-to-br from-blue-100 to-blue-300"
     >
       <div className="hidden lg:flex flex-col items-center justify-center p-4 w-1/2">
-        <img
+        <Image
           src="/assets/img/loginSubImg.png"
           alt="loginSubImg"
+          width={500}
+          height={500}
           className="max-w-full h-auto"
         />
       </div>
@@ -86,9 +89,11 @@ export default function LoginForm() {
         style={{ maxWidth: "700px" }}
       >
         <div className="text-center mb-10">
-          <img
+          <Image
             src="/assets/img/companyLogo.webp"
             alt="Company Logo"
+            width={100}
+            height={64}
             className="max-h-16 mx-auto"
           />
         </div>

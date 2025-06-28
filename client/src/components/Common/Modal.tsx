@@ -32,10 +32,12 @@ const Modal: React.FC<ModalProps> = ({
   return ReactDOM.createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"  
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose} // Call onClose when clicking the overlay
     >
       <div
         className={`bg-white rounded-lg shadow-xl w-full ${widthClass} mx-4 max-h-[90vh] overflow-y-auto`}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from closing it
       >
         <div className="p-6">{children}</div>
       </div>

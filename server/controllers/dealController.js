@@ -9,6 +9,22 @@ export const createDeal = async (req, res, next) => {
   }
 };
 
+export const getTotalDealsValueSummary = async (req, res, next) => {
+  try {
+    const totalDeals = await Deal.aggregate([
+      { $group: { _id: null, totalValue: { $sum: '$value' }, count: { $sum: 1 } } }
+    ]);
+
+    res.status(200).json({
+      totalDealsValue: totalDeals.length > 0 ? totalDeals[0].totalValue : 0,
+      totalDealsCount: totalDeals.length > 0 ? totalDeals[0].count : 0,
+    });
+  } catch (err) {
+    console.error('getTotalDealsValueSummary error:', err);
+    next(err);
+  }
+};
+
 export const getDeals = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;

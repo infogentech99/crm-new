@@ -23,23 +23,54 @@ export const manageInvoicesConfig = (
         <span>{item.updatedAt ? dayjs(item.updatedAt).format('DD/MM/YYYY hh:mm A') : 'N/A'}</span>
       ),
     },
-    { key: 'clientName', label: 'COMPANY', render: (item: Invoice) => <span>{item.user?.name || item.clientName || 'N/A'}</span> },
     {
-      key: 'projectId',
-      label: 'PROJECT TITLE',
+      key: 'clientName',
+      label: 'COMPANY',
       render: (item: Invoice) => (
         <span>
-          {item.user?.projects && item.user.projects.length > 0
-            ? item.user.projects.map((project) => project.title).join(', ')
-            : 'N/A'}
+          {item.user?.companyName || item.clientName || 'N/A'}
         </span>
       ),
     },
-    { key: 'clientPhone', label: 'CONTACT', render: (item: Invoice) => <span>{item.user?.phoneNumber || item.clientPhone || 'N/A'}</span> },
-    { key: 'invoiceNumber', label: 'INVOICE NO', render: (item: Invoice) => <span>{item._id}</span> },
-    { key: 'totalAmount', label: 'TOTAL', render: (item: Invoice) => <span>₹{item.totals?.total?.toFixed(2) || '0.00'} Rs</span> },
-    { key: 'dueAmount', label: 'DUE AMOUNT', render: (item: Invoice) => <span>₹{((item.totals?.total || 0) - (item.paidAmount || 0)).toFixed(2)} Rs</span> },
 
+    {
+      key: 'projectId',
+      label: 'PROJECT TITLE',
+      render: (item: Invoice) => {
+        // find the one project that matches this invoice
+        const project = item.user?.projects?.find(
+          (p) => p._id === item.projectId
+        );
+        return <span>{project?.title ?? 'N/A'}</span>;
+      },
+    },
+    { key: 'clientPhone', label: 'CONTACT', render: (item: Invoice) => <span>{item.user?.phoneNumber || item.clientPhone || 'N/A'}</span> },
+    {
+      key: 'invoiceNumber',
+      label: 'INVOICE NO',
+      render: (item: Invoice) => <span>{item._id}</span>,
+    },
+    {
+      key: 'totalAmount',
+      label: 'TOTAL',
+      render: (item: Invoice) => (
+        <span>₹{item.totals?.total?.toFixed(2) ?? '0.00'} Rs</span>
+      ),
+    },
+    {
+      key: 'dueAmount',
+      label: 'DUE AMOUNT',
+      render: (item: Invoice) => (
+        <span>
+          ₹
+          {(
+            (item.totals?.total || 0) -
+            (item.paidAmount || 0)
+          ).toFixed(2)}{' '}
+          Rs
+        </span>
+      ),
+    },
     {
       key: 'actions',
       label: 'ACTIONS',
@@ -63,12 +94,11 @@ export const manageInvoicesConfig = (
     },
   ];
 
-  const filteredColumns = [...baseColumns];
 
   return {
     pageTitle: 'Manage Invoices',
     showCreateInvoiceButton: true,
     createInvoiceButtonAction: () => alert('Create Invoice functionality is under development.'),
-    tableColumns: filteredColumns,
+    tableColumns: baseColumns,
   };
 };

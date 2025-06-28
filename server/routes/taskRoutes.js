@@ -5,6 +5,8 @@ import {
   createTask,
   updateTask,
   deleteTask,
+  getTaskStatusSummary,
+  getTasksDueSummary // Import new function
 } from '../controllers/taskController.js';
 import { protect, authorize } from '../middlewares/authMiddleware.js'; // Import authorize
 
@@ -15,11 +17,25 @@ router
   .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getAllTasks) // Add authorize
   .post(protect, authorize('superadmin','admin', 'salesperson', 'employee'), createTask); // Add authorize
 
+router.get(
+  '/summary/due',
+  protect,
+  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  getTasksDueSummary
+); // New route for tasks due summary
+
 router
   .route('/:id')
   .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getTask) // Add authorize
   .put(protect, authorize('superadmin','admin', 'salesperson'), updateTask) // Add authorize
   .patch(protect, authorize('superadmin','admin', 'salesperson'), updateTask) // Add authorize
   .delete(protect, authorize('superadmin','admin', 'salesperson'), deleteTask); // Add authorize
+
+router.get(
+  '/summary/status',
+  protect,
+  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  getTaskStatusSummary
+);
 
 export default router;

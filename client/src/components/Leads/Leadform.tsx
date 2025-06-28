@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { createLead, updateLead } from "@services/leadService";
@@ -10,7 +10,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage
 } from "@components/ui/form";
 import {
@@ -47,7 +46,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       state: "",
       zipCode: "",
       country: "",
-      source: "LinkedIn",
+      source: "Website",
       industry: "IT",
       callResponse: "Picked",
       description: "",
@@ -108,52 +107,52 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
           {["name", "phoneNumber", "email", "companyName", "address", "city", "state", "zipCode", "country", "source", "industry", "callResponse", "description", "remark", "position", "website"].map((field) => (
             <FormField
-              key={field}
-              control={form.control}
-              name={field as keyof FormData}
-              rules={
-                ["name", "phoneNumber", "email", "companyName", "city"].includes(field)
-                  ? { required: `${field.replace(/([A-Z])/g, ' $1')} is required` }
-                  : undefined
-              }
-              render={({ field: f }) => (
-                <FormItem>
-                  <RequiredLabel required={["name", "phoneNumber", "email", "companyName", "city"].includes(field)}>
-                    {field.replace(/([A-Z])/g, ' $1')}
-                  </RequiredLabel>
-                  <FormControl>
-                    {(field === "source" || field === "industry" || field === "callResponse") ? (
-                      <Select
-                        key={f.value as string}
-                        value={f.value as string}
-                        onValueChange={f.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue>{(f.value as string) || `Select ${field}`}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {field === "source" &&
-                            ["LinkedIn", "Website", "Referral", "Cold Call", "Other"].map(val => (
-                              <SelectItem key={val} value={val}>{val}</SelectItem>
-                            ))}
-                          {field === "industry" &&
-                            ["IT", "Retail", "Manufacturing", "Other"].map(val => (
-                              <SelectItem key={val} value={val}>{val}</SelectItem>
-                            ))}
-                          {field === "callResponse" &&
-                            ["Picked", "Not Response", "Talk to later"].map(val => (
-                              <SelectItem key={val} value={val}>{val}</SelectItem>
-                            ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <Input type="text" {...f} value={f.value as string} />
-                    )}
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+  key={field}
+  control={form.control}
+  name={field as keyof FormData}
+  rules={
+    ["name", "phoneNumber", "email", "companyName","city"].includes(field)
+      ? { required: `${field.replace(/([A-Z])/g, ' $1')} is required` }
+      : undefined
+  }
+  render={({ field: f }) => (
+    <FormItem>
+      <RequiredLabel required={["name", "phoneNumber", "email", "companyName","city"].includes(field)}>
+        {field.replace(/([A-Z])/g, ' $1')}
+      </RequiredLabel>
+      <FormControl>
+        {(field === "source" || field === "industry" || field === "callResponse") ? (
+          <Select
+            key={f.value as string}
+            value={f.value as string}
+            onValueChange={f.onChange}
+          >
+            <SelectTrigger>
+              <SelectValue>{(f.value as string) || `Select ${field}`}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {field === "source" &&
+                ["Website", "Referral", "LinkedIn", "Cold Call", "Facebook", "Google", "Instagram", "Twitter", "Advertisement", "Event", "Partnership", "Other"].map(val => (
+                  <SelectItem key={val} value={val}>{val}</SelectItem>
+                ))}
+              {field === "industry" &&
+                ["IT", "Retail", "Manufacturing", "Other"].map(val => (
+                  <SelectItem key={val} value={val}>{val}</SelectItem>
+                ))}
+              {field === "callResponse" &&
+                ["Picked", "Not Response", "Talk to later"].map(val => (
+                  <SelectItem key={val} value={val}>{val}</SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <Input type="text" {...f} value={f.value as string} />
+        )}
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
           ))}
 
           <div className="col-span-2 mt-4 flex justify-end gap-3">

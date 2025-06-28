@@ -17,10 +17,18 @@ export interface DashboardSummary {
   totalLeads: number;
   newContacts: number;
   openDeals: string;
+  openDeals: string;
   tasksDue: number;
   approvedQuotations: number;
   approvedInvoices: number;
   lostLeads: number;
+  pendingAmount: string;
+  totalInvoicesAmount: string;
+  totalPaidInvoicesAmount: string;
+  leadStatusSummary: { [key: string]: number };
+  leadSourceSummary: { [key: string]: number };
+  monthlyRevenue: { name: string; revenue: number }[];
+  taskStatusSummary: { [key: string]: number };
 }
 
 export interface RecentActivity {
@@ -54,12 +62,16 @@ export interface User {
   gstin?: string;
   phoneNumber?: string;
   projects?: { _id: string; title: string; status: string }[];
+  createdAt: string; // Added createdAt
 }
 
 export interface Lead {
   _id: string;
   name: string;
   email: string;
+  phone?: string; // Added
+  position?: string; // Added
+  company?: string; // Added (assuming this is the field used in the UI)
   phoneNumber?: string;
   createdBy: string | User; 
   companyName?: string; 
@@ -73,12 +85,10 @@ export interface Lead {
   linkedIn?: string;
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
-  notes?: {
-    message?: string;
-    createdAt?: string;
-    createdBy?: string;
-  }[];
-  status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
+  notes?: Note[]; // Changed to use Note interface
+  status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'payments_complete' | 'final_invoice' | 'contacted' | 'qualified' | 'cancelled' | 'lost';
+
+   
   gstin?: string;
   bestTimeToCall?: string;
   callResponse?: 'Picked' | 'Not Response' | 'Talk to later';
@@ -86,11 +96,20 @@ export interface Lead {
   remark?: string;
   createdAt: string;
   updatedAt: string;
-   projects: {
-    _id: string;
-    title: string;
-    status: string;
-  }[];
+  projects: Project[]; // Changed to use Project interface
+  transactions?: Transaction[]; // Added
+}
+
+export interface Project { // New interface for Project
+  _id: string;
+  title: string;
+  status: string;
+}
+
+export interface Note { // New interface for Note
+  message: string; // Made required
+  createdAt?: string;
+  createdBy?: string;
 }
 
 export interface Task {
@@ -104,6 +123,7 @@ export interface Task {
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  repeat?: 'None' | 'Daily' | 'Weekly' | 'Monthly'; // Added repeat property
 }
 
 export interface Transaction {
@@ -111,26 +131,30 @@ export interface Transaction {
   method: string
   amount: number;
   transactionId: string
-  invoiceId: string,
-  leadId: string,
+  invoiceId: string;
+  leadId: string;
+  projectId?: string; // Added projectId
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
   user: User;
-  invoice: Invoice,
-  transactionDate: string
+  invoice: Invoice;
+  transactionDate: string;
 }
 
 export interface Meeting {
   _id: string;
   title: string;
   date: string; 
-  duration: string; 
+  duration: number; // Changed to number
   status: 'Scheduled' | 'Completed' | 'Cancelled';
   participants?: (string | User | Contact | Lead)[];
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  platform?: string; // Added platform
+  meetlink?: string; // Added meetlink
+  description?: string; // Added description
 }
 
 export interface Bill {
@@ -251,7 +275,6 @@ export interface InvoiceItem {
 }
 
 export interface Quotation {
-  data: any;
   _id: string;
   quotationNumber: string;
   clientName: string;
@@ -264,20 +287,25 @@ export interface Quotation {
   createdAt: string;
   updatedAt: string;
   user: Lead;
-  totals: QuotationItem;
+  totals: {
+    taxable: number;
+    igst: number;
+    total: number;
+  };
+  date?: string; // Added date as it's used in page.tsx
 }
-
 export type LeadStatus =
-  | 'pending_approval'
-  | 'denied'
-  | 'approved'
+  | 'new'
   | 'quotation_submitted'
-  | 'quotation_rejected'
   | 'quotation_approved'
   | 'invoice_issued'
   | 'invoice_accepted'
   | 'processing_payments'
-  | 'completed';
+  | 'payments_complete'
+  | 'final_invoice'
+  | 'completed'
+  | 'cancelled'
+  | 'denied';
 
 export interface FormData {
   name: string;
@@ -313,4 +341,11 @@ export interface MeetingEmailData {
   meetlink: string;
   description: string;
   participants: string[];
+}
+
+export interface MeetingSummary {
+  totalMeetings: number;
+  upcomingMeetings: number;
+  completedMeetings: number;
+  cancelledMeetings: number;
 }

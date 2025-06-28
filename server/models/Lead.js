@@ -20,7 +20,7 @@ const LeadSchema = new mongoose.Schema({
   zipCode:   String,
   website:   String,
   linkedIn:  String,
-  source:    { type: String, enum: ['Website','Referral','LinkedIn','Cold Call','Other'], default: 'Website' },
+  source:    { type: String, enum: ['Website','Referral','LinkedIn','Cold Call','Facebook','Google','Instagram','Twitter','Advertisement','Event','Partnership','Other'], default: 'Website' },
   industry:  { type: String, enum: ['IT','Retail','Manufacturing','Other'], default: 'Other' },
   notes: [
   {

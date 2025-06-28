@@ -10,7 +10,7 @@ import EmailComposer from '@components/EmailComposer';
 import { toast } from 'sonner';
 import LeadNotes from '@components/Leads/LeadNotes';
 import PipelineStepper from '@components/ui/PipelineStepper';
-import { LeadStatus } from '@customTypes/index';
+import { LeadStatus, Lead, Project, Note, Transaction } from '@customTypes/index';
 import LeadDetailsShimmer from '@components/ui/LeadDetailsShimmer';
 import QuotationForm from '@components/Quotation/QuotationForm';
 import InvoiceForm from '@components/invoice/InoviceForm';
@@ -24,9 +24,9 @@ export default function LeadDetailsPage() {
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [lead, setLead] = useState<any>(null);
+    const [lead, setLead] = useState<Lead | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedLead, setSelectedLead] = useState<any>(null);
+    const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [isQuotationOpen, setIsQuotationOpen] = useState(false);
     const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
     const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
@@ -47,8 +47,8 @@ export default function LeadDetailsPage() {
                 const data = await getLeadById(id as string);
                 setLead(data);
 
-            } catch (err: any) {
-                setError(err.message || 'Failed to fetch lead');
+            } catch (err: unknown) {
+                setError((err as Error).message || 'Failed to fetch lead');
             } finally {
                 setLoading(false);
             }
@@ -57,7 +57,7 @@ export default function LeadDetailsPage() {
     }, [id]);
 
     const handleStatusChange = async (newStatus: LeadStatus) => {
-        if (!lead.projects || lead.projects.length === 0 || selectedProject === undefined || lead.projects[selectedProject] === undefined) {
+        if (!lead || !lead.projects || lead.projects.length === 0 || selectedProject === undefined || lead.projects[selectedProject] === undefined) {
             toast.error('Please add a project first.');
             return;
         }
@@ -65,7 +65,7 @@ export default function LeadDetailsPage() {
         if (lead.projects[selectedProject].status === newStatus) return;
 
         try {
-            const updatedProjects = lead.projects.map((project: object, index: number) =>
+            const updatedProjects = lead.projects.map((project: Project, index: number) =>
                 index === selectedProject
                     ? { ...project, status: newStatus }
                     : project
@@ -77,33 +77,35 @@ export default function LeadDetailsPage() {
 
             setLead(updatedLead);
             toast.success('Project status updated successfully');
-        } catch (err: any) {
-            toast.error(err.message || 'Failed to update project status');
+        } catch (err: unknown) {
+            toast.error((err as Error).message || 'Failed to update project status');
         }
     };
 
     const handleEditProject = (index: number) => {
+        if (!lead) return; // Add null check
         setEditTitle(lead.projects[index].title || '');
         setEditIndex(index);
         setIsEditModalOpen(true);
     };
 
     const handleDeleteProject = (index: number) => {
+        if (!lead) return; // Add null check
         setDeleteIndex(index);
         setIsDeleteModalOpen(true);
     };
 
     const confirmDeleteProject = async () => {
-        if (deleteIndex === null) return;
+        if (deleteIndex === null || !lead) return; // Add null check
 
-        const updatedProjects = lead.projects.filter((_: any, i: number) => i !== deleteIndex);
+        const updatedProjects = lead.projects.filter((_: Project, i: number) => i !== deleteIndex);
 
         try {
             const updated = await updateLead(lead._id, { projects: updatedProjects });
             setLead(updated);
             toast.success("Project deleted successfully");
             if (selectedProject === deleteIndex) setSelectedProject(0);
-        } catch (err) {
+        } catch {
             toast.error("Failed to delete project");
         } finally {
             setDeleteIndex(null);
@@ -112,9 +114,9 @@ export default function LeadDetailsPage() {
     };
 
     const handleSubmitEdit = async () => {
-        if (editIndex === null || !editTitle.trim()) return;
+        if (editIndex === null || !editTitle.trim() || !lead) return; // Add null check
 
-        const updatedProjects = lead.projects.map((p: any, i: number) =>
+        const updatedProjects = lead.projects.map((p: Project, i: number) =>
             i === editIndex ? { ...p, title: editTitle.trim() } : p
         );
 
@@ -124,12 +126,28 @@ export default function LeadDetailsPage() {
             toast.success("Project title updated");
             setIsEditModalOpen(false);
             setEditIndex(null);
-        } catch (err) {
+        } catch {
             toast.error("Failed to update title");
         }
     };
 
     if (loading) return <LeadDetailsShimmer />;
+    if (error) {
+        return (
+                <div className="text-red-500 text-center p-6 rounded-lg shadow-md">
+                    Error loading lead: {error}
+                </div>
+        );
+    }
+
+    if (!lead) {
+        return (
+                <div className="text-gray-600 text-center p-6 rounded-lg shadow-md">
+                    No lead found with this ID.
+                </div>
+        );
+    }
+
     return (
         <>
             <div className="w-full px-8 py-6 bg-white shadow-sm rounded-md mb-2">
@@ -199,20 +217,20 @@ export default function LeadDetailsPage() {
             </div>
 
             <LeadNotes
-                leadId={lead._id}
-                notes={lead.notes || []}
-                onNotesUpdated={(updatedNotes) => setLead((prev: any) => ({ ...prev, notes: updatedNotes }))}
+                leadId={lead!._id}
+                notes={lead!.notes || []}
+                onNotesUpdated={(updatedNotes: Note[]) => setLead((prev: Lead | null) => (prev ? { ...prev, notes: updatedNotes } : null))}
             />
             <div className='bg-white shadow-sm rounded-md my-6 p-4'>
                 <ProjectSelector
-                    projects={lead.projects || []}
+                    projects={lead!.projects || []}
                     selectedProjectIndex={selectedProject}
-                    onSelect={(index: any) => setSelectedProject(index)}
+                    onSelect={(index: number) => setSelectedProject(index)}
                     onEdit={handleEditProject}
                     onDelete={handleDeleteProject}
                 />
                 <PipelineStepper
-                    currentStatus={lead.projects?.[selectedProject]?.status || 'new'}
+                    currentStatus={lead!.projects?.[selectedProject]?.status || 'new'}
                     onStatusChange={(status: string) => handleStatusChange(status as LeadStatus)}
                     onCreateQuotation={() => setIsQuotationOpen(true)}
                     onCreateInvoice={() => setIsInvoiceOpen(true)}
@@ -220,18 +238,19 @@ export default function LeadDetailsPage() {
             </div>
             <TransactionList
                 transactions={
-                    (lead.transactions || []).filter(
-                        (txn: any) =>
-                            txn.projectId === lead.projects?.[selectedProject]?._id
+                    (lead!.transactions || []).filter(
+                        (txn: Transaction) =>
+                            txn.projectId === lead!.projects?.[selectedProject]?._id
                     )
                 }
-                projects={lead.projects}
+                projects={lead!.projects}
             />
 
             <AddProjectModal
                 isOpen={isProjectModalOpen}
                 onClose={() => setIsProjectModalOpen(false)}
                 leadId={lead._id}
+                existingProjects={lead.projects || []}
                 onProjectAdded={(updatedLead) => setLead(updatedLead)}
             />
             <Modal
@@ -258,7 +277,25 @@ export default function LeadDetailsPage() {
             >
                 <QuotationForm
                     mode="Create"
-                    data={lead}
+                    data={{
+                        _id: '', // Placeholder, will be generated on creation
+                        quotationNumber: '', // Placeholder
+                        clientName: lead.name || '',
+                        clientEmail: lead.email || '',
+                        items: [], // Start with empty items
+                        totalAmount: 0,
+                        issueDate: dayjs().format('YYYY-MM-DD'), // Current date
+                        validUntil: dayjs().add(30, 'days').format('YYYY-MM-DD'), // 30 days from now
+                        createdBy: lead.createdBy,
+                        createdAt: dayjs().toISOString(),
+                        updatedAt: dayjs().toISOString(),
+                        user: lead, // Pass the lead object as the 'user' property
+                        totals: {
+                            taxable: 0,
+                            igst: 0,
+                            total: 0,
+                        },
+                    }}
                     onClose={() => {
                         setIsQuotationOpen(false);
                     }}
@@ -271,8 +308,41 @@ export default function LeadDetailsPage() {
             >
                 <InvoiceForm
                     mode="Create"
-                    data={lead}
-                    projectId={lead?.projects?.[selectedProject]?._id || null}
+                    data={{
+                        _id: '', // Placeholder, will be generated on creation
+                        invoiceNumber: '', // Placeholder
+                        clientName: lead.name || '',
+                        clientEmail: lead.email || '',
+                        clientPhone: lead.phoneNumber || '',
+                        items: [], // Start with empty items
+                        totalAmount: 0,
+                        paidAmount: 0,
+                        status: 'Pending',
+                        issueDate: dayjs().format('YYYY-MM-DD'), // Current date
+                        dueDate: dayjs().add(30, 'days').format('YYYY-MM-DD'), // 30 days from now
+                        createdBy: lead.createdBy,
+                        createdAt: dayjs().toISOString(),
+                        updatedAt: dayjs().toISOString(),
+                        user: { // Map lead properties to a User-like object for the 'user' field
+                            _id: lead._id,
+                            name: lead.name || '',
+                            email: lead.email || '',
+                            role: 'client', // Assuming a default role for the client
+                            phone: lead.phoneNumber || '',
+                            address: lead.address || '',
+                            city: lead.city || '',
+                            zipCode: lead.zipCode || '',
+                            gstin: lead.gstin || '',
+                            phoneNumber: lead.phoneNumber || '',
+                            createdAt: lead.createdAt,
+                        },
+                        totals: {
+                            taxable: 0,
+                            igst: 0,
+                            total: 0,
+                        },
+                    }}
+                    projectId={lead!.projects?.[selectedProject]?._id || null}
                     onClose={() => {
                         setIsInvoiceOpen(false);
                     }}
@@ -280,7 +350,7 @@ export default function LeadDetailsPage() {
             </Modal>
 
             <EmailComposer
-                toEmail={lead.email}
+                toEmail={lead!.email}
                 isOpen={isEmailModalOpen}
                 onClose={() => setIsEmailModalOpen(false)}
             />
@@ -319,7 +389,7 @@ export default function LeadDetailsPage() {
                     setDeleteIndex(null);
                 }}
                 onConfirm={confirmDeleteProject}
-                itemLabel={deleteIndex !== null && lead.projects?.[deleteIndex]?.title ? lead.projects[deleteIndex].title : "Project"}
+                itemLabel={deleteIndex !== null && lead!.projects?.[deleteIndex]?.title ? lead!.projects[deleteIndex].title : "Project"}
                 title="Delete Project"
             />
 

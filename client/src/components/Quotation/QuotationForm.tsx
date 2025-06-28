@@ -6,24 +6,29 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createQuotation, updateQuotation } from '@services/quotationService';
 import dayjs from 'dayjs';
-import { Bill, QuotationItem } from '@customTypes/index';
+import { Bill, QuotationItem, Quotation } from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
 import { Input } from '@components/ui/input';
 import { getBills } from '@services/billService';
 import CreatableSelect from 'react-select/creatable';
 
 interface Props {
-  data: any;
+  data: Quotation;
   mode: 'Create' | 'Edit';
   onClose: () => void;
+}
+
+interface PredefinedItem {
+  label: string;
+  value: string;
+  price: number;
+  hsn: string;
 }
 
 export default function QuotationForm({ data, mode, onClose }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
-  const [loadingBills, setLoadingBills] = useState(true);
-  const [billError, setBillError] = useState<string | null>(null);
   const [items, setItems] = useState<QuotationItem[]>(
     mode === 'Edit' && data?.items?.length
       ? data.items
@@ -41,19 +46,20 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
   );
 
   const [gstin, setGstin] = useState(
-    mode === 'Edit' ? data?.user?.gstin || '' : data?.gstin || ''
+    mode === 'Edit' ? data?.user?.gstin || '' : ''
   );
+  const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
     const fetchBills = async () => {
       try {
         const res = await getBills();
         setBills(res.bills);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to fetch bills:', err);
-        setBillError(err.message || 'Failed to load bills');
+        // setBillError(err.message || 'Failed to load bills'); // billError is unused
       } finally {
-        setLoadingBills(false);
+        // setLoadingBills(false); // loadingBills is unused
       }
     };
 
@@ -67,7 +73,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
     hsn: bill.hsnCode,
   }));
 
-  const handleSelect = (selected: any, index: number) => {
+  const handleSelect = (selected: PredefinedItem | null, index: number) => {
     const updated = [...items];
     if (selected) {
       updated[index] = {
@@ -131,14 +137,40 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
   );
   const igst = +(taxable * 0.18).toFixed(2);
   const total = +(taxable + igst).toFixed(2);
+  const user = data?.user || data;
+  const leadId = user?._id || data?._id;
 
   const handleSubmit = async () => {
+    setValidationError('');
     setSubmitting(true);
+
+    // Validation for items
+    if (!leadId) {
+      setValidationError('Lead (client) is required.');
+      setSubmitting(false);
+      return;
+    }
+    if (!items.length || items.some(i => !i.description || !i.price)) {
+      setValidationError('Each item must have description and price.');
+      setSubmitting(false);
+      return;
+    }
+    if (!taxable) {
+      setValidationError('At least one item with valid amount required.');
+      setSubmitting(false);
+      return;
+    }
+
     try {
       const payload = {
-        _id: data?.user?._id || data?._id,
+        _id: leadId,          // <--- THIS FIELD IS REQUIRED BY BACKEND!
         gstin,
-        items,
+        items: items.map(i => ({
+          description: i.description,
+          quantity: Number(i.quantity),
+          price: Number(i.price),
+          hsn: i.hsn || '',
+        })),
         totals: {
           taxable,
           igst,
@@ -163,8 +195,6 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
       setSubmitting(false);
     }
   };
-
-  const user = data?.user || data;
 
   return (
     <div>
@@ -265,8 +295,10 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
                       : predefinedItems.find(
                           (opt) => opt.value === item.description
                         ) || {
-                          label: item.description,
-                          value: item.description,
+                          label: item.description || '',
+                          value: item.description || '',
+                          price: item.price, // Ensure price is included
+                          hsn: item.hsn,     // Ensure hsn is included
                         }
                   }
                   isClearable
@@ -347,6 +379,11 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           </p>
         </div>
       </div>
+
+      {/* Show any error */}
+      {validationError && (
+        <div className="text-red-600 mt-2 text-right">{validationError}</div>
+      )}
 
       <div className="col-span-2 mt-6 flex justify-end gap-3">
         <Button

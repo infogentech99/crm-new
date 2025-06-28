@@ -1,4 +1,4 @@
-import { Invoice, InvoiceItem, QuotationItem, InvoiceResponse } from '@customTypes/index';
+import { Invoice, InvoiceItem, InvoiceResponse } from '@customTypes/index';
 
 const API_URL = '/api/invoice'; 
 
@@ -10,11 +10,19 @@ const getAuthHeaders = () => {
   };
 };
 
+
+export interface PaginatedInvoices {
+  invoices: Invoice[];
+  totalPages: number;
+  currentPage: number;
+  totalInvoices: number;
+}
+
 export const getInvoices = async (
   page: number = 1,
   limit: number = 10,
   search: string = ''
-): Promise<{ invoices: Invoice[]; totalPages: number; currentPage: number; totalInvoices: number }> => {
+): Promise<PaginatedInvoices> => {
   const headers = getAuthHeaders();
   let url = `${API_URL}?page=${page}&limit=${limit}&populate=projects`;
   if (search) {
@@ -45,13 +53,14 @@ export const createInvoice = async (
     _id: string;
     gstin: string;
     items: InvoiceItem[];
+    projectId: string | null;
     totals: {
       taxable: number;
       igst: number;
       total: number;
     };
   }
-): Promise<any> => {
+): Promise<{ message: string; data: Invoice }> => {
   const response = await fetch(`${API_URL}/genrate`, {
     method: 'POST',
     headers: {
