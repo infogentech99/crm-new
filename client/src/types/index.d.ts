@@ -86,8 +86,7 @@ export interface Lead {
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
   notes?: Note[]; // Changed to use Note interface
-  status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'payments_complete' | 'final_invoice' | 'contacted' | 'qualified' | 'cancelled' | 'lost';
-
+  status?: LeadStatus; // Changed to use LeadStatus type
    
   gstin?: string;
   bestTimeToCall?: string;
@@ -304,7 +303,6 @@ export type LeadStatus =
   | 'payments_complete'
   | 'final_invoice'
   | 'completed'
-  | 'cancelled'
   | 'denied';
 
 export interface FormData {
@@ -319,7 +317,7 @@ export interface FormData {
   country: string;
   source: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
-  status: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
+  status: LeadStatus;
   callResponse: 'Picked' | 'Not Response' | 'Talk to later';
   description?: string;
   remark?: string;
