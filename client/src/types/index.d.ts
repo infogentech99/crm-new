@@ -83,6 +83,7 @@ export interface Lead {
   zipCode?: string;
   website?: string;
   linkedIn?: string;
+   description?: string;
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
   notes?: Note[]; // Changed to use Note interface
@@ -255,11 +256,11 @@ export interface CustomerData {
 }
 
 export interface QuotationItem {
-  name: string;
+  name?: string;
   description?: string;
   quantity: number;
-  unitPrice: number;
-  total: number;
+  unitPrice?: number;
+  total?: number;
   price: number;
   hsn: string
 }
@@ -323,6 +324,7 @@ export interface FormData {
   remark?: string;
   position?: string;
   website?: string;
+  linkedIn?: string;
   createdBy: string | User;
   projects: {
     _id: string;

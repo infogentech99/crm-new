@@ -24,9 +24,8 @@ import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { RxCross2 } from "react-icons/rx";
 import { FormData } from "@customTypes/index";
-import RequiredLabel from '@components/ui/RequiredLabel'; // Assuming this is the correct path for RequiredLabel]
-
-
+import RequiredLabel from '@components/ui/RequiredLabel'; // Assuming this is the correct path for RequiredLabel
+import { Textarea } from "@components/ui/Component";
 
 interface LeadFormProps {
   initialData?: Partial<FormData> & { _id?: string };
@@ -53,6 +52,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       remark: "",
       position: "",
       website: "",
+      linkedIn: "",
       createdBy: "",
       projects: [],
     },
@@ -67,20 +67,16 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-
     mutationFn: (data: FormData) =>
-
       mode === "Edit" && initialData?._id
         ? updateLead(initialData._id, data)
         : createLead(data),
-
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       toast.success(`Lead ${mode === "Edit" ? "updated" : "created"} successfully`);
       onClose();
     },
     onError: () => {
-
       toast.error("Something went wrong. Please try again.");
     },
   });
@@ -89,8 +85,27 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
     mutation.mutate(values);
   };
 
+  const fields = [
+    "name",
+    "phoneNumber",
+    "email",
+    "companyName",
+    "position",
+    "address",
+    "city",
+    "state",
+    "zipCode",
+    "country",
+    "source",
+    "industry",
+    "callResponse",
+    "remark",
+    "website",
+    "linkedIn",
+  ];
+
   return (
-    <div className="p-3 w-full max-w-3xl">
+    <div className="p-3 w-full ">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold text-blue-600">
           {mode === "Edit" ? "Edit Lead" : "Create Lead"}
@@ -104,58 +119,77 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
         </button>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
-          {["name", "phoneNumber", "email", "companyName", "address", "city", "state", "zipCode", "country", "source", "industry", "callResponse", "description", "remark", "position", "website"].map((field) => (
-            <FormField
-  key={field}
-  control={form.control}
-  name={field as keyof FormData}
-  rules={
-    ["name", "phoneNumber", "email", "companyName","city"].includes(field)
-      ? { required: `${field.replace(/([A-Z])/g, ' $1')} is required` }
-      : undefined
-  }
-  render={({ field: f }) => (
-    <FormItem>
-      <RequiredLabel required={["name", "phoneNumber", "email", "companyName","city"].includes(field)}>
-        {field.replace(/([A-Z])/g, ' $1')}
-      </RequiredLabel>
-      <FormControl>
-        {(field === "source" || field === "industry" || field === "callResponse") ? (
-          <Select
-            key={f.value as string}
-            value={f.value as string}
-            onValueChange={f.onChange}
-          >
-            <SelectTrigger>
-              <SelectValue>{(f.value as string) || `Select ${field}`}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {field === "source" &&
-                ["Website", "Referral", "LinkedIn", "Cold Call", "Facebook", "Google", "Instagram", "Twitter", "Advertisement", "Event", "Partnership", "Other"].map(val => (
-                  <SelectItem key={val} value={val}>{val}</SelectItem>
-                ))}
-              {field === "industry" &&
-                ["IT", "Retail", "Manufacturing", "Other"].map(val => (
-                  <SelectItem key={val} value={val}>{val}</SelectItem>
-                ))}
-              {field === "callResponse" &&
-                ["Picked", "Not Response", "Talk to later"].map(val => (
-                  <SelectItem key={val} value={val}>{val}</SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <Input type="text" {...f} value={f.value as string} />
-        )}
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-3 gap-4">
+          {fields.map((field) => (
+            <div key={field}>
+              <FormField
+                control={form.control}
+                name={field as keyof FormData}
+                rules={
+                  ["name", "phoneNumber", "email", "companyName", "city"].includes(field)
+                    ? { required: `${field.replace(/([A-Z])/g, ' $1')} is required` }
+                    : undefined
+                }
+                render={({ field: f }) => (
+                  <FormItem>
+                    <RequiredLabel required={["name", "phoneNumber", "email", "companyName", "city"].includes(field)}>
+                      {field.replace(/([A-Z])/g, ' $1')}
+                    </RequiredLabel>
+                    <FormControl>
+                      {(field === "source" || field === "industry" || field === "callResponse") ? (
+                        <Select
+                          key={f.value as string}
+                          value={f.value as string}
+                          onValueChange={f.onChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue>{(f.value as string) || `Select ${field}`}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {field === "source" &&
+                              ["Website", "Referral", "LinkedIn", "Cold Call", "Facebook", "Google", "Instagram", "Twitter", "Advertisement", "Event", "Partnership", "Other"].map(val => (
+                                <SelectItem key={val} value={val}>{val}</SelectItem>
+                              ))}
+                            {field === "industry" &&
+                              ["IT", "Retail", "Manufacturing", "Other"].map(val => (
+                                <SelectItem key={val} value={val}>{val}</SelectItem>
+                              ))}
+                            {field === "callResponse" &&
+                              ["Picked", "Not Response", "Talk to later"].map(val => (
+                                <SelectItem key={val} value={val}>{val}</SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input type="text" {...f} value={f.value as string} />
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           ))}
 
-          <div className="col-span-2 mt-4 flex justify-end gap-3">
+          <div className="col-span-3">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field: f }) => (
+                <FormItem>
+                  <RequiredLabel required={false}>
+                    Description
+                  </RequiredLabel>
+                  <FormControl>
+                    <Textarea {...f} rows={4} placeholder="Enter detailed description here..." />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="col-span-3 mt-4 flex justify-end gap-3">
             <Button
               type="button"
               onClick={onClose}

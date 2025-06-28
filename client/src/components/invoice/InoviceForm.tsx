@@ -13,7 +13,7 @@ import CreatableSelect from 'react-select/creatable';
 import { createInvoice, updateInvoice } from '@services/invoiceService';
 
 interface Props {
-  data: Invoice;
+  data: any;
   mode: 'Create' | 'Edit';
    projectId: string | null;
   onClose: () => void;
@@ -31,7 +31,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
   const [items, setItems] = useState<InvoiceItem[]>(
-    mode === 'Edit' && data?.items?.length
+    mode === 'Edit'
       ? data.items
       : [
           {
@@ -57,9 +57,6 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
         setBills(res.bills);
       } catch (err: unknown) {
         console.error('Failed to fetch bills:', err);
-        // setBillError(err.message || 'Failed to load bills'); // billError is unused
-      } finally {
-        // setLoadingBills(false); // loadingBills is unused
       }
     };
 
