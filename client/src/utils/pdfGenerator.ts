@@ -15,7 +15,7 @@ const removeOklchColors = () => {
 };
 
 export async function generatePDFBlob(
-  ref: RefObject<HTMLDivElement>
+  ref: RefObject<HTMLDivElement | null>
 ): Promise<jsPDF> {
   if (!ref.current) throw new Error("Invoice element not found");
   const invoiceEl = ref.current;

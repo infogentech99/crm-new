@@ -112,32 +112,41 @@ export default function Page() {
 
   const downloadPDF = async () => {
     setDownloading(true);
-    const pdf = await generatePDFBlob(invoiceRef);
-    pdf.save(`invoice-${data.order.id}.pdf`);
-    toast.success("Downloaded PDF successfully!");
+    if (invoiceRef.current) {
+      const pdf = await generatePDFBlob(invoiceRef);
+      pdf.save(`invoice-${data.order.id}.pdf`);
+      toast.success("Downloaded PDF successfully!");
+    } else {
+      toast.error("Failed to generate PDF: Invoice content not found.");
+    }
     setDownloading(false);
   };
 
   const sendPDFEmail = async () => {
     setSending(true);
     try {
-      const doc = await generatePDFBlob(invoiceRef);
-      const blob = doc.output("blob");
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const formData = new FormData();
-        formData.append("pdfBase64", reader.result as string);
-        formData.append("customerEmail", data.customer.email);
-        formData.append("invoiceId", data.order.id);
-        formData.append("clientName", data.customer.name);
+      if (invoiceRef.current) {
+        const doc = await generatePDFBlob(invoiceRef);
+        const blob = doc.output("blob");
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const formData = new FormData();
+          formData.append("pdfBase64", reader.result as string);
+          formData.append("customerEmail", data.customer.email);
+          formData.append("invoiceId", data.order.id);
+          formData.append("clientName", data.customer.name);
 
-        const response = await createEmail(formData);
-        response.message
-          ? toast.success("Invoice sent to customer’s email.")
-          : toast.error("Failed to send invoice email.");
+          const response = await createEmail(formData);
+          response.message
+            ? toast.success("Invoice sent to customer’s email.")
+            : toast.error("Failed to send invoice email.");
+          setSending(false);
+        };
+        reader.readAsDataURL(blob);
+      } else {
+        toast.error("Failed to generate PDF: Invoice content not found.");
         setSending(false);
-      };
-      reader.readAsDataURL(blob);
+      }
     } catch {
       toast.error("Failed to generate PDF.");
       setSending(false);
