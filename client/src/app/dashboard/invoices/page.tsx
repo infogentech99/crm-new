@@ -59,6 +59,7 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
 
   const handleViewInvoice = useCallback((invoice: Invoice) => {
     setSelectedInvoice(invoice);
+    console.log("Selected Invoice:", invoice);
     if (invoice?._id) {
       router.push(`/dashboard/invoices/${invoice._id}`)
     }

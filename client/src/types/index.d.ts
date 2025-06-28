@@ -74,6 +74,7 @@ export interface Lead {
   company?: string; // Added (assuming this is the field used in the UI)
   phoneNumber?: string;
   createdBy: string | User; 
+  projectId: string; // 
   companyName?: string; 
   jobTitle?: string;
   address?: string;
@@ -95,6 +96,7 @@ export interface Lead {
   denialReason?: string;
   remark?: string;
   createdAt: string;
+
   updatedAt: string;
   projects: Project[]; // Changed to use Project interface
   transactions?: Transaction[]; // Added

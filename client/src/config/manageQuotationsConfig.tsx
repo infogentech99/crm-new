@@ -23,7 +23,7 @@ export const manageQuotationsConfig = (
     {
       key: 'quotationNumber',
       label: 'QUOTATION NO.',
-      render: (item: Quotation) => <span>{item._id}</span>, // use _id directly
+      render: (item: Quotation) => <span>{item._id}</span>, 
     },
     {
       key: 'clientName',

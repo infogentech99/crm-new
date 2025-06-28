@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getLeadById, updateLead } from '@services/leadService';
 import dayjs from 'dayjs';
 import Modal from '@components/Common/Modal';
@@ -19,8 +19,10 @@ import ProjectSelector from '@components/Leads/ProjectSelector'
 import TransactionList from '@components/Leads/TransactionList';
 import { RxCross2 } from 'react-icons/rx';
 import DeleteModal from '@components/Common/DeleteModal';
+import { getOrCreateFinalInvoice } from '@services/invoiceService';
 export default function LeadDetailsPage() {
     const { id } = useParams();
+     const router = useRouter();  
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -36,6 +38,45 @@ export default function LeadDetailsPage() {
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+
+const handleCreateFinalInvoice = async () => {
+  if (!lead?.projects?.length) {
+    toast.error('Please add a project first.');
+    return;
+  }
+  const project = lead.projects[selectedProject];
+
+  // If already final, navigate if we have an invoiceId
+  if (project.status === 'final_invoice') {
+    const existing = (lead.transactions ?? []).find(
+      (t) =>
+        String(t.projectId) === String(project._id) &&
+        t.invoiceId
+    );
+    if (existing?.invoiceId) {
+      router.push(
+        `/dashboard/final-invoice/${existing.invoiceId}`
+      );
+      return;
+    }
+  }
+
+  try {
+    // now returns { _id, invoiceNumber, ... }
+    const invoice = await getOrCreateFinalInvoice(project._id);
+
+    // update the project status…
+    await handleStatusChange('final_invoice');
+
+    // then navigate using the invoice’s real _id
+    router.push(`/dashboard/final-invoice/${invoice._id}`);
+  } catch (err: any) {
+    console.error(err);
+    toast.error(err.message || 'Could not create final invoice.');
+  }
+};
+
+
      useEffect(() => {
        document.title = "Leads Details – CRM Application";
      }, []);
@@ -230,21 +271,28 @@ export default function LeadDetailsPage() {
                     onDelete={handleDeleteProject}
                 />
                 <PipelineStepper
-                    currentStatus={lead!.projects?.[selectedProject]?.status || 'new'}
-                    onStatusChange={(status: string) => handleStatusChange(status as LeadStatus)}
-                    onCreateQuotation={() => setIsQuotationOpen(true)}
-                    onCreateInvoice={() => setIsInvoiceOpen(true)}
-                />
+        currentStatus={lead.projects[selectedProject]?.status as LeadStatus || 'new'}
+        onStatusChange={(s) => handleStatusChange(s as LeadStatus)}
+        onCreateQuotation={() => setIsQuotationOpen(true)}
+        onCreateInvoice={() => setIsInvoiceOpen(true)}
+        onCreateFinalInvoice={handleCreateFinalInvoice}   // now returns void
+      />
             </div>
             <TransactionList
-                transactions={
-                    (lead!.transactions || []).filter(
-                        (txn: Transaction) =>
-                            txn.projectId === lead!.projects?.[selectedProject]?._id
-                    )
-                }
-                projects={lead!.projects}
-            />
+  transactions={
+    (lead!.transactions || [])
+      .filter(
+        (txn: Transaction) =>
+          String(txn.projectId) === String(lead!.projects?.[selectedProject]?._id)
+      )
+      .map((txn: any) => ({
+        ...txn,
+        transaction: txn.transaction ?? '', // Provide a default value if missing
+        date: txn.date ?? '', // Provide a default value if missing
+      }))
+  }
+  projects={lead!.projects}
+/>
 
             <AddProjectModal
                 isOpen={isProjectModalOpen}
@@ -262,7 +310,15 @@ export default function LeadDetailsPage() {
                 widthClass="max-w-3xl"
             >
                 <LeadForm
-                    initialData={selectedLead || undefined}
+                    initialData={
+                        selectedLead
+                            ? {
+                                ...selectedLead,
+                                // Map status to allowed values if necessary
+                                status: selectedLead.status as any, // Cast or map as needed
+                              }
+                            : undefined
+                    }
                     mode="Edit"
                     onClose={() => {
                         setIsModalOpen(false);

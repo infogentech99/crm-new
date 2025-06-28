@@ -1,6 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
+import { useRouter, useParams } from 'next/navigation';
 import { Check, CheckCheck, CheckCircle, CheckLine, FilePen, FileText, HandCoins, ReceiptText, X } from 'lucide-react';
 import { Button } from '@components/ui/button';
 
@@ -14,16 +15,19 @@ const MAIN_PIPELINE_STEPS = [
   { value: 'payments_complete', label: 'Payment Complete', icon: HandCoins },
   { value: 'final_invoice', label: 'Final Invoice', icon: HandCoins },
   { value: 'completed', label: 'Project Completed', icon: CheckCircle },
-];
+] as const;
 
-const DENIED_STEP = { value: 'denied', label: 'Denied', icon: X };
+const DENIED_STEP = { value: 'denied', label: 'Denied', icon: X } as const;
+type Status =
+  | typeof MAIN_PIPELINE_STEPS[number]['value']
+  | typeof DENIED_STEP.value;
 
 interface PipelineStepperProps {
-  currentStatus: string;
-  onStatusChange: (status: string) => void;
+  currentStatus: Status;
+  onStatusChange: (status: Status) => void;
   onCreateQuotation?: () => void;
   onCreateInvoice?: () => void;
-  onCreateFinalInvoice?: () => void;
+  onCreateFinalInvoice?: () => Promise<void>;
 }
 
 export default function PipelineStepper({
@@ -33,18 +37,32 @@ export default function PipelineStepper({
   onCreateInvoice,
   onCreateFinalInvoice,
 }: PipelineStepperProps) {
+  const router = useRouter();
+  // const { id: projectId } = useParams(); // not used here
 
+  const activeIndex = MAIN_PIPELINE_STEPS.findIndex(
+    (s) => s.value === currentStatus
+  );
 
-  const getStatus = (stepValue: string) => {
-    const activeIndex = MAIN_PIPELINE_STEPS.findIndex((s) => s.value === currentStatus);
-    const currentIndex = MAIN_PIPELINE_STEPS.findIndex((s) => s.value === stepValue);
-    if (currentStatus === 'denied') return 'inactive'; 
-    if (currentIndex < activeIndex) return 'done';
-    if (currentIndex === activeIndex) return 'active';
+  const getStatus = (stepValue: Status) => {
+    if (currentStatus === 'denied') return 'inactive';
+    const idx = MAIN_PIPELINE_STEPS.findIndex((s) => s.value === stepValue);
+    if (idx < activeIndex) return 'done';
+    if (idx === activeIndex) return 'active';
     return 'pending';
   };
 
- 
+  const handleClick = async (stepValue: Status) => {
+    if (stepValue === 'final_invoice') {
+      onStatusChange('final_invoice');
+      if (onCreateFinalInvoice) {
+        // simply call your parent handler (which does the router.push)
+        await onCreateFinalInvoice();
+      }
+    } else {
+      onStatusChange(stepValue);
+    }
+  };
   return (
     <div className="w-full px-4 ">
       <div className="relative flex items-start justify-start max-w-7xl mx-auto pt-8 gap-4">
@@ -69,18 +87,8 @@ export default function PipelineStepper({
                 />
               )}
 
-              {/* Circle + click handler */}
               <div
-                onClick={() => {
-                  if (step.value === 'final_invoice') {
-                    // 1) advance the pipeline
-                    onStatusChange('final_invoice');
-                    // 2) open the final‐invoice modal
-                    onCreateFinalInvoice?.();
-                  } else {
-                    onStatusChange(step.value);
-                  }
-                }}
+                onClick={() => handleClick(step.value)}
                 className={clsx(
                   'w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 cursor-pointer z-10',
                   {
@@ -100,58 +108,47 @@ export default function PipelineStepper({
                 })}
               >
                 {step.label}
-              </span>
-            
+              </span>            
 
-              {(step.value === 'quotation_submitted' && currentStatus === 'quotation_submitted') && (
-                <div className="mt-2 w-full flex justify-center">
+
+              {step.value === 'quotation_submitted' &&
+                status === 'active' &&
+                onCreateQuotation && (
                   <Button
                     className="text-xs w-34 bg-green-600 hover:bg-green-700 text-white"
                     onClick={onCreateQuotation}
                   >
                    <FilePen /> Create Quotation
                   </Button>
-                </div>
-              )}
-
-              {(step.value === 'invoice_issued' && currentStatus === 'invoice_issued') && (
-                <div className="mt-2 w-full flex justify-center">
+                )}
+              {step.value === 'invoice_issued' &&
+                status === 'active' &&
+                onCreateInvoice && (
                   <Button
-                    className="text-xs w-34 bg-green-600 hover:bg-green-700 text-white"
                     onClick={onCreateInvoice}
+                    className="mt-2 text-xs bg-green-600 hover:bg-green-700 text-white"
                   >
-                     <FilePen /> Create Invoice
+                    <FilePen /> Create Invoice
                   </Button>
-                </div>
-              )}
-              {(step.value === 'final_invoice' && currentStatus === 'final_invoice') && (
-                <div className="mt-2 w-full flex justify-center">
-                  <Button
-                    className="text-xs w-34 bg-green-600 hover:bg-green-700 text-white"
-                    onClick={onCreateFinalInvoice}
-                  >
-                     <FilePen /> Final Invoice
-                  </Button>
-                </div>
-              )}
+                )}
             </div>
           );
         })}
 
-        <div className="flex flex-col items-center w-40 z-10 ml-6">
+        <div className="flex flex-col items-center w-40 ml-6 z-10">
           <div
             onClick={() => onStatusChange(DENIED_STEP.value)}
             className={clsx(
-              'w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 cursor-pointer',
+              'w-10 h-10 mb-2 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300',
               {
                 'bg-red-600 text-white': currentStatus === 'denied',
                 'bg-gray-300 text-white': currentStatus !== 'denied',
               }
             )}
           >
-            <DENIED_STEP.icon className="w-5 h-5" />
+            <X className="w-5 h-5" />
           </div>
-          <span className="text-sm font-medium text-center mt-1 text-red-600">
+          <span className="text-sm font-medium text-center text-red-600">
             {DENIED_STEP.label}
           </span>
         </div>

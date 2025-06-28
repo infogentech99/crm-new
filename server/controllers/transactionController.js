@@ -6,7 +6,7 @@ import Lead        from '../models/Lead.js';
 export const createTransaction = async (req, res, next) => {
   try {
     const { leadId, invoiceId, amount, method, transactionId, projectId } = req.body;
-    if (!leadId || !invoiceId || amount == null || !method) {
+    if (!leadId || !invoiceId || amount == null || !method || !transactionId || !projectId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -47,6 +47,7 @@ export const createTransaction = async (req, res, next) => {
           date: new Date(),
           amount,
           method,
+          projectId,
         }
       }
     });
