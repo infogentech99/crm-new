@@ -141,6 +141,7 @@ export interface Transaction {
   user: User;
   invoice: Invoice;
   transactionDate: string;
+  date: string;
 }
 
 export interface Meeting {
@@ -205,8 +206,7 @@ export interface Invoice {
   items: QuotationItem[]; 
   totalAmount: number;
   paidAmount?: number; 
-  status: 'Pending' | 'Paid' | 'Overdue' | 'Cancelled';
-  issueDate: string; 
+  issueDate?: string; 
   dueDate: string; 
   relatedQuotation?: string; 
   createdBy: string | User;
@@ -273,8 +273,8 @@ export interface InvoiceItem {
   quantity?: number;
   unitPrice?: number;
   total?: number;
-  price: number;
-  hsn: string
+  price?: number;
+  hsn?: string
 }
 
 export interface Quotation {

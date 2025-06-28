@@ -129,7 +129,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
   };
 
   const taxable = items.reduce(
-    (sum, item) => sum + item.quantity * item.price,
+    (sum, item) => sum + ((item.quantity ?? 0) * (item.price ?? 0)),
     0
   );
   const igst = +(taxable * 0.18).toFixed(2);
@@ -325,7 +325,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
                 />
               </td>
               <td className="p-2 text-right w-32 font-semibold text-gray-800">
-                ₹{(item.quantity * item.price).toLocaleString('en-IN')}
+                ₹{((item.quantity ?? 0) * (item.price ?? 0)).toLocaleString('en-IN')}
               </td>
               <td className="p-2 text-center w-12">
                 <button
