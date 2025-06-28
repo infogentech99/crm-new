@@ -36,7 +36,7 @@ export default function TransactionList({ transactions, projects }: Props) {
         mergedTransactions.map((txn) => (
 
           <div
-            key={txn._id}
+            key={txn.transactionId}
             className="flex justify-between px-4 py-3 border-b text-sm hover:bg-gray-50"
           >
             <span className="flex-1">{txn.invoiceId}</span>

@@ -161,7 +161,7 @@ export default function Page() {
     ...items,
     ...Array.from({ length: Math.max(0, MIN_ROWS - items.length) }, () => null),
   ];
-  const amountInWords = `${toWords(Math.round(totals.total)).replace(/(^\w|\s\w)/g, m => m.toUpperCase())} Rupees Only`;
+const amountInWords = `${toWords(Math.round(totals.total)).replace(/(^\w|\s\w)/g, (m: string) => m.toUpperCase())} Rupees Only`;
 
   return (
     <>
@@ -235,7 +235,7 @@ export default function Page() {
                       <strong>Bill To:</strong> {customer.name}
                     </div>
                     <div className="mt-1">
-                      <strong>Address:</strong> {customer.address},{" "}
+                      <strong>Address:</strong> {customer.address},
                       {customer.city} {customer.postalCode}
                     </div>
                     {customer.email && (
@@ -261,9 +261,9 @@ export default function Page() {
             {/* 2) Items & Totals */}
             <table className="w-full border-collapse border border-black text-sm">
               <colgroup>
-                <col style={{ width: "10%" }} />
-                <col style={{ width: "40%" }} />
-                <col style={{ width: "10%" }} />
+                <col style={{ width: "5%" }} />
+                <col style={{ width: "50%" }} />
+                <col style={{ width: "5%" }} />
                 <col style={{ width: "15%" }} />
                 <col style={{ width: "10%" }} />
                 <col style={{ width: "15%" }} />
@@ -320,7 +320,7 @@ export default function Page() {
                     </td>
                     <td className="border-l border-r border-black px-3 py-2 leading-snug">
                       {it
-                        ? `₹${(it.price * it.quantity).toLocaleString(
+                        ? `₹${(it.price * (it.quantity || 0)).toLocaleString(
                             "en-IN"
                           )}`
                         : ""}

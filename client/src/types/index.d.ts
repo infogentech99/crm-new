@@ -266,11 +266,11 @@ export interface QuotationItem {
   hsn: string
 }
 export interface InvoiceItem {
-  name: string;
+  name?: string;
   description?: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
+  quantity?: number;
+  unitPrice?: number;
+  total?: number;
   price: number;
   hsn: string
 }

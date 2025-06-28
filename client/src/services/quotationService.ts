@@ -45,7 +45,7 @@ export async function getQuotationById(id: string): Promise<Quotation> {
 }
 
 interface CreatePayload {
-  user: string;
+  _id?: string;
   gstin?: string;
   items: QuotationItem[];
   totals: {

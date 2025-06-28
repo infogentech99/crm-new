@@ -163,7 +163,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
 
     try {
       const payload = {
-        user: leadId,        
+        _id: leadId,        
         gstin,
         items: items.map(i => ({
           description: i.description,
