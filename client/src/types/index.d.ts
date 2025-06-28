@@ -214,6 +214,7 @@ export interface Invoice {
   date?: string; 
   payment?: PaymentDetails; 
   user: User;
+  projectId: string;
   totals: {
     taxable: number;
     igst: number;

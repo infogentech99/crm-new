@@ -169,9 +169,15 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
               }}
             />
           </Modal>
-        {isTransactionModalOpen && (
+        {isTransactionModalOpen && selectedInvoice && (
           <TransactionModal
-            selectedInvoice={selectedInvoice}
+            selectedInvoice={{
+              _id: selectedInvoice._id,
+              totals: selectedInvoice.totals,
+              paidAmount: selectedInvoice.paidAmount,
+              user: selectedInvoice.user._id,
+              projectId: selectedInvoice.projectId,
+            }}
             onClose={() => {
               setIsTransactionModalOpen(false);
               queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
