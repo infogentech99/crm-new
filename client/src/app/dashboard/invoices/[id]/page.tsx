@@ -86,7 +86,6 @@ export default function Page() {
         });
       } catch (err) {
         console.error("Failed to fetch invoice:", err);
-        setError("Failed to load invoice.");
     //     setInvoiceError(err.message || "Failed to load invoice.");
     //     return; // stop before fetching payments
     //   }

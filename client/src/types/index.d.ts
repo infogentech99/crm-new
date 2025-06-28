@@ -62,7 +62,8 @@ export interface User {
   gstin?: string;
   phoneNumber?: string;
   projects?: { _id: string; title: string; status: string }[];
-  createdAt: string; // Added createdAt
+  createdAt: string;
+  companyName:string; // Added createdAt
 }
 
 export interface Lead {
@@ -211,6 +212,7 @@ export interface Invoice {
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  companyName: string;
   date?: string; 
   payment?: PaymentDetails; 
   user: User;
