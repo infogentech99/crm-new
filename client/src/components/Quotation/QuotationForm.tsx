@@ -182,6 +182,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
         await createQuotation(payload);
         toast.success('Quotation created successfully!');
       } else {
+        // Use _id for update, which is now the custom string ID
         await updateQuotation(data._id, payload);
         toast.success('Quotation updated successfully!');
       }
