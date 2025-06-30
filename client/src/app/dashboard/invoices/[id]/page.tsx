@@ -17,7 +17,8 @@ import {
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
 import dayjs from "dayjs";
-import { toWords } from "number-to-words";
+import { toWords } from 'number-to-words';
+
 
 export default function Page() {
   const params = useParams();
@@ -321,7 +322,7 @@ export default function Page() {
                     </td>
                     <td className="border-l border-r border-black px-3 py-2 leading-snug">
                       {it
-                        ? `₹${it.price.toLocaleString("en-IN")}`
+                        ? `₹${(it.price ?? 0).toLocaleString("en-IN")}`
                         : ""}
                     </td>
                     <td className="border-l border-r border-black px-3 py-2 leading-snug">
@@ -329,9 +330,9 @@ export default function Page() {
                     </td>
                     <td className="border-l border-r border-black px-3 py-2 leading-snug">
                       {it
-                        ? `₹${(it.price * (it.quantity || 0)).toLocaleString(
+                        ? `₹${(((it.price ?? 0) * (it.quantity || 0)).toLocaleString(
                           "en-IN"
-                        )}`
+                        ))}`
                         : ""}
                     </td>
                   </tr>

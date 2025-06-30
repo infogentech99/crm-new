@@ -105,24 +105,6 @@ export const deleteInvoice = async (id: string): Promise<{ message: string }> =>
   return response.json();
 };
 
-
-// export const getOrCreateFinalInvoice = async (
-//   leadId: string
-// ): Promise<InvoiceResponse> => {
-//   const res = await fetch(`${API_URL}/final/${leadId}`, {
-//     method: 'POST',
-//     headers: getAuthHeaders(),
-//   });
-//   if (!res.ok) {
-//     const err = await res.json().catch(() => ({}));
-//     throw new Error(
-//       err.message || `Failed to get/create final invoice for project ${leadId}`
-//     );
-//   }
-//   return res.json();
-// };
-
-// client/services/invoiceService.ts
 export const getOrCreateFinalInvoice = async (
   invoiceNumber: string
 ): Promise<InvoiceResponse> => {

@@ -269,6 +269,7 @@ export interface QuotationItem {
   price: number;
   hsn: string
 }
+
 export interface InvoiceItem {
   name?: string;
   description?: string;

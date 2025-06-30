@@ -1,7 +1,7 @@
 'use client';
 
 import dayjs from 'dayjs';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { Transaction } from '../../types';
 
@@ -11,14 +11,18 @@ interface Props {
 }
 
 export default function TransactionList({ transactions, projects }: Props) {
-  const mergedTransactions = transactions.map((txn) => {
+  const mergedTransactions = useMemo(
+    () =>
+transactions.map((txn) => {
     const project = projects.find((p) => p._id === txn.projectId);
     return {
       ...txn,
       projectTitle: project?.title || 'N/A',
       projectStatus: project?.status || 'Unknown',
     };
-  });
+  }),
+    [transactions, projects]
+  );
 
   return (
     <div className="bg-white shadow rounded-lg p-6">
@@ -32,11 +36,13 @@ export default function TransactionList({ transactions, projects }: Props) {
         <span className="flex-1">Amount</span>
         <span className="flex-1 text-right">Date & Time</span>
       </div>
-      {mergedTransactions.length > 0 ? (
-        mergedTransactions.map((txn) => (
-
+      <div>
+        {mergedTransactions.length > 0 ? (
+          mergedTransactions.map((txn, idx) => {
+            const key = txn.transactionId ?? `${txn.invoiceId}-${idx}`;
+            return (
           <div
-            key={txn.transactionId}
+            key={key}
             className="flex justify-between px-4 py-3 border-b text-sm hover:bg-gray-50"
           >
             <span className="flex-1">{txn.invoiceId}</span>
@@ -49,10 +55,12 @@ export default function TransactionList({ transactions, projects }: Props) {
              {dayjs(txn.transactionDate).format('D MMM YYYY, hh:mm A')}
             </span>
           </div>
-        ))
-      ) : (
-        <div className="px-4 py-3 text-gray-500 italic">No transactions for this project.</div>
+        );
+          })
+        ) : (
+          <div key="no-transactions"  className="px-4 py-3 text-gray-500 italic">No transactions for this project.</div>
       )}
+      </div>
     </div>
   );
 }
