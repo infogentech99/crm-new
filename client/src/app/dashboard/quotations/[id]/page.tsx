@@ -60,7 +60,7 @@ export default function Page() {
     if (!id) return;
     getQuotationById(id)
       .then((res) => {
-        const q = res.data;
+        const q = res;
         const taxable = q.totals?.taxable || 0;
         let cgst = 0,
           sgst = 0,

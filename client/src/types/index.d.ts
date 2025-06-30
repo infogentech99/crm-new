@@ -228,6 +228,7 @@ export interface Invoice {
 
 
 export interface InvoiceResponse {
+  _id: string;
   data: Invoice;
 }
 
@@ -354,4 +355,8 @@ export interface MeetingSummary {
   upcomingMeetings: number;
   completedMeetings: number;
   cancelledMeetings: number;
+}
+
+declare module 'number-to-words' {
+  export function toWords(num: number): string;
 }
