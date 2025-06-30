@@ -31,8 +31,8 @@ export const manageQuotationsConfig = (
       render: (item: Quotation) => <span>{item.user?.name || 'N/A'}</span>,
     },
     {
-      key: 'company', label: 'COMPANY',
-      render: (item: Quotation) => <span>{item.user?.company || 'N/A'}</span>,
+      key: 'companyName', label: 'COMPANY',
+      render: (item: Quotation) => <span>{item.user?.companyName || 'N/A'}</span>,
     },
     {
       key: 'totalAmount',

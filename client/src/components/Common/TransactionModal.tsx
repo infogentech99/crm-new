@@ -42,7 +42,6 @@ export default function TransactionModal({ selectedInvoice, onClose }: Props) {
     if (!selectedInvoice?._id) return;
     setTxLoading(true);
     try {
-      // fetch first page with invoiceId as search term
       const { transactions: allTxs } = await getTransactions(1, 100, selectedInvoice._id);
       setTransactions(allTxs);
     } catch (err) {
@@ -110,7 +109,7 @@ export default function TransactionModal({ selectedInvoice, onClose }: Props) {
           <h2 className="text-xl font-semibold text-blue-600">Add Transaction</h2>
           <button
             onClick={onClose}
-            className="text-gray-200 p-1 text-2xl hover:text-gray-500"
+            className="text-gray-200 p-1 text-2xl hover:text-gray-500 cursor-pointer"
             aria-label="Close"
           >
             <RxCross2 />
@@ -178,8 +177,8 @@ export default function TransactionModal({ selectedInvoice, onClose }: Props) {
           ) : transactions.length > 0 ? (
             <ul className="text-sm max-h-40 overflow-y-auto divide-y">
               {transactions.map(txn => (
-                <li key={txn.transaction} className="grid grid-cols-4 py-1 px-2 items-center">
-                  <span>{dayjs(txn.date).format('DD MM YYYY')}</span>
+                <li key={txn._id} className="grid grid-cols-4 py-1 px-2 items-center">
+                  <span>{dayjs(txn?.date).format('DD MM YYYY')}</span>
                   <span className="truncate" title={txn.transactionId}>{txn.transactionId || '-'}</span>
                   <span>{txn.method}</span>
                   <span className="text-right">₹{txn.amount.toFixed(2)}</span>

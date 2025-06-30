@@ -32,22 +32,22 @@ const allowedOrigins = [
   'https://crm.globallysolution.com'
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    callback(new Error(`CORS policy: Origin ${origin} not allowed`));
-  },
-  credentials: true,
-}));
-
 // app.use(cors({
-//   origin: 'http://localhost:3000',   // your React app’s URL
-//   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-//   credentials: true
+//   origin: (origin, callback) => {
+//     if (!origin) return callback(null, true);
+//     if (allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     }
+//     callback(new Error(`CORS policy: Origin ${origin} not allowed`));
+//   },
+//   credentials: true,
 // }));
+
+app.use(cors({
+  origin: 'http://localhost:3000',   // your React app’s URL
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  credentials: true
+}));
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(process.cwd(), 'server', 'uploads')));

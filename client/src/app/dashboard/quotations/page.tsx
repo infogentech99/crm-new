@@ -46,7 +46,7 @@ const ManageQuotationsPage: React.FC = () => {
     queryFn: () => getQuotations(1, 10000, search),
     enabled: isMounted,
   });
-
+  console.log(data, "asdasfA")
   const allQuotations = data?.quotations || [];
   const totalQuotations = allQuotations.length;
   const totalPages = Math.ceil(totalQuotations / limit);

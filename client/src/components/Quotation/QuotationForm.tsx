@@ -13,7 +13,7 @@ import { getBills } from '@services/billService';
 import CreatableSelect from 'react-select/creatable';
 
 interface Props {
-  data: Quotation;
+  data: any;
   mode: 'Create' | 'Edit';
   onClose: () => void;
 }
@@ -144,7 +144,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
     setValidationError('');
     setSubmitting(true);
 
-    // Validation for items
+    
     if (!leadId) {
       setValidationError('Lead (client) is required.');
       setSubmitting(false);
@@ -163,7 +163,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
 
     try {
       const payload = {
-        _id: leadId,          // <--- THIS FIELD IS REQUIRED BY BACKEND!
+        _id: leadId,        
         gstin,
         items: items.map(i => ({
           description: i.description,
@@ -182,6 +182,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
         await createQuotation(payload);
         toast.success('Quotation created successfully!');
       } else {
+        // Use _id for update, which is now the custom string ID
         await updateQuotation(data._id, payload);
         toast.success('Quotation updated successfully!');
       }

@@ -29,13 +29,11 @@ export const genrate = async (req, res) => {
     const quotation = new Quotation({
       user: _id,
       totals,
-      createdBy: req.user?._id, // Use optional chaining for safety
+      createdBy: req.user?._id, 
       items: []
     });
 
-    // Validate and create item documents
     for (const [idx, itemData] of items.entries()) {
-      // Validate required item fields (customize as needed)
       if (
         !itemData.description ||
         typeof itemData.price !== 'number' ||

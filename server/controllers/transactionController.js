@@ -14,7 +14,6 @@ export const createTransaction = async (req, res, next) => {
     if (!invoice) {
       return res.status(404).json({ error: 'Invoice not found' });
     }
-
     const txn = await Transaction.create({
       user: leadId,
       invoice: invoiceId,
@@ -22,13 +21,13 @@ export const createTransaction = async (req, res, next) => {
       method,
       transactionId,
       projectId,  
-       createdBy:     req.user._id
+      createdBy:     req.user._id
     });
+    
     invoice.paidAmount = (invoice.paidAmount || 0) + amount;
     invoice.transactions = invoice.transactions || [];
     invoice.transactions.push(txn._id);
 
-    // 4) Auto-advance only if it was accepted
     if (invoice.status === 'invoice_accepted') {
       if (invoice.paidAmount >= invoice.totalAmount) {
         invoice.status = 'payments_complete';

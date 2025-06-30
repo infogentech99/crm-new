@@ -17,7 +17,6 @@ import { Lead, Project } from '@customTypes/index';
 
 const projectStatuses = [
   'new',
-  'contacted',
   'approved',
   'quotation_submitted',
   'quotation_approved',

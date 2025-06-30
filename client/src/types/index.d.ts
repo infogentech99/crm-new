@@ -62,7 +62,8 @@ export interface User {
   gstin?: string;
   phoneNumber?: string;
   projects?: { _id: string; title: string; status: string }[];
-  createdAt: string; // Added createdAt
+  createdAt: string;
+  companyName:string; // Added createdAt
 }
 
 export interface Lead {
@@ -84,11 +85,11 @@ export interface Lead {
   zipCode?: string;
   website?: string;
   linkedIn?: string;
+   description?: string;
   source?: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry?: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
   notes?: Note[]; // Changed to use Note interface
-  status?: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'payments_complete' | 'final_invoice' | 'contacted' | 'qualified' | 'cancelled' | 'lost';
-
+  status?: LeadStatus; // Changed to use LeadStatus type
    
   gstin?: string;
   bestTimeToCall?: string;
@@ -142,6 +143,7 @@ export interface Transaction {
   user: User;
   invoice: Invoice;
   transactionDate: string;
+  date: string;
 }
 
 export interface Meeting {
@@ -206,16 +208,17 @@ export interface Invoice {
   items: QuotationItem[]; 
   totalAmount: number;
   paidAmount?: number; 
-  status: 'Pending' | 'Paid' | 'Overdue' | 'Cancelled';
-  issueDate: string; 
+  issueDate?: string; 
   dueDate: string; 
   relatedQuotation?: string; 
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
+  companyName: string;
   date?: string; 
   payment?: PaymentDetails; 
   user: User;
+  projectId: string;
   totals: {
     taxable: number;
     igst: number;
@@ -258,22 +261,22 @@ export interface CustomerData {
 }
 
 export interface QuotationItem {
-  name: string;
+  name?: string;
   description?: string;
   quantity: number;
-  unitPrice: number;
-  total: number;
+  unitPrice?: number;
+  total?: number;
   price: number;
   hsn: string
 }
 export interface InvoiceItem {
-  name: string;
+  name?: string;
   description?: string;
-  quantity: number;
-  unitPrice: number;
-  total: number;
-  price: number;
-  hsn: string
+  quantity?: number;
+  unitPrice?: number;
+  total?: number;
+  price?: number;
+  hsn?: string
 }
 
 export interface Quotation {
@@ -306,7 +309,6 @@ export type LeadStatus =
   | 'payments_complete'
   | 'final_invoice'
   | 'completed'
-  | 'cancelled'
   | 'denied';
 
 export interface FormData {
@@ -321,12 +323,13 @@ export interface FormData {
   country: string;
   source: 'Website' | 'Referral' | 'LinkedIn' | 'Cold Call';
   industry: 'IT' | 'Retail' | 'Manufacturing' | 'Other';
-  status: 'pending_approval' | 'denied' | 'approved' | 'quotation_submitted' | 'quotation_rejected' | 'quotation_approved' | 'invoice_issued' | 'invoice_accepted' | 'completed' | 'processing_payments' | 'new' | 'contacted' | 'qualified' | 'lost';
+  status: LeadStatus;
   callResponse: 'Picked' | 'Not Response' | 'Talk to later';
   description?: string;
   remark?: string;
   position?: string;
   website?: string;
+  linkedIn?: string;
   createdBy: string | User;
   projects: {
     _id: string;

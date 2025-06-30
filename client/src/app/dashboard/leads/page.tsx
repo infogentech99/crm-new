@@ -210,22 +210,17 @@ const ManageLeadsPage: React.FC = () => {
 
   const statusOptions = [
     { value: 'all', label: 'All Status' },
-    { value: 'approved', label: 'Approved' },
-    { value: 'pending_approval', label: 'Pending Approval' },
+    { value: 'new', label: 'New' },
     { value: 'quotation_submitted', label: 'Quotation Submitted' },
-    { value: 'quotation_rejected', label: 'Quotation Rejected' },
     { value: 'quotation_approved', label: 'Quotation Approved' },
     { value: 'invoice_issued', label: 'Invoice Issued' },
     { value: 'invoice_accepted', label: 'Invoice Accepted' },
-    { value: 'completed', label: 'Completed' },
     { value: 'processing_payments', label: 'Processing Payments' },
-    { value: 'new', label: 'New' },
-    { value: 'contacted', label: 'Contacted' },
-    { value: 'qualified', label: 'Qualified' },
-    // { value: 'denied', label: 'Denied' },
+    { value: 'payments_complete', label: 'Payments Completed' },
+     { value: 'final_invoice', label: 'Final Invoice' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'denied', label: 'Denied' },
   ];
-
-
   return (
       <div className="p-6 rounded-lg shadow-md bg-white">
         <LeadSummaryCards />

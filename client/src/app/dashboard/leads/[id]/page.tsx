@@ -87,7 +87,6 @@ const handleCreateFinalInvoice = async () => {
             try {
                 const data = await getLeadById(id as string);
                 setLead(data);
-
             } catch (err: unknown) {
                 setError((err as Error).message || 'Failed to fetch lead');
             } finally {
@@ -175,17 +174,17 @@ const handleCreateFinalInvoice = async () => {
     if (loading) return <LeadDetailsShimmer />;
     if (error) {
         return (
-                <div className="text-red-500 text-center p-6 rounded-lg shadow-md">
-                    Error loading lead: {error}
-                </div>
+            <div className="text-red-500 text-center p-6 rounded-lg shadow-md">
+                Error loading lead: {error}
+            </div>
         );
     }
 
     if (!lead) {
         return (
-                <div className="text-gray-600 text-center p-6 rounded-lg shadow-md">
-                    No lead found with this ID.
-                </div>
+            <div className="text-gray-600 text-center p-6 rounded-lg shadow-md">
+                No lead found with this ID.
+            </div>
         );
     }
 
@@ -216,9 +215,9 @@ const handleCreateFinalInvoice = async () => {
                     <div className="space-y-2">
                         <p><strong>Name:</strong> {lead?.name || '-'}</p>
                         <p><strong>Email:</strong> {lead?.email || '-'}</p>
-                        <p><strong>Phone:</strong> {lead?.phone || '-'}</p>
+                        <p><strong>Phone:</strong> {lead?.phoneNumber || '-'}</p>
                         <p><strong>Position:</strong> {lead?.position || '-'}</p>
-                        <p><strong>Company:</strong> {lead?.company || '-'}</p>
+                        <p><strong>Company:</strong> {lead?.companyName || '-'}</p>
                         <p><strong>Industry:</strong> {lead?.industry || '-'}</p>
                         <p><strong>State:</strong> {lead?.state || '-'}</p>
                         <p>
@@ -240,6 +239,8 @@ const handleCreateFinalInvoice = async () => {
                             ) : (
                                 '-'
                             )}
+
+                            <p><strong>Description:</strong> {lead?.description || '-'}</p>
                         </p>
                     </div>
 
@@ -247,7 +248,6 @@ const handleCreateFinalInvoice = async () => {
                         <p><strong>Current Project:</strong> {lead.projects?.[selectedProject]?.title || '-'}</p>
                         <p><strong>Project Status:</strong> {lead.projects?.[selectedProject]?.status || '-'}</p>
                         <p><strong>Source:</strong> {lead?.source || '-'}</p>
-                        <p><strong>Best Time To Call:</strong> {lead?.bestTimeToCall || '-'}</p>
                         <p><strong>Call Response:</strong> {lead?.callResponse || '-'}</p>
                         <p><strong>Address:</strong> {lead?.address || '-'}</p>
                         <p><strong>Remark:</strong> {lead?.remark || '-'}</p>
@@ -307,7 +307,7 @@ const handleCreateFinalInvoice = async () => {
                     setIsModalOpen(false);
                     setSelectedLead(null);
                 }}
-                widthClass="max-w-3xl"
+                widthClass="max-w-4xl"
             >
                 <LeadForm
                     initialData={
@@ -333,25 +333,7 @@ const handleCreateFinalInvoice = async () => {
             >
                 <QuotationForm
                     mode="Create"
-                    data={{
-                        _id: '', // Placeholder, will be generated on creation
-                        quotationNumber: '', // Placeholder
-                        clientName: lead.name || '',
-                        clientEmail: lead.email || '',
-                        items: [], // Start with empty items
-                        totalAmount: 0,
-                        issueDate: dayjs().format('YYYY-MM-DD'), // Current date
-                        validUntil: dayjs().add(30, 'days').format('YYYY-MM-DD'), // 30 days from now
-                        createdBy: lead.createdBy,
-                        createdAt: dayjs().toISOString(),
-                        updatedAt: dayjs().toISOString(),
-                        user: lead, // Pass the lead object as the 'user' property
-                        totals: {
-                            taxable: 0,
-                            igst: 0,
-                            total: 0,
-                        },
-                    }}
+                    data={lead}
                     onClose={() => {
                         setIsQuotationOpen(false);
                     }}
@@ -364,40 +346,7 @@ const handleCreateFinalInvoice = async () => {
             >
                 <InvoiceForm
                     mode="Create"
-                    data={{
-                        _id: '', // Placeholder, will be generated on creation
-                        invoiceNumber: '', // Placeholder
-                        clientName: lead.name || '',
-                        clientEmail: lead.email || '',
-                        clientPhone: lead.phoneNumber || '',
-                        items: [], // Start with empty items
-                        totalAmount: 0,
-                        paidAmount: 0,
-                        status: 'Pending',
-                        issueDate: dayjs().format('YYYY-MM-DD'), // Current date
-                        dueDate: dayjs().add(30, 'days').format('YYYY-MM-DD'), // 30 days from now
-                        createdBy: lead.createdBy,
-                        createdAt: dayjs().toISOString(),
-                        updatedAt: dayjs().toISOString(),
-                        user: { // Map lead properties to a User-like object for the 'user' field
-                            _id: lead._id,
-                            name: lead.name || '',
-                            email: lead.email || '',
-                            role: 'client', // Assuming a default role for the client
-                            phone: lead.phoneNumber || '',
-                            address: lead.address || '',
-                            city: lead.city || '',
-                            zipCode: lead.zipCode || '',
-                            gstin: lead.gstin || '',
-                            phoneNumber: lead.phoneNumber || '',
-                            createdAt: lead.createdAt,
-                        },
-                        totals: {
-                            taxable: 0,
-                            igst: 0,
-                            total: 0,
-                        },
-                    }}
+                    data={lead}
                     projectId={lead!.projects?.[selectedProject]?._id || null}
                     onClose={() => {
                         setIsInvoiceOpen(false);
