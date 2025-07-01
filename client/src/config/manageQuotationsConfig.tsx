@@ -67,12 +67,14 @@ export const manageQuotationsConfig = (
           >
             <Eye className="h-4 w-4" />
           </button>
-          <button
-            className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer"
-            onClick={() => handleEditQuotation(item)}
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+          {userRole !== 'accounts' && (
+            <button
+              className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer"
+              onClick={() => handleEditQuotation(item)}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          )}
           <button
             className="text-red-500 hover:text-red-700 flex items-center cursor-pointer"
             onClick={() => handleDeleteQuotation(item)}

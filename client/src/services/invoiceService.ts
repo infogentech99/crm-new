@@ -1,4 +1,4 @@
-import { Invoice, InvoiceItem, InvoiceResponse } from '@customTypes/index';
+import { Invoice, InvoiceItem, InvoiceResponse, FinalInvoice } from '@customTypes/index';
 
 const API_URL = '/api/invoice'; 
 
@@ -105,36 +105,35 @@ export const deleteInvoice = async (id: string): Promise<{ message: string }> =>
   return response.json();
 };
 
-export const getOrCreateFinalInvoice = async (
+export async function getOrCreateFinalInvoice(
   invoiceNumber: string
-): Promise<InvoiceResponse> => {
-  const res = await fetch(
-    `${API_URL}/final-invoice/${invoiceNumber}`,
-    {
-      method: 'POST',
-      headers: getAuthHeaders(),
-    }
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      err.message ||
-        `Failed to get/create final invoice for invoice #${invoiceNumber}`
-    );
-  }
-  return res.json();
-};
-
-
-export const getInvoiceByNumber = async (
-  invoiceNumber: string
-): Promise<InvoiceResponse> => {
-  const res = await fetch(`${API_URL}/${invoiceNumber}`, {
+): Promise<InvoiceResponse> {
+  const res = await fetch(`${API_URL}/final-invoice/${invoiceNumber}`, {
+    method: 'POST',
     headers: getAuthHeaders(),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Failed to fetch invoice ${invoiceNumber}`);
+    throw new Error(
+      err.message ||
+        `Failed to get/create final invoice for #${invoiceNumber}`
+    );
   }
   return res.json();
-};
+}
+
+/**
+ * Fetch an existing final‐invoice by invoiceNumber.
+ */
+export async function getFinalInvoiceByNumber(
+  invoiceNumber: string
+): Promise<InvoiceResponse> {
+  const res = await fetch(`${API_URL}/final-invoice/${invoiceNumber}`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to fetch final invoice #${invoiceNumber}`);
+  }
+  return res.json();
+}

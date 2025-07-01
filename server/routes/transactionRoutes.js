@@ -5,17 +5,17 @@ import { protect, authorize } from '../middlewares/authMiddleware.js'; // Import
 const router = express.Router();
 
 router.route('/')
-  .get(protect, authorize('superadmin','admin','salesperson'), listTransactions)
-  .post(protect, authorize('superadmin','admin','salesperson'), createTransaction);
+  .get(protect, authorize('superadmin','admin','salesperson','accounts'), listTransactions)
+  .post(protect, authorize('superadmin','admin','salesperson','accounts'), createTransaction);
 
 router.get('/:invoiceId/transactions',
-  protect, authorize('superadmin','admin','salesperson'),
+  protect, authorize('superadmin','admin','salesperson','accounts'),
   getTransactionsByInvoice
 );
 
 router.route('/:id')
-  .get(protect, authorize('superadmin','admin','salesperson'), getTransaction)
-  .put(protect, authorize('superadmin','admin','salesperson'), updateTransaction)
-  .delete(protect, authorize('superadmin','admin','salesperson'), deleteTransaction);
+  .get(protect, authorize('superadmin','admin','salesperson','accounts'), getTransaction)
+  .put(protect, authorize('superadmin','admin','salesperson','accounts'), updateTransaction)
+  .delete(protect, authorize('superadmin','admin','salesperson','accounts'), deleteTransaction);
 
 export default router;

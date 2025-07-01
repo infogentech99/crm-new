@@ -35,13 +35,14 @@ export async function getQuotations(
 
 export async function getQuotationById(id: string): Promise<Quotation> {
   const res = await fetch(`${API_URL}/${id}`, {
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   });
   if (!res.ok) {
-    const { message } = await res.json();
-    throw new Error(message || `Failed to fetch quotation ${id}`);
+    const err = await res.json();
+    throw new Error(err.message || `Failed to fetch quotation ${id}`);
   }
-  return res.json();
+  const payload = await res.json();   // { message: string; data: Quotation }
+  return payload.data;                // ← return just the Quotation
 }
 
 interface CreatePayload {

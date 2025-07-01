@@ -205,7 +205,7 @@ export const updateTransaction = async (req, res, next) => {
     if (!txn) {
       return res.status(404).json({ success: false, message: 'Transaction not found' });
     }
-    if (req.user.role !== 'superadmin' && !txn.createdBy.equals(req.user._id)) {
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && !txn.createdBy.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
 
@@ -224,7 +224,7 @@ export const deleteTransaction = async (req, res, next) => {
     if (!txn) {
       return res.status(404).json({ success: false, message: 'Transaction not found' });
     }
-    if (req.user.role !== 'superadmin' && !txn.createdBy.equals(req.user._id)) {
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && !txn.createdBy.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
 

@@ -61,7 +61,7 @@ export const getAllQuotations = async (req, res) => {
     const search = req.query.search?.trim() || '';
 
     let query = {};
-    if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+    if (req.user.role !== 'superadmin' && req.user.role !== 'admin' && req.user.role !== 'accounts') {
       query.createdBy = req.user._id;
     }
 
@@ -115,7 +115,7 @@ export const getAllQuotations = async (req, res) => {
 //     // enforce per-role access
 //     if (req.user.role !== 'superadmin' &&
 //         !quotation.createdBy.equals(req.user._id)) {
-//       return res.status(403).json({ message: 'Forbidden' });
+//       return res.status(403).json({ message: 'Forbdden' });
 //     }
 
 //     res.json({ data: quotation });
@@ -138,7 +138,7 @@ export const getQuotationById = async (req, res) => {
     }
 
     // enforce per-role access
-    if (req.user.role !== 'superadmin' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && 
         !quotation.createdBy.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -158,7 +158,7 @@ export const updateQuotation = async (req, res) => {
     if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
 
     // enforce per-role access
-    if (req.user.role !== 'superadmin' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
         !quotation.createdBy.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -200,7 +200,7 @@ export const deleteQuotation = async (req, res) => {
     if (!quotation) return res.status(404).json({ message: 'Not found' });
 
     // enforce per-role access
-    if (req.user.role !== 'superadmin' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
         !quotation.createdBy.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }

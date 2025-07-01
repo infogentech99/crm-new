@@ -1,40 +1,91 @@
 import express from 'express';
-import { genrate, getAllInvoices, getInvoiceById, updateInvoice, deleteInvoice, getTotalPaidInvoicesAmount,getMonthlyRevenueSummary, getPendingInvoiceAmountSummary,getTotalInvoicesAmount, } from "../controllers/invoiceController.js";
-import { protect, authorize } from '../middlewares/authMiddleware.js'; // Import middleware
+import {
+  genrate,
+  getAllInvoices,
+  getInvoiceById,
+  updateInvoice,
+  deleteInvoice,
+  getTotalPaidInvoicesAmount,
+  getMonthlyRevenueSummary,
+  getPendingInvoiceAmountSummary,
+  getTotalInvoicesAmount,
+} from "../controllers/invoiceController.js";
+import { protect, authorize } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/genrate', protect, authorize('superadmin','admin', 'salesperson', 'employee'), genrate); // Add protect and authorize
-router.get('/', protect, authorize('superadmin','admin', 'salesperson', 'employee'), getAllInvoices); // Add protect and authorize
-router.get('/:id', protect, authorize('superadmin','admin', 'salesperson', 'employee'), getInvoiceById); // Add protect and authorize
-router.put('/:id', protect, authorize('superadmin','admin', 'salesperson','employee'), updateInvoice); // Add protect and authorize (assuming manager/admin can update)
-router.delete('/:id', protect, authorize('superadmin','admin', 'salesperson',''), deleteInvoice); // Add protect and authorize (assuming manager/admin can delete)
+// Define which roles can access summary endpoints
+const SUMMARY_ROLES = [
+  'superadmin',
+  'admin',
+  'salesperson',
+  'employee',
+  'accounts',
+];
 
+// Standard CRUD routes
+router.post(
+  '/genrate',
+  protect,
+  authorize(...SUMMARY_ROLES),
+  genrate
+);
+
+router.get(
+  '/',
+  protect,
+  authorize(...SUMMARY_ROLES),
+  getAllInvoices
+);
+
+router.get(
+  '/:id',
+  protect,
+  authorize(...SUMMARY_ROLES),
+  getInvoiceById
+);
+
+router.put(
+  '/:id',
+  protect,
+  authorize(...SUMMARY_ROLES),
+  updateInvoice
+);
+
+router.delete(
+  '/:id',
+  protect,
+  // maybe restrict deletes to non-employee roles
+  authorize('superadmin', 'admin', 'salesperson', 'accounts'),
+  deleteInvoice
+);
+
+// Summary endpoints, all using the same allowed roles
 router.get(
   '/summary/monthly-revenue',
   protect,
-  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  authorize(...SUMMARY_ROLES),
   getMonthlyRevenueSummary
 );
 
 router.get(
   '/summary/pending-amount',
   protect,
-  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  authorize(...SUMMARY_ROLES),
   getPendingInvoiceAmountSummary
 );
 
 router.get(
   '/summary/total-amount',
   protect,
-  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  authorize(...SUMMARY_ROLES),
   getTotalInvoicesAmount
 );
 
 router.get(
   '/summary/total-paid-amount',
   protect,
-  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  authorize(...SUMMARY_ROLES),
   getTotalPaidInvoicesAmount
 );
 

@@ -218,6 +218,7 @@ export interface Invoice {
   date?: string; 
   payment?: PaymentDetails; 
   user: User;
+   status?: LeadStatus;
   projectId: string;
   totals: {
     taxable: number;
@@ -359,4 +360,32 @@ export interface MeetingSummary {
 
 declare module 'number-to-words' {
   export function toWords(num: number): string;
+}
+
+/** For your “final‐invoice” endpoints */
+export interface FinalInvoice {
+  _id: string;
+  invoiceNumber: string;
+  projectId: string;
+  projectTitle?: string; 
+  client?: {
+    _id: string;
+    name: string;
+    companyName?: string;
+    address?: string;
+    city?: string;
+    zipCode?: string;
+    email?: string;
+    phone?: string;
+    gstin?: string;
+  };
+  items: InvoiceItem[];
+  totals: InvoiceTotals;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InvoiceResponse {
+  message?: string;
+  data: FinalInvoice;
 }

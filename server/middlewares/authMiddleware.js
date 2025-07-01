@@ -41,15 +41,14 @@ export const protect = async (req, res, next) => {
 
 export const authorize = (...allowedRoles) => {
   return (req, res, next) => {
+    console.log('authorizing role=', req.user?.role, 'allowed=', allowedRoles);
     if (!req.user) {
       return res.status(401).json({ message: 'Not authenticated' });
     }
-
-    // Superadmin bypasses all role checks
+    // superadmin bypass
     if (req.user.role === 'superadmin') {
       return next();
     }
-
     if (!allowedRoles.includes(req.user.role)) {
       return res
         .status(403)
@@ -58,3 +57,4 @@ export const authorize = (...allowedRoles) => {
     next();
   };
 };
+

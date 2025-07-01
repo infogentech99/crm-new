@@ -51,7 +51,7 @@ export const getUsers = async (req, res, next) => {
 export const createUser = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
-    if (!['admin','salesperson','employee'].includes(role)) {
+    if (!['admin','salesperson','employee', 'accounts'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
     if (await User.findOne({ email })) {

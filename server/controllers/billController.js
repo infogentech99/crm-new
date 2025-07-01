@@ -94,7 +94,7 @@ export const updateBill = async (req, res) => {
     }
 
     // Ownership check
-    if (req.user.role !== 'superadmin' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
         !bill.createdBy.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }

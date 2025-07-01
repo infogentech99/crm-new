@@ -6,36 +6,43 @@ import {
   updateTask,
   deleteTask,
   getTaskStatusSummary,
-  getTasksDueSummary // Import new function
+  getTasksDueSummary
 } from '../controllers/taskController.js';
-import { protect, authorize } from '../middlewares/authMiddleware.js'; // Import authorize
+import { protect, authorize } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
+// Roles allowed across task endpoints
+const TASK_ROLES = ['superadmin', 'admin', 'salesperson', 'employee', 'accounts'];
+
+// List and create tasks
 router
   .route('/')
-  .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getAllTasks) // Add authorize
-  .post(protect, authorize('superadmin','admin', 'salesperson', 'employee'), createTask); // Add authorize
+  .get(protect, authorize(...TASK_ROLES), getAllTasks)
+  .post(protect, authorize(...TASK_ROLES), createTask);
 
+// Summary for tasks due
 router.get(
   '/summary/due',
   protect,
-  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  authorize(...TASK_ROLES),
   getTasksDueSummary
-); // New route for tasks due summary
+);
 
-router
-  .route('/:id')
-  .get(protect, authorize('superadmin','admin', 'salesperson', 'employee'), getTask) // Add authorize
-  .put(protect, authorize('superadmin','admin', 'salesperson'), updateTask) // Add authorize
-  .patch(protect, authorize('superadmin','admin', 'salesperson'), updateTask) // Add authorize
-  .delete(protect, authorize('superadmin','admin', 'salesperson'), deleteTask); // Add authorize
-
+// Task status summary
 router.get(
   '/summary/status',
   protect,
-  authorize(['superadmin', 'admin', 'manager', 'employee']),
+  authorize(...TASK_ROLES),
   getTaskStatusSummary
 );
+
+// Individual task operations
+router
+  .route('/:id')
+  .get(protect, authorize(...TASK_ROLES), getTask)
+  .put(protect, authorize(...TASK_ROLES), updateTask)
+  .patch(protect, authorize(...TASK_ROLES), updateTask)
+  .delete(protect, authorize(...TASK_ROLES), deleteTask);
 
 export default router;

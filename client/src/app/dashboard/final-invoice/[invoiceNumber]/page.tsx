@@ -89,7 +89,7 @@ export default function FinalInvoicePage() {
     setDownloading(true);
     if (invoiceRef.current) {
       const pdf = await generatePDFBlob(invoiceRef);
-      pdf.save(`invoice-${data.order.id}.pdf`);
+      pdf.save(`Final-Invoice-${data.order.id}.pdf`);
       toast.success('Downloaded PDF successfully!');
     } else {
       toast.error('Failed to generate PDF: Invoice content not found.');

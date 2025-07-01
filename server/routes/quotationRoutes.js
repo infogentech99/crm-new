@@ -11,12 +11,34 @@ import { protect, authorize } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
 router.use(protect);
-router.use(authorize('superadmin', 'admin', 'salesperson'));
-
-router.post('/genrate', genrate);
-router.get('/', getAllQuotations);
-router.get('/:id', getQuotationById);
-router.put('/:id', updateQuotation);
-router.delete('/:id', deleteQuotation);
+router.post(
+  '/genrate',
+  authorize('superadmin', 'admin', 'salesperson','accounts'),
+  genrate
+);
+router.get(
+  '/',
+  authorize('superadmin','accounts'),
+  getAllQuotations
+);
+router.get(
+  '/:id',
+  authorize('superadmin','accounts'),
+  getQuotationById
+);
+router.put(
+  '/:id',
+  authorize('superadmin','accounts'),
+  updateQuotation
+);
+router.delete(
+  '/:id',
+  authorize('superadmin','accounts'),
+  deleteQuotation
+);
 
 export default router;
+
+
+
+

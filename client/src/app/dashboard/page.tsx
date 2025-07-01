@@ -14,9 +14,14 @@ import TaskStatusChart from "@components/Dashboard/TaskStatusChart";
 export default function DashboardPage() {
   const router = useRouter();
   const token = useSelector((state: RootState) => state.token.token);
- useEffect(() => {
-   document.title = "Dashboard – CRM Application";
- }, []);
+  const role = useSelector((state: RootState) => state.user.role);
+
+  // Set page title
+  useEffect(() => {
+    document.title = "Dashboard – CRM Application";
+  }, []);
+
+  // Redirect if not authenticated
   useEffect(() => {
     if (!token) {
       router.push("/");
@@ -24,21 +29,39 @@ export default function DashboardPage() {
   }, [token, router]);
 
   if (!token) {
-    return null; 
+    return null;
   }
 
   return (
     <>
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 select-none">Welcome to your Dashboard!</h1>
-      <p className="text-gray-600 mb-8 select-none">Here&#39;s a quick overview of your CRM activities.</p>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6 select-none">
+        Welcome to your Dashboard!
+      </h1>
+      <p className="text-gray-600 mb-8 select-none">
+        Here&apos;s a quick overview of your CRM activities.
+      </p>
+
+      {/* Show DashboardCards only for non-accounts*/}
+      {/* {role !== "accounts" && <DashboardCards />} */}
+
       <DashboardCards />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <LeadStatusChart />
-        <TaskStatusChart />
-        <LeadSourceChart />
+
+      <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Show these only for non-accounts */}
+        {role !== "accounts" && (
+          <>
+            <LeadStatusChart />
+            <TaskStatusChart />
+            <LeadSourceChart />
+          </>
+        )}
+
+        {/* Always show revenue chart */}
         <RevenueChart />
       </div>
-      <RecentActivityTable />
+
+      
+      {role !== "accounts" && <RecentActivityTable />} 
     </>
   );
 }

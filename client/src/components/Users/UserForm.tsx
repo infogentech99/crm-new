@@ -95,6 +95,7 @@ export default function CustomForm({ data, mode, onClose }: Props) {
               <SelectContent>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="salesperson">Salesperson</SelectItem>
+                <SelectItem value="accounts">Accounts</SelectItem>
                 <SelectItem value="employee">Employee</SelectItem>
               </SelectContent>
             </Select>

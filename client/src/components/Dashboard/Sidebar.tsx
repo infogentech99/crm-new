@@ -1,3 +1,4 @@
+// Sidebar.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,7 +8,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { removeToken } from "@store/slices/tokenSlice";
 import { removeUser } from "@store/slices/userSlice";
 import { RootState } from "@store/store";
-
 import {
   LayoutDashboard,
   Users,
@@ -21,6 +21,7 @@ import {
   ScrollText,
   Landmark,
   ChartNoAxesCombined,
+  FileIcon,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -31,74 +32,22 @@ interface SidebarItem {
 }
 
 const sidebarItems: SidebarItem[] = [
-  {
-    id: "dashboard",
-    href: "/dashboard",
-    icon: <LayoutDashboard size={24} />,
-    label: "Dashboard",
-  },
-  {
-    id: "users",
-    href: "/dashboard/users",
-    icon: <Users size={24} />,
-    label: "Manage Users",
-  },
-  {
-    id: "leads",
-    href: "/dashboard/leads",
-    icon: <ChartNoAxesCombined size={24} />,
-    label: "All Leads",
-  },
-  {
-    id: "contacts",
-    href: "/dashboard/contacts",
-    icon: <Phone  size={24}/>,
-    label: "Contacts",
-  },
-  {
-    id: "projects",
-    href: "/dashboard/projects",
-    icon: <FolderOpenDot  size={24}/>,
-    label: "Projects",
-  },
-  {
-    id: "quotations",
-    href: "/dashboard/quotations",
-    icon: <FileText size={24} />,
-    label: "Quotations",
-  },
-  {
-    id: "invoices",
-    href: "/dashboard/invoices",
-    icon: <Wallet size={24}/>,
-    label: "Invoices",
-  },
-  {
-    id: "bills",
-    href: "/dashboard/bills",
-    icon: <ScrollText size={24}/>,
-    label: "Deals Bill",
-  },
-  {
-    id: "transactions",
-    href: "/dashboard/transactions",
-    icon: <Landmark size={24} />,
-    label: "Transactions",
-  },
-  {
-    id: "meetings",
-    href: "/dashboard/meetings",
-    icon: <Calendar size={24} />,
-    label: "Meetings",
-  },
-  {
-    id: "tasks",
-    href: "/dashboard/tasks",
-    icon: <ListChecks size={24} />,
-    label: "Task Assigning",
-  }
-];
+  { id: "dashboard",     href: "/dashboard",             icon: <LayoutDashboard size={24}/>,      label: "Dashboard" },
+  { id: "users",         href: "/dashboard/users",       icon: <Users size={24}/>,                label: "Manage Users" },
+  { id: "leads",         href: "/dashboard/leads",       icon: <ChartNoAxesCombined size={24}/>,  label: "All Leads" },
+  { id: "contacts",      href: "/dashboard/contacts",    icon: <Phone size={24}/>,                label: "Contacts" },
+  { id: "projects",      href: "/dashboard/projects",    icon: <FolderOpenDot size={24}/>,         label: "Projects" },
+  { id: "quotations",    href: "/dashboard/quotations",  icon: <FileText size={24}/>,             label: "Quotations" },
+  { id: "invoices",      href: "/dashboard/invoices",    icon: <Wallet size={24}/>,               label: "Invoices" },
+  { id: "transactions",  href: "/dashboard/transactions", icon: <Landmark size={24}/>,             label: "Transactions" },
 
+  // ← move this here, right after transactions
+  { id: "final-invoice", href: "/dashboard/final-invoice", icon: <FileIcon size={24}/>,           label: "Final Invoice" },
+
+  { id: "bills",         href: "/dashboard/bills",       icon: <ScrollText size={24}/>,           label: "Deals Bill" },
+  { id: "meetings",      href: "/dashboard/meetings",    icon: <Calendar size={24}/>,             label: "Meetings" },
+  { id: "tasks",         href: "/dashboard/tasks",       icon: <ListChecks size={24}/>,           label: "Task Assigning" },
+];
 
 export default function Sidebar() {
   const dispatch = useDispatch();
@@ -108,9 +57,7 @@ export default function Sidebar() {
   const [mounted, setMounted] = useState(false);
   const role = useSelector((state: RootState) => state.user.role);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   const handleLogout = () => {
     dispatch(removeToken());
@@ -118,20 +65,36 @@ export default function Sidebar() {
     localStorage.removeItem("token");
     router.push("/");
   };
+
   const filteredItems = sidebarItems.filter(item => {
-    if (item.id === "users" && role !== "superadmin") {
-      return false;
+    // Superadmin sees everything
+    if (role === "superadmin") return true;
+
+    // Accounts see only this exact list (including final-invoice now)
+    if (role === "accounts") {
+      return [
+        "dashboard",
+        "projects",
+        "quotations",
+        "invoices",
+        "transactions",
+        "final-invoice",
+      ].includes(item.id);
     }
+
+    // Everyone else: hide the "users" link
+    if (item.id === "users") return false;
+
     return true;
   });
 
   return (
-    <div className="fixed top-0 left-0 h-screen w-16 bg-gray-800 text-gray-200 flex flex-col  shadow-lg z-50">
-      <div className="flex flex-col h-full ">
+    <div className="fixed top-0 left-0 h-screen w-16 bg-gray-800 text-gray-200 flex flex-col shadow-lg z-50">
+      <div className="flex flex-col h-full">
         {mounted && filteredItems.map(item => (
           <Link href={item.href} key={item.id}>
             <div
-              className={`relative py-4 space-y-2 flex justify-center items-center cursor-pointer rounded ${
+              className={`relative py-4 flex justify-center items-center cursor-pointer rounded ${
                 pathname === item.href ? "bg-gray-700" : "hover:bg-red-600"
               }`}
               onMouseEnter={() => setHoveredItemId(item.id)}
@@ -155,7 +118,7 @@ export default function Sidebar() {
         >
           <LogOut size={24} />
           {hoveredItemId === "logout" && (
-            <span className="absolute left-full ml-3 whitespace-nowrap bg-gray-700 text-white text-xs px-3  rounded">
+            <span className="absolute left-full ml-3 whitespace-nowrap bg-gray-700 text-white text-xs px-3 rounded">
               Logout
             </span>
           )}

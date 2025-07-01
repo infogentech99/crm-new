@@ -44,38 +44,28 @@ const handleCreateFinalInvoice = async () => {
     toast.error('Please add a project first.');
     return;
   }
-  const project = lead.projects[selectedProject];
+  const project = lead!.projects[selectedProject];
 
-  // If already final, navigate if we have an invoiceId
-  if (project.status === 'final_invoice') {
-    const existing = (lead.transactions ?? []).find(
+    // If final invoice exists, navigate directly
+    const existing = lead!.transactions?.find(
       (t) =>
         String(t.projectId) === String(project._id) &&
         t.invoiceId
     );
-    if (existing?.invoiceId) {
-      router.push(
-        `/dashboard/final-invoice/${existing.invoiceId}`
-      );
+    if (project.status === 'final_invoice' && existing?.invoiceId) {
+      router.push(`/dashboard/final-invoice/${existing.invoiceId}`);
       return;
     }
-  }
 
-  try {
-    // now returns { _id, invoiceNumber, ... }
-    const invoice = await getOrCreateFinalInvoice(project._id);
-
-    // update the project status…
-    await handleStatusChange('final_invoice');
-
-    // then navigate using the invoice’s real _id
-    router.push(`/dashboard/final-invoice/${invoice._id}`);
-  } catch (err: any) {
-    console.error(err);
-    toast.error(err.message || 'Could not create final invoice.');
-  }
-};
-
+    try {
+    //   const invoice = await getOrCreateFinalInvoice(project._id);
+      await handleStatusChange('final_invoice');
+    //   router.push(`/dashboard/final-invoice/${invoice._id}`);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || 'Could not create final invoice.');
+    }
+  };
 
      useEffect(() => {
        document.title = "Leads Details – CRM Application";
@@ -240,8 +230,9 @@ const handleCreateFinalInvoice = async () => {
                                 '-'
                             )}
 
-                            <p><strong>Description:</strong> {lead?.description || '-'}</p>
+                            
                         </p>
+                        <p><strong>Description:</strong> {lead?.description || '-'}</p>
                     </div>
 
                     <div className="space-y-2">

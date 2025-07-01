@@ -1,5 +1,3 @@
-
-
 import express from 'express';
 import {
   getUsers,
@@ -18,24 +16,37 @@ router.use(protect);
 
 router.get(
   '/',
+  authorize('accounts', 'superadmin'),
   getUsers
 );
 
 router.post(
   '/',
-  authorize(['superadmin']),
+  authorize('superadmin', 'accounts'),
   createUser
 );
 
-router
-  .route('/:id')
-  .all(authorize(['superadmin']))
-  .get(getUserById)
-  .put(updateUser)
-  .delete(deleteUser);
+router.get(
+  '/:id',
+  authorize('accounts', 'superadmin'),
+  getUserById
+);
+
+router.put(
+  '/:id',
+  authorize('superadmin'),
+  updateUser
+);
+
+router.delete(
+  '/:id',
+  authorize('superadmin'),
+  deleteUser
+);
+
 router.get(
   '/:id/activities',
-  authorize(['superadmin']),
+  authorize('accounts', 'superadmin'),
   getUserActivities
 );
 

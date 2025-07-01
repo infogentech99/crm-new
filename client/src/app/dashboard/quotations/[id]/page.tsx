@@ -59,8 +59,10 @@ export default function Page() {
   useEffect(() => {
     if (!id) return;
     getQuotationById(id)
-      .then((res) => {
-        const q = res;
+      .then((q) => {
+        // q is a Quotation, no .data property
+        console.log("fetched quotation:", q);
+
         const taxable = q.totals?.taxable || 0;
         let cgst = 0,
           sgst = 0,

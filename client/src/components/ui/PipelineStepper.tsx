@@ -131,6 +131,17 @@ export default function PipelineStepper({
                     <FilePen /> Create Invoice
                   </Button>
                 )}
+
+              {step.value === 'final_invoice' &&
+                status === 'active' &&
+                onCreateFinalInvoice && (
+                  <Button
+                    className="mt-2 text-xs bg-green-600 hover:bg-green-700 text-white"
+                    onClick={onCreateFinalInvoice}
+                  >
+                    <FilePen />Final Invoice
+                  </Button>
+                )}
             </div>
           );
         })}

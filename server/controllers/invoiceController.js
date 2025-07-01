@@ -54,9 +54,9 @@ export const getMonthlyRevenueSummary = async (req, res) => {
     };
 
     // If you want to filter by user, add this:
-    // if (req.user.role !== 'superadmin') {
-    //   query.createdBy = req.user._id;
-    // }
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' ) {
+      query.createdBy = req.user._id;
+    }
 
     const monthlyRevenue = await Invoice.aggregate([
       { $match: query },
@@ -199,7 +199,7 @@ export const getAllInvoices = async (req, res) => {
 
 
     if (req.user.role !== 'superadmin' &&
-        req.user.role !== 'admin') {
+        req.user.role !== 'admin' && req.user.role !== 'accounts') {
       query.createdBy = req.user._id;
     }
 
@@ -208,6 +208,7 @@ export const getAllInvoices = async (req, res) => {
       .populate('user')
       .populate('items')
       .populate('createdBy', 'name role')
+
       .sort('-createdAt')
       .skip((page - 1) * limit)
       .limit(limit);
@@ -230,13 +231,14 @@ export const getInvoiceById = async (req, res) => {
       .populate('user')
       .populate('items')
       .populate('createdBy', 'name role');
+     
 
     if (!invoice) {
       return res.status(404).json({ error: 'Invoice not found' });
     }
 
 
-    if (req.user.role !== 'superadmin' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -261,7 +263,7 @@ export const updateInvoice = async (req, res) => {
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
-    if (req.user.role !== 'superadmin' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -301,7 +303,7 @@ export const deleteInvoice = async (req, res) => {
     }
 
     // enforce per-role access
-    if (req.user.role !== 'superadmin' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }

@@ -36,7 +36,8 @@ export default function ManageUsersPage() {
   const router = useRouter();
 
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "salesperson">("all");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "salesperson" | "accounts">("all");
+
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -156,6 +157,7 @@ export default function ManageUsersPage() {
                 <SelectItem value="all">All Roles</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="salesperson">Salesperson</SelectItem>
+                <SelectItem value="accounts">Accounts</SelectItem>
               </SelectContent>
             </Select>
             <Select
