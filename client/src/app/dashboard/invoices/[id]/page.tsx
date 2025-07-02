@@ -344,7 +344,7 @@ export default function Page() {
                   ["IGST (18%) (₹)", totals.igst],
                   ["Total Invoice Value (₹)", totals.total],
                 ].map(([label, val], i) => (
-                  <tr key={i} className={i === 4 ? "bg-gray-100" : ""}>
+                  <tr key={i}>
                     <td
                       colSpan={5}
                       className="border border-black px-2 py-0.5 text-right font-semibold"
