@@ -1,7 +1,6 @@
 'use client';
 
 import clsx from 'clsx';
-import { useRouter, useParams } from 'next/navigation';
 import { Check, CheckCheck, CheckCircle, CheckLine, FilePen, FileText, HandCoins, ReceiptText, X } from 'lucide-react';
 import { Button } from '@components/ui/button';
 
@@ -37,7 +36,6 @@ export default function PipelineStepper({
   onCreateInvoice,
   onCreateFinalInvoice,
 }: PipelineStepperProps) {
-  const router = useRouter();
   // const { id: projectId } = useParams(); // not used here
 
   const activeIndex = MAIN_PIPELINE_STEPS.findIndex(
