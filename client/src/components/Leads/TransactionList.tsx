@@ -39,14 +39,14 @@ transactions.map((txn) => {
       <div>
         {mergedTransactions.length > 0 ? (
           mergedTransactions.map((txn, idx) => {
-            const key = txn.transactionId ?? `${txn.invoiceId}-${idx}`;
+            const key = txn.transaction ?? `${txn.invoiceId}-${idx}`;
             return (
           <div
             key={key}
             className="flex justify-between px-4 py-3 border-b text-sm hover:bg-gray-50"
           >
             <span className="flex-1">{txn.invoiceId}</span>
-            <span className="flex-1 text-gray-800">{txn.transactionId}</span>
+            <span className="flex-1 text-gray-800">{txn.transaction}</span>
             <span className="flex-1">{txn.projectTitle}</span>
 
             <span className="flex-1">{txn.method}</span>
