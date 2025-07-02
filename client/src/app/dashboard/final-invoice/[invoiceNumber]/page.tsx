@@ -165,11 +165,10 @@ export default function FinalInvoicePage() {
             <Image
               src="/assets/img/companyLogo.webp"
               alt="InfoGentech Logo"
-              width={150}
-              height={53}
-              className="h-[14mm]"
+              width={230}
+              height={45}
             />
-            <div className="text-xs leading-snug space-y-1">
+            <div className="text-xs leading-snug space-y-1 mr-12">
               <p>
                 <strong>Company:</strong> InfoGentech Softwares LLP
               </p>

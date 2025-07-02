@@ -373,7 +373,7 @@ declare module 'number-to-words' {
 export interface FinalInvoice {
   _id: string;
   invoiceNumber: string;
-  projectId: string;
+  projectId?: string | null;
   projectTitle?: string; 
   user?: User; // Assuming user is of type User
   client?: {

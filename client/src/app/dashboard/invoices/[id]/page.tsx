@@ -196,15 +196,14 @@ export default function Page() {
             </span>
 
             {/* Top meta: logo + company info */}
-            <div className="flex items-start space-x-12">
+            <div className="flex items-start space-x-12 mr-12">
               <Image
                 src="/assets/img/companyLogo.webp"
                 alt="InfoGentech Logo"
-                width={100}
-                height={53}
-                className="h-[14mm]"
+                width={230}
+                height={45}
               />
-              <div className="text-xs leading-snug space-y-1">
+              <div className="text-xs leading-snug space-y-1 mr-12">
                 <p>
                   <strong>Company:</strong> InfoGentech Softwares LLP
                 </p>
