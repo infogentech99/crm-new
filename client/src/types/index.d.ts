@@ -219,7 +219,7 @@ export interface Invoice {
   payment?: PaymentDetails; 
   user: User;
    status?: LeadStatus;
-  projectId: string;
+  projectId?: string | null;
   totals: {
     taxable: number;
     igst: number;
