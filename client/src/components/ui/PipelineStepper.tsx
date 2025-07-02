@@ -3,6 +3,8 @@
 import clsx from 'clsx';
 import { Check, CheckCheck, CheckCircle, CheckLine, FilePen, FileText, HandCoins, ReceiptText, X } from 'lucide-react';
 import { Button } from '@components/ui/button';
+import { RootState } from '@store/store';
+import { useSelector } from 'react-redux';
 
 const MAIN_PIPELINE_STEPS = [
   { value: 'new', label: 'New Lead', icon: FileText },
@@ -37,7 +39,7 @@ export default function PipelineStepper({
   onCreateFinalInvoice,
 }: PipelineStepperProps) {
   // const { id: projectId } = useParams(); // not used here
-
+const userRole = useSelector((state: RootState) => state.user.role || '');
   const activeIndex = MAIN_PIPELINE_STEPS.findIndex(
     (s) => s.value === currentStatus
   );
@@ -54,7 +56,6 @@ export default function PipelineStepper({
     if (stepValue === 'final_invoice') {
       onStatusChange('final_invoice');
       if (onCreateFinalInvoice) {
-        // simply call your parent handler (which does the router.push)
         await onCreateFinalInvoice();
       }
     } else {
@@ -131,7 +132,7 @@ export default function PipelineStepper({
                 )}
 
               {step.value === 'final_invoice' &&
-                status === 'active' &&
+                status === 'active' && userRole === 'superadmin' &&
                 onCreateFinalInvoice && (
                   <Button
                     className="mt-2 text-xs bg-green-600 hover:bg-green-700 text-white"
