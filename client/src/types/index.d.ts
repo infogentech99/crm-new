@@ -75,7 +75,7 @@ export interface Lead {
   company?: string; // Added (assuming this is the field used in the UI)
   phoneNumber?: string;
   createdBy: string | User; 
-  projectId: string; // 
+  projectId?: string; // 
   companyName?: string; 
   jobTitle?: string;
   address?: string;
@@ -339,6 +339,7 @@ export interface FormData {
   website?: string;
   linkedIn?: string;
   createdBy: string | User;
+  projectId?: string; // Optional projectId
   projects: {
     _id: string;
     title: string;
