@@ -3,16 +3,13 @@
 import LeadDetailsShimmer from "@components/ui/LeadDetailsShimmer";
 import { createEmail } from "@services/emailService";
 import { getInvoiceById } from "@services/invoiceService";
-// import { getTransactionsByInvoiceId } from "@services/transactionService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-// import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import {
   InvoiceItem,
   CustomerData,
   InvoiceResponse,
-  //   Transaction,
 } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";

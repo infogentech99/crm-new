@@ -134,6 +134,7 @@ export interface Transaction {
   method: string
   amount: number;
   transactionId: string
+  transaction: string; // Changed to string
   invoiceId: string;
   leadId: string;
   projectId?: string; // Added projectId

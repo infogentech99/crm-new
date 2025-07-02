@@ -5,11 +5,9 @@ import { createEmail } from "@services/emailService";
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useParams } from "next/navigation";
-// import DashboardLayout from "@components/Dashboard/DashboardLayout";
 import { QuotationItem } from "@customTypes/index";
 import { Button } from "@components/ui/button";
 import { generatePDFBlob } from "@utils/pdfGenerator";
-import dayjs from "dayjs";
 import { toWords } from "number-to-words";
 import { getQuotationById } from "@services/quotationService";
 
@@ -91,7 +89,6 @@ export default function Page() {
             price: it.price,
             hsn: it.hsn,
           })),
-          // invoiceDate: dayjs(q.date || q.createdAt).format("DD-MM-YYYY"),
            invoiceDate: q.date || q.createdAt, // just raw string
           totals: { taxable, cgst, sgst, igst, total },
         });

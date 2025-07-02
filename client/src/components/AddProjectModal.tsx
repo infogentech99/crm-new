@@ -13,7 +13,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@components/ui/select';
-import { Lead, Project } from '@customTypes/index';
+import { Lead } from '@customTypes/index';
 
 const projectStatuses = [
   'new',
