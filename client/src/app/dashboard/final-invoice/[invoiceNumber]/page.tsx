@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import { toWords } from 'number-to-words';
@@ -161,9 +162,11 @@ export default function FinalInvoicePage() {
           </span>
 
           <div className="flex items-start space-x-12">
-            <img
+            <Image
               src="/assets/img/companyLogo.webp"
               alt="InfoGentech Logo"
+              width={150}
+              height={53}
               className="h-[14mm]"
             />
             <div className="text-xs leading-snug space-y-1">
@@ -384,9 +387,11 @@ export default function FinalInvoicePage() {
                   <p className="mb-0">IFSC: KKBK0004626</p>
                 </div>
                 <div className="text-center space-y-1">
-                  <img
+                  <Image
                     src="/assets/img/qr.webp"
                     alt="UPI QR"
+                    width={76}
+                    height={76}
                     className="h-[20mm] mx-auto"
                   />
                   <p className="font-semibold mt-1 mb-0">
@@ -399,9 +404,11 @@ export default function FinalInvoicePage() {
                 <p className="font-semibold uppercase mb-0">
                   For InfoGentech Softwares LLP
                 </p>
-                <img
+                <Image
                   src="/assets/img/sign.webp"
                   alt="Signature"
+                  width={100}
+                  height={45}
                   className="h-[12mm] mx-auto"
                 />
                 <p className="font-semibold mb-0">Authorised Signatory</p>
