@@ -92,8 +92,10 @@ export default function LoginForm() {
           <Image
             src="/assets/img/companyLogo.webp"
             alt="Company Logo"
-            width={100}
-            height={64}
+            width={200}
+            height={80
+              
+            }
             className="max-h-16 mx-auto"
           />
         </div>
