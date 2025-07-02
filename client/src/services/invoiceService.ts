@@ -1,4 +1,4 @@
-import { Invoice, InvoiceItem, InvoiceResponse, FinalInvoice } from '@customTypes/index';
+import { Invoice, InvoiceItem, InvoiceResponse } from '@customTypes/index';
 
 const API_URL = '/api/invoice'; 
 

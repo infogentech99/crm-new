@@ -10,6 +10,7 @@ import { manageFinalInvoiceConfig } from "@config/manageFinalInvoiceConfig";
 import { getInvoices } from "@services/invoiceService";
 import { FinalInvoice } from "@customTypes/index";
 import { useRouter } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
 const ManageFinalInvoicesPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -51,7 +52,10 @@ const ManageFinalInvoicesPage: React.FC = () => {
   limit
 );
 
-
+ const handleLimitChange = (value: string) => {
+    setLimit(Number(value));
+    setPage(1);
+  };
 
   useEffect(() => {
     document.title = `${pageTitle} – CRM Application`;
@@ -73,6 +77,17 @@ const ManageFinalInvoicesPage: React.FC = () => {
           }}
           className="max-w-sm"
         />
+         <Select onValueChange={handleLimitChange} value={String(limit)}>
+            <SelectTrigger className="w-[100px]">
+              <SelectValue placeholder="Limit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="5">5</SelectItem>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
       </div>
 
       <DataTable<FinalInvoice>

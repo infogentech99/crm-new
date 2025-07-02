@@ -6,14 +6,14 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createQuotation, updateQuotation } from '@services/quotationService';
 import dayjs from 'dayjs';
-import { Bill, QuotationItem, Quotation } from '@customTypes/index';
+import { Bill, QuotationItem, Lead, Quotation } from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
 import { Input } from '@components/ui/input';
 import { getBills } from '@services/billService';
 import CreatableSelect from 'react-select/creatable';
 
 interface Props {
-  data: any;
+  data: Lead | Quotation;
   mode: 'Create' | 'Edit';
   onClose: () => void;
 }
@@ -29,25 +29,29 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
-  const [items, setItems] = useState<QuotationItem[]>(
-    mode === 'Edit' && data?.items?.length
-      ? data.items
-      : [
-          {
-            name: '',
-            description: '',
-            quantity: 1,
-            price: 0,
-            unitPrice: 0,
-            hsn: '',
-            total: 0,
-          },
-        ]
-  );
+  const [items, setItems] = useState<QuotationItem[]>(() => {
+    if (mode === 'Edit' && 'items' in data) {
+      return (data as Quotation).items;
+    }
+    return [
+      {
+        name: '',
+        description: '',
+        quantity: 1,
+        price: 0,
+        unitPrice: 0,
+        hsn: '',
+        total: 0,
+      },
+    ];
+  });
 
-  const [gstin, setGstin] = useState(
-    mode === 'Edit' ? data?.user?.gstin || '' : ''
-  );
+  const [gstin, setGstin] = useState(() => {
+    if (mode === 'Edit' && 'user' in data) {
+      return (data as Quotation)?.user?.gstin || '';
+    }
+    return (data as Lead)?.gstin || '';
+  });
   const [validationError, setValidationError] = useState('');
 
   useEffect(() => {
@@ -137,8 +141,9 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
   );
   const igst = +(taxable * 0.18).toFixed(2);
   const total = +(taxable + igst).toFixed(2);
-  const user = data?.user || data;
-  const leadId = user?._id || data?._id;
+  const currentUser: Lead =
+    mode === 'Edit' && 'user' in data ? (data as Quotation).user : (data as Lead);
+  const leadId = currentUser?._id;
 
   const handleSubmit = async () => {
     setValidationError('');
@@ -217,7 +222,11 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           <label className="text-sm font-medium block mb-1">Date</label>
           <Input
             type="text"
-            value={dayjs(data?.date || new Date()).format('YYYY-MM-DD')}
+            value={dayjs(
+              mode === 'Edit' && 'date' in data
+                ? (data as Quotation).date
+                : new Date()
+            ).format('YYYY-MM-DD')}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -226,7 +235,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           <label className="text-sm font-medium block mb-1">Company Name</label>
           <Input
             type="text"
-            value={user?.name || ''}
+            value={currentUser?.name || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -246,7 +255,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           </label>
           <Input
             type="text"
-            value={user?.address || ''}
+            value={currentUser?.address || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -255,7 +264,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           <label className="text-sm font-medium block mb-1">Email</label>
           <Input
             type="email"
-            value={user?.email || ''}
+            value={currentUser?.email || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -264,7 +273,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           <label className="text-sm font-medium block mb-1">Phone No</label>
           <Input
             type="text"
-            value={user?.phoneNumber || ''}
+            value={currentUser?.phoneNumber || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />

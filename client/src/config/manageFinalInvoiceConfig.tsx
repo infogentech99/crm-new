@@ -1,6 +1,6 @@
 // src/config/manageFinalInvoiceConfig.tsx
 
-import { FinalInvoice, Invoice } from "@customTypes/index";
+import { FinalInvoice } from "@customTypes/index";
 import dayjs from "dayjs";
 import { Eye } from "lucide-react";
 import React from "react";

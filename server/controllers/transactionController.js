@@ -127,7 +127,7 @@ export const listTransactions = async (req, res, next) => {
       },
       { $unwind: '$user' },
 
-      ...(search ? [{ $match: query }] : []),
+      { $match: query },
 
       {
         $project: {

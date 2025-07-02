@@ -5,7 +5,7 @@ import { Button } from '@components/ui/button';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import dayjs from 'dayjs';
-import { Bill, InvoiceItem, Invoice } from '@customTypes/index';
+import { Bill, InvoiceItem, Lead, Invoice, User } from '@customTypes/index';
 import { RxCross2 } from 'react-icons/rx';
 import { Input } from '@components/ui/input';
 import { getBills } from '@services/billService';
@@ -13,9 +13,9 @@ import CreatableSelect from 'react-select/creatable';
 import { createInvoice, updateInvoice } from '@services/invoiceService';
 
 interface Props {
-  data: any;
+  data: Lead | Invoice;
   mode: 'Create' | 'Edit';
-   projectId: string | null;
+  projectId: string | null;
   onClose: () => void;
 }
 
@@ -30,25 +30,29 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
-  const [items, setItems] = useState<InvoiceItem[]>(
-    mode === 'Edit'
-      ? data.items
-      : [
-          {
-            name: '',
-            description: '',
-            quantity: 1,
-            price: 0,
-            unitPrice: 0,
-            hsn: '',
-            total: 0,
-          },
-        ]
-  );
+  const [items, setItems] = useState<InvoiceItem[]>(() => {
+    if (mode === 'Edit' && 'items' in data) {
+     return (data as Invoice).items;
+    }
+    return [
+      {
+        name: '',
+        description: '',
+        quantity: 1,
+        price: 0,
+        unitPrice: 0,
+        hsn: '',
+        total: 0,
+      },
+    ];
+  });
 
-  const [gstin, setGstin] = useState(
-    mode === 'Edit' ? data?.user?.gstin || '' : ''
-  );
+  const [gstin, setGstin] = useState(() => {
+    if (mode === 'Edit' && 'user' in data) {
+      return (data as Invoice)?.user?.gstin || '';
+    }
+    return (data as Lead)?.gstin || '';
+  });
 
   useEffect(() => {
     const fetchBills = async () => {
@@ -66,8 +70,8 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
   const predefinedItems = bills?.map((bill) => ({
     label: bill.description,
     value: bill.description,
-    price: bill.amount,
-    hsn: bill.hsnCode,
+    price: bill.amount ?? 0, // Ensure price is a number
+    hsn: bill.hsnCode ?? '', // Ensure hsn is a string
   }));
 
   const handleSelect = (selected: PredefinedItem | null, index: number) => {
@@ -139,10 +143,18 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
     setSubmitting(true);
     try {
       const payload = {
-        _id: data?.user?._id || data?._id,
+        _id:
+          mode === 'Edit' && 'user' in data
+            ? (data as Invoice)?.user?._id
+            : (data as Lead)?._id,
         gstin,
-        items,
-        projectId,
+        items: items.map(i => ({
+          description: i.description,
+          quantity: Number(i.quantity),
+          price: Number(i.price),
+          hsn: i.hsn || '',
+        })),
+        projectId: projectId || null, // Convert undefined to null
         totals: {
           taxable,
           igst,
@@ -154,7 +166,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
         await createInvoice(payload);
         toast.success('Invoice created successfully!');
       } else {
-        await updateInvoice(data._id, payload);
+        await updateInvoice((data as Invoice)._id, payload);
         toast.success('Invoice updated successfully!');
       }
 
@@ -168,7 +180,8 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
     }
   };
 
-  const user = data?.user || data;
+  const currentUser: Lead | User =
+    mode === 'Edit' && 'user' in data ? (data as Invoice).user : (data as Lead);
 
   return (
     <div>
@@ -190,7 +203,11 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
           <label className="text-sm font-medium block mb-1">Date</label>
           <Input
             type="text"
-            value={dayjs(data?.date || new Date()).format('YYYY-MM-DD')}
+            value={dayjs(
+              mode === 'Edit' && 'date' in data
+                ? (data as Invoice).date
+                : new Date()
+            ).format('YYYY-MM-DD')}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -199,7 +216,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
           <label className="text-sm font-medium block mb-1">Company Name</label>
           <Input
             type="text"
-            value={user?.name || ''}
+            value={currentUser?.name || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -219,7 +236,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
           </label>
           <Input
             type="text"
-            value={user?.address || ''}
+            value={currentUser?.address || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -228,7 +245,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
           <label className="text-sm font-medium block mb-1">Email</label>
           <Input
             type="email"
-            value={user?.email || ''}
+            value={currentUser?.email || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -237,7 +254,7 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
           <label className="text-sm font-medium block mb-1">Phone No</label>
           <Input
             type="text"
-            value={user?.phoneNumber || ''}
+            value={currentUser?.phoneNumber || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
           />
@@ -264,16 +281,16 @@ export default function InvoiceForm({ data, mode, onClose,projectId }: Props) {
                   placeholder="Search or type"
                   onChange={(selected) => handleSelect(selected, idx)}
                   value={
-                   item.description === ''
+                    item.description === ''
                       ? null
                       : predefinedItems.find(
-                      (opt) => opt.value === item.description
-                    ) || {
-                      label: item.description || '',
-                      value: item.description || '',
-                      price: item.price,
-                      hsn: item.hsn,
-                    }
+                          (opt) => opt.value === item.description
+                        ) || {
+                          label: item.description || '',
+                          value: item.description || '',
+                          price: item.price ?? 0, // Ensure price is a number
+                          hsn: item.hsn ?? '', // Ensure hsn is a string
+                        }
                   }
                   isClearable
                   isSearchable

@@ -83,7 +83,7 @@ export default function Sidebar() {
     }
 
     // Everyone else: hide the "users" link
-    if (item.id === "users") return false;
+    if (item.id === "users" || item.id  === "final-invoice") return false;
 
     return true;
   });

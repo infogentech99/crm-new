@@ -111,7 +111,7 @@ export default function ManageUsersPage() {
     setSelectedUser(null);
   };
 
-  const config = manageUsersConfig(openView, openEdit, openDelete, openCreate);
+  const config = manageUsersConfig(openView, openEdit, openDelete, openCreate, page, limit);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {

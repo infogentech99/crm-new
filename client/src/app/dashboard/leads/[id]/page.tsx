@@ -19,7 +19,6 @@ import ProjectSelector from '@components/Leads/ProjectSelector'
 import TransactionList from '@components/Leads/TransactionList';
 import { RxCross2 } from 'react-icons/rx';
 import DeleteModal from '@components/Common/DeleteModal';
-import { getOrCreateFinalInvoice } from '@services/invoiceService';
 export default function LeadDetailsPage() {
     const { id } = useParams();
      const router = useRouter();  
@@ -61,9 +60,13 @@ const handleCreateFinalInvoice = async () => {
     //   const invoice = await getOrCreateFinalInvoice(project._id);
       await handleStatusChange('final_invoice');
     //   router.push(`/dashboard/final-invoice/${invoice._id}`);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      toast.error(err.message || 'Could not create final invoice.');
+      if (err instanceof Error) {
+        toast.error(err.message || 'Could not create final invoice.');
+      } else {
+        toast.error('Could not create final invoice.');
+      }
     }
   };
 
@@ -276,9 +279,9 @@ const handleCreateFinalInvoice = async () => {
         (txn: Transaction) =>
           String(txn.projectId) === String(lead!.projects?.[selectedProject]?._id)
       )
-      .map((txn: any) => ({
+      .map((txn: Transaction) => ({
         ...txn,
-        transaction: txn.transaction ?? '', // Provide a default value if missing
+        transaction: txn.transaction ?? '',
         date: txn.date ?? '', // Provide a default value if missing
       }))
   }
@@ -306,7 +309,7 @@ const handleCreateFinalInvoice = async () => {
                             ? {
                                 ...selectedLead,
                                 // Map status to allowed values if necessary
-                                status: selectedLead.status as any, // Cast or map as needed
+                                status: selectedLead.status as LeadStatus, // Cast or map as needed
                               }
                             : undefined
                     }

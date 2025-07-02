@@ -17,19 +17,23 @@ export interface ManageUsersConfig {
  * @param handleEditUser   
  * @param handleDeleteUser 
  * @param handleCreateUser 
+ * @param currentPage - The current page number for pagination.
+ * @param itemsPerPage - The number of items per page for pagination.
  */
 export const manageUsersConfig = (
   handleViewUser: (user: User) => void,
   handleEditUser: (user: User) => void,
   handleDeleteUser: (user: User) => void,
-  handleCreateUser: () => void
+  handleCreateUser: () => void,
+  currentPage: number,
+  itemsPerPage: number
 ): ManageUsersConfig => {
   const columns: DataTableProps<User>['columns'] = [
     {
       key: "_id",
       label: "S.NO",
       render: (item: User, index?: number) => (
-        <span>{index !== undefined ? index + 1 : ""}</span>
+        <span>{index !== undefined ? (currentPage - 1) * itemsPerPage + index + 1 : ""}</span>
       ),
     },
     { key: "name", label: "NAME" },

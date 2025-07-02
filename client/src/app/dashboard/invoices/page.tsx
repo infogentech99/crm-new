@@ -29,7 +29,6 @@ const ManageInvoicesPage: React.FC = () => {
   const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -160,15 +159,17 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
             onClose={() => setIsInvoiceOpen(false)}
             widthClass="max-w-5xl"
           >
-            <InvoiceForm
-              mode="Edit"
-              data={selectedInvoice}
-              projectId=''
-              onClose={() => {
-                setIsInvoiceOpen(false);
-                queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
-              }}
-            />
+            {selectedInvoice && (
+              <InvoiceForm
+                mode="Edit"
+                data={selectedInvoice}
+                projectId=''
+                onClose={() => {
+                  setIsInvoiceOpen(false);
+                  queryClient.invalidateQueries({ queryKey: ['allInvoices'] });
+                }}
+              />
+            )}
           </Modal>
         {isTransactionModalOpen && selectedInvoice && (
           <TransactionModal
@@ -177,7 +178,7 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
               totals: selectedInvoice.totals,
               paidAmount: selectedInvoice.paidAmount,
               user: selectedInvoice.user._id,
-              projectId: selectedInvoice.projectId,
+              projectId: selectedInvoice.projectId ?? '',
             }}
             onClose={() => {
               setIsTransactionModalOpen(false);

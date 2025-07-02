@@ -134,6 +134,7 @@ export interface Transaction {
   method: string
   amount: number;
   transactionId: string
+  transaction: string; // Changed to string
   invoiceId: string;
   leadId: string;
   projectId?: string; // Added projectId
@@ -219,7 +220,7 @@ export interface Invoice {
   payment?: PaymentDetails; 
   user: User;
    status?: LeadStatus;
-  projectId: string;
+  projectId?: string | null;
   totals: {
     taxable: number;
     igst: number;
@@ -372,7 +373,7 @@ declare module 'number-to-words' {
 export interface FinalInvoice {
   _id: string;
   invoiceNumber: string;
-  projectId: string;
+  projectId?: string | null;
   projectTitle?: string; 
   user?: User; // Assuming user is of type User
   client?: {

@@ -51,7 +51,7 @@ export const getTransactionById = async (id: string): Promise<Transaction> => {
 
 export const createTransaction = async (
   transactionData: TransactionInput
-): Promise<any> => {
+   ): Promise<string> => {
   const response = await fetch(API_URL, {
     method: 'POST',
     headers: getAuthHeaders(),
