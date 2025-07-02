@@ -134,10 +134,12 @@ export default function Page() {
           formData.append("invoiceId", data.order.id);
           formData.append("clientName", data.customer.name);
 
-          const response = await createEmail(formData);
-          response.message
-            ? toast.success("Invoice sent to customer’s email.")
-            : toast.error("Failed to send invoice email.");
+          const res = await createEmail(formData);
+          if (res.message) {
+                   toast.success('Invoice sent to Successfully email.');
+                 } else {
+                   toast.error('Failed to send invoice email.');
+                 }
           setSending(false);
         };
         reader.readAsDataURL(blob);

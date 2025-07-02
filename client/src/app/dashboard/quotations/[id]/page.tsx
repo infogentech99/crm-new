@@ -89,7 +89,7 @@ export default function Page() {
             price: it.price,
             hsn: it.hsn,
           })),
-           invoiceDate: q.date || q.createdAt, // just raw string
+          invoiceDate: q.date || q.createdAt, // just raw string
           totals: { taxable, cgst, sgst, igst, total },
         });
       })
@@ -123,10 +123,12 @@ export default function Page() {
         formData.append("invoiceId", data.order.id);
         formData.append("clientName", data.customer.name);
 
-        const response = await createEmail(formData);
-        response.message
-          ? toast.success("Quotation sent to customer’s email.")
-          : toast.error("Failed to send quotation email.");
+        const res = await createEmail(formData);
+        if (res.message) {
+          toast.success('Invoice sent to Successfully email.');
+        } else {
+          toast.error('Failed to send invoice email.');
+        }
         setSending(false);
       };
       reader.readAsDataURL(blob);
@@ -150,7 +152,7 @@ export default function Page() {
     ...items,
     ...Array.from({ length: Math.max(0, MIN_ROWS - items.length) }, () => null),
   ];
-   const amountInWords = `${toWords(Math.round(totals.total))
+  const amountInWords = `${toWords(Math.round(totals.total))
     .replace(/(^\w|\s\w)/g, m => m.toUpperCase())} Rupees Only`;
 
   return (
@@ -311,8 +313,8 @@ export default function Page() {
                     <td className="border-l border-r border-black px-3 py-2 leading-snug">
                       {it
                         ? `₹${(it.price * it.quantity).toLocaleString(
-                            "en-IN"
-                          )}`
+                          "en-IN"
+                        )}`
                         : ""}
                     </td>
                   </tr>
@@ -328,115 +330,115 @@ export default function Page() {
                   ["SGST (9%) (₹)", totals.sgst],
                   ["IGST (18%) (₹)", totals.igst],
                   ["Total Invoice Value (₹)", totals.total],
-              ].map(([label, val], i) => (
-                <tr key={i} className={i === 4 ? "bg-gray-100" : ""}>
-                  <td
-                    colSpan={5}
-                    className="border border-black px-2 py-1 text-right font-semibold"
-                  >
-                    {label}
-                  </td>
-                  <td className="border border-black px-2 py-1 font-semibold">
-                    ₹{(val as number).toLocaleString("en-IN")}
+                ].map(([label, val], i) => (
+                  <tr key={i} className={i === 4 ? "bg-gray-100" : ""}>
+                    <td
+                      colSpan={5}
+                      className="border border-black px-2 py-1 text-right font-semibold"
+                    >
+                      {label}
+                    </td>
+                    <td className="border border-black px-2 py-1 font-semibold">
+                      ₹{(val as number).toLocaleString("en-IN")}
+                    </td>
+                  </tr>
+                ))}
+
+                {/* Amount in Words */}
+                <tr>
+                  <td colSpan={6} className="border border-black p-0">
+                    <div className="px-2 py-1 flex justify-between items-start text-xs font-semibold">
+                      <span>Amount in Words:</span>
+                      <span>{amountInWords}</span>
+                    </div>
                   </td>
                 </tr>
-              ))}
-
-              {/* Amount in Words */}
-              <tr>
-                <td colSpan={6} className="border border-black p-0">
-                  <div className="px-2 py-1 flex justify-between items-start text-xs font-semibold">
-                    <span>Amount in Words:</span>
-                    <span>{amountInWords}</span>
-                  </div>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+              </tfoot>
+            </table>
 
 
             {/* Terms, Bank & Signature */}
-<div className="grid grid-cols-2 border border-black text-[10px]">
-  {/* Terms & Conditions */}
-  <div className="p-3 border-r border-black leading-snug space-y-2">
-    <p className="font-semibold uppercase mb-1">Terms &amp; Conditions</p>
-    <div className="space-y-1">
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    Payment shall be made via Bank Transfer/Check/Online only.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    No direct UPI payments to employees.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    InfoGentech is not liable for personal account payments.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    3% late fee applies after 15 days on unpaid balances.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    Company may terminate services if payment is not made on time.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    Payment due within 5 days from the invoice date.
-  </p>
-  <p className="flex items-start">
-    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
-    All disputes are subject to Delhi jurisdiction.
-  </p>
-</div>
+            <div className="grid grid-cols-2 border border-black text-[10px]">
+              {/* Terms & Conditions */}
+              <div className="p-3 border-r border-black leading-snug space-y-2">
+                <p className="font-semibold uppercase mb-1">Terms &amp; Conditions</p>
+                <div className="space-y-1">
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    Payment shall be made via Bank Transfer/Check/Online only.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    No direct UPI payments to employees.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    InfoGentech is not liable for personal account payments.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    3% late fee applies after 15 days on unpaid balances.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    Company may terminate services if payment is not made on time.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    Payment due within 5 days from the invoice date.
+                  </p>
+                  <p className="flex items-start">
+                    <span className="inline-block w-1 h-1 bg-black rounded-full mt-1 mr-2" />
+                    All disputes are subject to Delhi jurisdiction.
+                  </p>
+                </div>
 
-  </div>
+              </div>
 
-  {/* Bank Details + QR in two columns, then Signature */}
-  <div className="p-3 leading-snug space-y-4">
-    {/* Bank & QR side-by-side */}
-    <div className="grid grid-cols-2 gap-x-2">
-      {/* Left: Bank Details */}
-      <div className="space-y-1">
-        <p className="font-semibold uppercase mb-0">Bank Details</p>
-        <p className="mb-0">InfoGentech Softwares LLP</p>
-        <p className="mb-0">Kotak Mahindra Bank, Model Town III, Delhi 110009</p>
-        <p className="mb-0">Current Account: 1049022633</p>
-        <p className="mb-0">IFSC: KKBK0004626</p>
-      </div>
-      {/* Right: QR Code + UPI ID */}
-      <div className="text-center space-y-1">
-        <img
-          src="/assets/img/qr.webp"
-          alt="UPI QR"
-          className="h-[20mm] mx-auto"
-        />
-        <p className="font-semibold mt-1 mb-0">
-          UPI ID: infogentechsoftwares@kotak
-        </p>
-      </div>
-    </div>
+              {/* Bank Details + QR in two columns, then Signature */}
+              <div className="p-3 leading-snug space-y-4">
+                {/* Bank & QR side-by-side */}
+                <div className="grid grid-cols-2 gap-x-2">
+                  {/* Left: Bank Details */}
+                  <div className="space-y-1">
+                    <p className="font-semibold uppercase mb-0">Bank Details</p>
+                    <p className="mb-0">InfoGentech Softwares LLP</p>
+                    <p className="mb-0">Kotak Mahindra Bank, Model Town III, Delhi 110009</p>
+                    <p className="mb-0">Current Account: 1049022633</p>
+                    <p className="mb-0">IFSC: KKBK0004626</p>
+                  </div>
+                  {/* Right: QR Code + UPI ID */}
+                  <div className="text-center space-y-1">
+                    <img
+                      src="/assets/img/qr.webp"
+                      alt="UPI QR"
+                      className="h-[20mm] mx-auto"
+                    />
+                    <p className="font-semibold mt-1 mb-0">
+                      UPI ID: infogentechsoftwares@kotak
+                    </p>
+                  </div>
+                </div>
 
-    {/* Signature Panel */}
-    <div className="pt-3 border-t border-black text-center space-y-1">
-      <p className="font-semibold uppercase mb-0">
-        For InfoGentech Softwares LLP
-      </p>
-      <img
-        src="/assets/img/sign.webp"
-        alt="Signature"
-        className="h-[12mm] mx-auto"
-      />
-      <p className="font-semibold mb-0">Authorised Signatory</p>
-    </div>
-  </div>
+                {/* Signature Panel */}
+                <div className="pt-3 border-t border-black text-center space-y-1">
+                  <p className="font-semibold uppercase mb-0">
+                    For InfoGentech Softwares LLP
+                  </p>
+                  <img
+                    src="/assets/img/sign.webp"
+                    alt="Signature"
+                    className="h-[12mm] mx-auto"
+                  />
+                  <p className="font-semibold mb-0">Authorised Signatory</p>
+                </div>
+              </div>
 
-  {/* E. & O.E. footer */}
-  <div className="col-span-2 border-t border-black py-1 text-center font-semibold">
-    E. &amp; O.E.
-  </div>
-</div>
+              {/* E. & O.E. footer */}
+              <div className="col-span-2 border-t border-black py-1 text-center font-semibold">
+                E. &amp; O.E.
+              </div>
+            </div>
 
 
 
