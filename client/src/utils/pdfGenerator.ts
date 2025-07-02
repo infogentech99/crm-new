@@ -13,8 +13,11 @@ const stripOklch = (el: HTMLElement) => {
 const removeOklchColors = () => {
   document.querySelectorAll<HTMLElement>("*").forEach(stripOklch);
 };
-export const generatePDFBlob = async (invoiceRef: any) => {
+export const generatePDFBlob = async (invoiceRef: React.RefObject<HTMLDivElement | null>) => {
   removeOklchColors();
+  if (!invoiceRef.current) {
+    throw new Error("Invoice reference is null, cannot generate PDF.");
+  }
   const canvas = await html2canvas(invoiceRef.current, { scale: 2 });
 
 
