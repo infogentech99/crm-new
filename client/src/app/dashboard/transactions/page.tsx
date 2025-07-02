@@ -145,7 +145,7 @@ const ManageTransactionsPage: React.FC = () => {
         <Modal
           isOpen={isTransactionModalOpen}
           onClose={() => setIsTransactionModalOpen(false)}
-          widthClass="max-w-xl"
+          widthClass="max-w-sm"
         >
           {selectedTransaction && (
             <TransactionForm

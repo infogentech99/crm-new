@@ -227,6 +227,11 @@ export interface Invoice {
   };
 }
 
+export interface InvoiceTotals {
+  taxable: number;
+  igst: number;
+  total: number;
+}
 
 export interface InvoiceResponse {
   _id: string;
@@ -368,6 +373,7 @@ export interface FinalInvoice {
   invoiceNumber: string;
   projectId: string;
   projectTitle?: string; 
+  user?: User; // Assuming user is of type User
   client?: {
     _id: string;
     name: string;

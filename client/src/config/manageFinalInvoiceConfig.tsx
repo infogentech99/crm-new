@@ -45,7 +45,7 @@ export const manageFinalInvoiceConfig = (
     {
           key: 'projectId',
           label: 'PROJECT TITLE',
-          render: (item: Invoice) => {
+          render: (item: FinalInvoice) => {
             const project = item.user?.projects?.find(
               (p) => p._id === item.projectId
             );
@@ -77,7 +77,7 @@ export const manageFinalInvoiceConfig = (
       render: (inv) => (
         <button
           onClick={() => onView(inv)}
-          className="text-gray-600 hover:text-gray-800"
+          className="text-gray-600 hover:text-gray-800 cursor-pointer"
         >
           <Eye size={16} />
         </button>

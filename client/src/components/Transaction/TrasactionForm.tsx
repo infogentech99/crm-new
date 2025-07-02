@@ -50,7 +50,7 @@ export default function EditTransactionForm({ selectedInvoice, onClose }: Props)
         <h2 className="text-xl font-semibold text-blue-600">Edit Transaction</h2>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 text-xl"
+          className="text-gray-400 hover:text-gray-600 text-xl cursor-pointer"
           aria-label="Close"
         >
           <RxCross2 />
