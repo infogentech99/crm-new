@@ -44,6 +44,7 @@ app.use(cors({
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS']
 }));
 
+
 // app.use(cors({
 //   origin: 'http://localhost:3000',   // your React app’s URL
 //   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
