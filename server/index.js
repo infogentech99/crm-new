@@ -45,11 +45,11 @@ app.use(cors({
 }));
 
 
-app.use(cors({
-  origin: 'http://localhost:3000',   // your React app’s URL
-  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
-  credentials: true
-}));
+// app.use(cors({
+//   origin: 'http://localhost:3000',   // your React app’s URL
+//   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+//   credentials: true
+// }));
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(process.cwd(), 'server', 'uploads')));
