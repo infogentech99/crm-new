@@ -14,14 +14,14 @@ export const loginUser = async (credentials: LoginCredentials): Promise<AuthResp
       credentials: 'include', // send cookies if needed
     });
   } catch (err) {
-    throw new Error('Network error. Please try again.');
+    throw new Error(`Network error. Please try again. ${err instanceof Error ? err.message : String(err)}`);
   }
 
   let data;
   try {
     data = await response.json();
   } catch (err) {
-    throw new Error('Invalid server response.');
+    throw new Error(`Invalid server response. ${err instanceof Error ? err.message : String(err)}`);
   }
 
   if (!response.ok) {
