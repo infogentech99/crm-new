@@ -3,18 +3,30 @@ import { LoginCredentials, AuthResponse } from '@customTypes/index';
 const API_URL = '/api/auth';
 
 export const loginUser = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-  const response = await fetch(`${API_URL}/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(credentials),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || 'Login failed');
+  let response;
+  try {
+    response = await fetch(`${API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(credentials),
+      credentials: 'include', // send cookies if needed
+    });
+  } catch (err) {
+    throw new Error('Network error. Please try again.');
   }
 
-  return response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (err) {
+    throw new Error('Invalid server response.');
+  }
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Login failed');
+  }
+
+  return data;
 };
