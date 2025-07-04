@@ -184,7 +184,7 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
                 other: ''
               };
               const defaultLink = defaultLinks[val as keyof typeof defaultLinks];
-              handleChange('meetlink', val === 'other' ? '' : defaultLink);
+              handleChange('meetlinks', val === 'other' ? '' : defaultLink);
             }}>
 
               <SelectTrigger>
@@ -229,7 +229,7 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
                 type="text"
                 value={formData.meetlink}
                 onChange={(e) => handleChange('meetlink', e.target.value)}
-                placeholder=""
+                placeholder="Links"
               />
             </div>
           </div>
