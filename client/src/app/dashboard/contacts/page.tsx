@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import DataTable from '@components/Common/DataTable';
-import { manageContactsConfig } from '@config/manageContactsConfig'
+import { manageContactsConfig } from '@config/manageContactsConfig';
 import { Input } from '@components/ui/input';
 import {
   Select,
@@ -14,6 +14,9 @@ import {
 } from '@components/ui/select';
 import { PaginationComponent } from '@components/ui/pagination';
 import { getLeads } from '@services/leadService';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/store';
+import { useRouter } from 'next/navigation';
 
 const ManageContactsPage: React.FC = () => {
   const [page, setPage] = useState(1);
@@ -21,10 +24,22 @@ const ManageContactsPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isMounted, setIsMounted] = useState(false);
 
+  const userRole = useSelector((state: RootState) => state.user.role || '');
+  const router = useRouter();
+
   useEffect(() => {
       document.title = "Manage Contact – CRM Application";
     setIsMounted(true);
   }, []);
+  useEffect(() => {
+    if (isMounted && userRole === 'accounts') {
+      router.replace('/dashboard');
+    }
+  }, [isMounted, userRole, router]);
+
+  if (!isMounted || userRole === 'accounts') {
+    return null;
+  }
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allLeadsForContacts', search], 
@@ -65,10 +80,6 @@ const ManageContactsPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
-
-  if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
-  }
 
   return (
       <div className="p-6 rounded-lg shadow-md bg-white">

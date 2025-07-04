@@ -21,6 +21,7 @@ import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import TaskForm from '@components/Task/TaskForm';
+import { useRouter } from 'next/navigation';
 
 const ManageTasksPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -32,6 +33,7 @@ const ManageTasksPage: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
@@ -39,6 +41,15 @@ const ManageTasksPage: React.FC = () => {
     document.title = "Manage Tasks – CRM Application";
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+      if (isMounted && userRole === 'accounts') {
+        router.replace('/dashboard');
+      }
+    }, [isMounted, userRole, router]);
+  
+    // 3️⃣ Guard rendering
+    if (!isMounted || userRole === 'accounts') return null;
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allTasks', search],

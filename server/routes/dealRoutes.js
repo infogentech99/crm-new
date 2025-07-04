@@ -24,7 +24,7 @@ router.route('/:id')
 
   
 // Or if you have a roles-array variable:
-const DEAL_SUMMARY_ROLES = ['superadmin','admin','salesperson','employee','accounts'];
+const DEAL_SUMMARY_ROLES = ['superadmin','admin','salesperson','employee'];
 router.get(
   '/summary/total-value',
   protect,

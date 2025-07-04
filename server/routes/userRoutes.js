@@ -16,19 +16,19 @@ router.use(protect);
 
 router.get(
   '/',
-  authorize('accounts', 'superadmin','salesperson','admin'),
+  authorize( 'superadmin','salesperson','admin'),
   getUsers
 );
 
 router.post(
   '/',
-  authorize('superadmin', 'accounts'),
+  authorize('superadmin'),
   createUser
 );
 
 router.get(
   '/:id',
-  authorize('accounts', 'superadmin'),
+  authorize( 'superadmin'),
   getUserById
 );
 
@@ -46,7 +46,7 @@ router.delete(
 
 router.get(
   '/:id/activities',
-  authorize('accounts', 'superadmin'),
+  authorize( 'superadmin'),
   getUserActivities
 );
 
