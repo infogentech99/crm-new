@@ -72,12 +72,10 @@ export const getAllQuotations = async (req, res) => {
 
       const matchedLeadIds = matchedLeads.map(lead => lead._id);
 
-      query = {
-        $or: [
-          { _id: { $regex: search, $options: 'i' } }, 
-          { user: { $in: matchedLeadIds } }, 
-        ],
-      };
+       query.$or = [
+        { _id: { $regex: search, $options: 'i' } },
+        { user: { $in: matchedLeadIds } },
+      ];
     }
 
     const totalQuotations = await Quotation.countDocuments(query);
@@ -92,8 +90,8 @@ export const getAllQuotations = async (req, res) => {
     res.json({
       quotations,
       currentPage: page,
-      totalPages:  Math.ceil(totalQuotations / limit),
-      totalQuotations 
+      totalPages: Math.ceil(totalQuotations / limit),
+      totalQuotations,
     });
   } catch (err) {
     console.error(err);

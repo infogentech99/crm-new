@@ -16,7 +16,7 @@ router.use(protect);
 
 router.get(
   '/',
-  authorize('accounts', 'superadmin'),
+  authorize('accounts', 'superadmin','salesperson','admin'),
   getUsers
 );
 
