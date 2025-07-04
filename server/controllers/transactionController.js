@@ -102,7 +102,7 @@ export const listTransactions = async (req, res, next) => {
         { 'invoice._id': { $regex: search, $options: 'i' } } //search using invoice 
       ];
     }
-     if (req.user.role !== 'superadmin' && req.user.role !== 'admin') {
+     if (req.user.role !== 'superadmin' && req.user.role !== 'admin'&& req.user.role !== 'accounts') {
       query.createdBy = req.user._id;
     }
 
