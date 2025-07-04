@@ -28,7 +28,7 @@ export default function FinalInvoicePage() {
     totals: { taxable: number; cgst: number; sgst: number; igst: number; total: number };
   }>({
     order: { id: '', totalAmount: 0 },
-    customer: { name: '', address: '', city: '', postalCode: '', email: '', phone: '', gstn: '' },
+    customer: { name: '', address: '', city: '', state: '', postalCode: '', email: '', phone: '', gstn: '' },
     items: [],
     invoiceDate: '',
     totals: { taxable: 0, cgst: 0, sgst: 0, igst: 0, total: 0 },
@@ -49,7 +49,8 @@ export default function FinalInvoicePage() {
         let cgst = 0,
           sgst = 0,
           igst = 0;
-        if ((invoice.user?.city || '').trim().toLowerCase() === 'delhi') {
+      const userState = (invoice.user?.state || "").trim().toLowerCase();
+      if (userState === "delhi") {
           cgst = taxable * 0.09;
           sgst = taxable * 0.09;
         } else {
@@ -63,6 +64,7 @@ export default function FinalInvoicePage() {
             name: invoice.user?.name || '',
             address: invoice.user?.address || '',
             city: invoice.user?.city || '',
+            state: invoice.user?.state || '',
             postalCode: invoice.user?.zipCode || '',
             email: invoice.user?.email || '',
             phone: invoice.user?.phone || '',
@@ -214,9 +216,8 @@ export default function FinalInvoicePage() {
                         <strong>Bill To:</strong> {customer.name}
                       </div>
                       <div className="mt-1">
-                        <strong>Address:</strong> {customer.address},
-                        {customer.city} {customer.postalCode}
-                      </div>
+  <strong>Address:</strong> {customer.address}, {customer.city}, {customer.state} {customer.postalCode}
+</div>
                       {customer.email && (
                         <div className="mt-1">
                           <strong>Email:</strong> {customer.email}

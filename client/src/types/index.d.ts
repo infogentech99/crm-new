@@ -58,6 +58,7 @@ export interface User {
   phone?: string;
   address?: string;
   city?: string;
+  state?: string;
   zipCode?: string;
   gstin?: string;
   phoneNumber?: string;
@@ -219,6 +220,7 @@ export interface Invoice {
   date?: string; 
   payment?: PaymentDetails; 
   user: User;
+  string?: string;
    status?: LeadStatus;
   projectId?: string | null;
   totals: {
@@ -262,6 +264,7 @@ export interface CustomerData {
   name: string;
   address: string;
   city: string;
+  state: string;
   postalCode: string;
   email: string;
   phone: string;

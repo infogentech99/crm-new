@@ -3,6 +3,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { RootState } from "@store/store";
 import DataTable from "@components/Common/DataTable";
 import { Input } from "@components/ui/input";
 import { PaginationComponent } from "@components/ui/pagination";
@@ -13,6 +15,13 @@ import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 
 const ManageFinalInvoicesPage: React.FC = () => {
+  const router = useRouter();
+  const userRole = useSelector((state: RootState) => state.user.role || '');
+
+  // Only allow superadmin & accounts
+  const allowed = ["superadmin", "accounts"];
+  const isAllowed = allowed.includes(userRole);
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState("");
@@ -21,11 +30,18 @@ const ManageFinalInvoicesPage: React.FC = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+  // Redirect unauthorized users immediately after mount
+  useEffect(() => {
+    if (mounted && !isAllowed) {
+      router.replace("/dashboard");
+    }
+  }, [mounted, isAllowed, router]);
+
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["allInvoices", search],
+    queryKey: ["allFinalInvoices", search],
     queryFn: () => getInvoices(1, 10000, search),
-    enabled: mounted,
+    enabled: mounted && isAllowed,
   });
 
   const all = data?.invoices || [];
@@ -44,7 +60,6 @@ const ManageFinalInvoicesPage: React.FC = () => {
   const totalPages = Math.ceil(total / limit);
   const start = (page - 1) * limit;
   const pageData = filtered.slice(start, start + limit);
-  const router = useRouter();
 
  const { pageTitle, tableColumns } = manageFinalInvoiceConfig(
   { onView: (inv) => router.push(`/dashboard/final-invoice/${inv.invoiceNumber || inv._id}`) },
@@ -61,7 +76,7 @@ const ManageFinalInvoicesPage: React.FC = () => {
     document.title = `${pageTitle} – CRM Application`;
   }, [pageTitle]);
 
-  if (!mounted) return null;
+  if (!mounted || !isAllowed) return null;
 
   return (
     <div className="p-6 bg-white rounded-lg shadow">
