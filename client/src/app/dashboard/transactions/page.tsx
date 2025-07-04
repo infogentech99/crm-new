@@ -18,6 +18,8 @@ import { PaginationComponent } from '@components/ui/pagination';
 import Modal from '@components/Common/Modal';
 import DeleteModal from '@components/Common/DeleteModal';
 import TransactionForm from '@components/Transaction/TrasactionForm';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/store';
 const ManageTransactionsPage: React.FC = () => {
   const queryClient = useQueryClient();
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -28,7 +30,7 @@ const ManageTransactionsPage: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [isMounted, setIsMounted] = useState(false);
-
+   const userRole = useSelector((state: RootState) => state.user.role || '');
  useEffect(() => {
    document.title = "Manage Transactions – CRM Application";
  }, []);
@@ -77,7 +79,8 @@ const ManageTransactionsPage: React.FC = () => {
     handleEditTransaction,
     handleDeleteTransaction,
     page,
-    limit
+    limit,
+    userRole,
   );
 
   const handlePageChange = (newPage: number) => {
