@@ -3,17 +3,15 @@ import { Quotation } from '@customTypes/index';
 import { Eye, Trash2, Pencil } from 'lucide-react';
 import React from 'react';
 import { DataTableProps } from '@components/Common/DataTable';
-import { useSelector } from 'react-redux';
-import { RootState } from '@store/store';
 
 export const manageQuotationsConfig = (
   handleViewQuotation: (quotation: Quotation) => void,
   handleEditQuotation: (quotation: Quotation) => void,
   handleDeleteQuotation: (quotation: Quotation) => void,
+  userRole: string,
   currentPage: number,
   limit: number
 ) => {
-  const userRole = useSelector((state: RootState) => state.user.role || '');
   const baseColumns: DataTableProps<Quotation>['columns'] = [
     {
       key: '_id',
@@ -57,38 +55,38 @@ export const manageQuotationsConfig = (
         <span>{item.updatedAt ? dayjs(item.updatedAt).format('DD/MM/YYYY hh:mm A') : 'N/A'}</span>
       ),
     },
-    userRole !== 'accounts'
-      ? {
-          key: 'actions',
-          label: 'ACTIONS',
-          align: 'right',
-          render: (item: Quotation) => (
-            <div className="flex items-center justify-end space-x-2">
-              <button
-                className="text-gray-500 hover:text-gray-700 flex items-center cursor-pointer"
-                onClick={() => handleViewQuotation(item)}
-              >
-                <Eye className="h-4 w-4" />
-              </button>
-              {userRole !== 'accounts' && (
+    ...(userRole !== 'accounts'
+      ? [
+          {
+            key: 'actions',
+            label: 'ACTIONS',
+            align: 'right',
+            render: (item: Quotation) => (
+              <div className="flex items-center justify-end space-x-2">
+                <button
+                  className="text-gray-500 hover:text-gray-700 flex items-center cursor-pointer"
+                  onClick={() => handleViewQuotation(item)}
+                >
+                  <Eye className="h-4 w-4" />
+                </button>
                 <button
                   className="text-blue-500 hover:text-blue-700 flex items-center cursor-pointer"
                   onClick={() => handleEditQuotation(item)}
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
-              )}
-              <button
-                className="text-red-500 hover:text-red-700 flex items-center cursor-pointer"
-                onClick={() => handleDeleteQuotation(item)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          ),
-        }
-      : null,
-  ].filter(Boolean) as DataTableProps<Quotation>['columns'];
+                <button
+                  className="text-red-500 hover:text-red-700 flex items-center cursor-pointer"
+                  onClick={() => handleDeleteQuotation(item)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ),
+          } as DataTableProps<Quotation>['columns'][number],
+        ]
+      : []),
+  ];
 
   return {
     pageTitle: 'Manage Quotations',
