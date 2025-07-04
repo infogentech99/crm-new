@@ -135,10 +135,11 @@ export interface Transaction {
   method: string
   amount: number;
   transactionId: string
-  transaction: string; // Changed to string
+  transaction: string; 
   invoiceId: string;
   leadId: string;
-  projectId?: string; // Added projectId
+  projectId?: string;
+  projectTitle?: string;
   createdBy: string | User;
   createdAt: string;
   updatedAt: string;
@@ -223,6 +224,7 @@ export interface Invoice {
   string?: string;
    status?: LeadStatus;
   projectId?: string | null;
+  projectTitle?: string; // Added projectTitle
   totals: {
     taxable: number;
     igst: number;

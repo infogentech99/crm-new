@@ -179,6 +179,7 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
               paidAmount: selectedInvoice.paidAmount,
               user: selectedInvoice.user._id,
               projectId: selectedInvoice.projectId ?? '',
+              projectTitle: selectedInvoice.user.projects, 
             }}
             onClose={() => {
               setIsTransactionModalOpen(false);

@@ -5,11 +5,10 @@ import Lead        from '../models/Lead.js';
 
 export const createTransaction = async (req, res, next) => {
   try {
-    const { leadId, invoiceId, amount, method, transactionId, projectId } = req.body;
+    const { leadId, invoiceId, amount, method, transactionId, projectId, projectTitle } = req.body;
     if (!leadId || !invoiceId || amount == null || !method || !transactionId || !projectId) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-
     const invoice = await Invoice.findById(invoiceId);
     if (!invoice) {
       return res.status(404).json({ error: 'Invoice not found' });
@@ -20,10 +19,10 @@ export const createTransaction = async (req, res, next) => {
       amount,
       method,
       transactionId,
-      projectId,  
+      projectId,
+      projectTitle, 
       createdBy:     req.user._id
     });
-    
     invoice.paidAmount = (invoice.paidAmount || 0) + amount;
     invoice.transactions = invoice.transactions || [];
     invoice.transactions.push(txn._id);
@@ -47,6 +46,7 @@ export const createTransaction = async (req, res, next) => {
           amount,
           method,
           projectId,
+          projectTitle, // Save projectTitle to Lead's transactions array
         }
       }
     });
@@ -135,6 +135,7 @@ export const listTransactions = async (req, res, next) => {
           amount: 1,
           transactionId: 1,
           projectId: 1,
+          projectTitle: 1,
           method: 1,
           createdBy: 1,
           transactionDate: 1,
