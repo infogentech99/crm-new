@@ -23,9 +23,11 @@ import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import MeetingView from '@components/Meetings/MeetingView';
+import { useRouter } from 'next/navigation';
 
 const ManageMeetingsPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
@@ -46,6 +48,15 @@ const ManageMeetingsPage: React.FC = () => {
     document.title = "Manage Meetings – CRM Application";
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted && userRole === 'accounts') {
+      router.replace('/dashboard');
+    }
+  }, [isMounted, userRole, router]);
+
+  // 3️⃣ Guard rendering
+  if (!isMounted || userRole === 'accounts') return null;
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allMeetings', search],
@@ -121,10 +132,6 @@ const ManageMeetingsPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
-
-  if (!isMounted) {
-    return null;
-  }
 
   return (
       <div className="p-6 bg-white rounded-lg shadow-md">

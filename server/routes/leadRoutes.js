@@ -33,84 +33,84 @@ const upload = multer({ storage });
 router.post(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson','employee'),
   createLead
 );
 
 router.get(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson','employee'),
   getLeads
 );
 
 router.get(
   '/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
   getLead
 );
 
 router.get(
   '/invoiceHistory/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','accounts'),
+  authorize('superadmin', 'admin', 'salesperson'),
   getLeadHistory
 );
 
 router.get(
   '/summary/status',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
   getLeadStatusSummary
 );
 
 router.get(
   '/summary/source',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson', 'employee'),
   getLeadSourceSummary
 );
 
 router.put(
   '/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson','employee'),
   updateLead
 );
 
 router.patch(
   '/:id/approve',
   protect,
-  authorize('superadmin', 'admin','accounts'),
+  authorize('superadmin', 'admin'),
   approveLead
 );
 
 router.patch(
   '/:id/deny',
   protect,
-  authorize('superadmin', 'admin','accounts'),
+  authorize('superadmin', 'admin'),
   denyLead
 );
 
 router.delete(
   '/:id',
   protect,
-  authorize('superadmin','accounts'),
+  authorize('superadmin'),
   deleteLead
 );
 
 router.post(
   '/:id/quotations',
   protect,
-  authorize('superadmin', 'admin','accounts'),
+  authorize('superadmin', 'admin'),
   upload.single('file'),
   uploadQuotation
 );
 router.get(
   '/invoiceHistory/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','accounts'),
+  authorize('superadmin', 'admin', 'salesperson'),
   getLeadHistory
 );
 

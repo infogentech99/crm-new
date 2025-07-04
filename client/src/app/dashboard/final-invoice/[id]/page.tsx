@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
 import { toWords } from 'number-to-words';
 import { toast } from 'sonner';
@@ -12,10 +12,34 @@ import { generatePDFBlob } from '@utils/pdfGenerator';
 import { InvoiceItem, CustomerData, InvoiceResponse } from '@customTypes/index';
 import { getInvoiceById } from '@services/invoiceService';
 import { createEmail } from '@services/emailService';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/store';
 
 export default function FinalInvoicePage() {
   const params = useParams();
   const id = params?.id as string;
+  const router = useRouter();
+
+  // Role guard state
+  const userRole = useSelector((state: RootState) => state.user.role || '');
+  const [isMounted, setIsMounted] = useState(false);
+
+  // mount effect
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // redirect non-superadmin/accounts
+  useEffect(() => {
+    if (isMounted && !['superadmin', 'accounts'].includes(userRole)) {
+      router.replace('/dashboard');
+    }
+  }, [isMounted, userRole, router]);
+
+  if (!isMounted || !['superadmin', 'accounts'].includes(userRole)) {
+    return null;
+  }
+
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   const [sending, setSending] = useState(false);

@@ -22,9 +22,12 @@ import {
 import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
+import { useRouter } from 'next/navigation';
 
 const ManageBillsPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const userRole = useSelector((state: RootState) => state.user.role || '');
+  const router = useRouter();
 
   const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,13 +37,20 @@ const ManageBillsPage: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
 
-  const userRole = useSelector((state: RootState) => state.user.role || '');
-
 
   useEffect(() => {
     document.title = "Manage Bills – CRM Application";
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted && userRole === 'accounts') {
+      router.replace('/dashboard');
+    }
+  }, [isMounted, userRole, router]);
+
+  // 3️⃣ Prevent rendering for accounts or before mount
+  if (!isMounted || userRole === 'accounts') return null;
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allBills', search],
@@ -118,10 +128,6 @@ const ManageBillsPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
-
-  if (!isMounted) {
-    return null;
-  }
 
   return (
       <div className="p-6 rounded-lg shadow-md bg-white">
