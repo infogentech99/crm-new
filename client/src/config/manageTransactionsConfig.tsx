@@ -3,6 +3,8 @@ import { Pencil, Trash2 } from 'lucide-react';
 import dayjs from 'dayjs';
 import React from 'react';
 import { DataTableProps } from '@components/Common/DataTable'; // Import DataTableProps
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 export const manageTransactionsConfig = (
   handleEditTransaction: (transaction: Transaction) => void,
@@ -10,6 +12,7 @@ export const manageTransactionsConfig = (
   currentPage: number,
   limit: number
 ) => {
+  const userRole = useSelector((state: RootState) => state.user.role || '');
   const baseColumns: DataTableProps<Transaction>['columns'] = [
     {
       key: '_id',
@@ -46,28 +49,30 @@ export const manageTransactionsConfig = (
       label: 'DATE',
       render: (item: Transaction) => <span>{dayjs(item.transactionDate).format('DD/MM/YYYY')}</span>,
     },
-    {
-      key: 'actions',
-      label: 'ACTIONS',
-      align: 'right',
-      render: (item: Transaction) => (
-        <div className="flex items-center justify-end space-x-2">
-          <button
-            className="text-blue-500 hover:text-gray-700 flex items-center cursor-pointer"
-            onClick={() => handleEditTransaction(item)}
-          >
-           <Pencil className="h-4 w-4" />
-          </button>
-          <button
-            className="text-red-500 hover:text-red-700 flex items-center cursor-pointer"
-            onClick={() => handleDeleteTransaction(item)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-      ),
-    },
-  ];
+    userRole !== 'accounts'
+      ? {
+          key: 'actions',
+          label: 'ACTIONS',
+          align: 'right',
+          render: (item: Transaction) => (
+            <div className="flex items-center justify-end space-x-2">
+              <button
+                className="text-blue-500 hover:text-gray-700 flex items-center cursor-pointer"
+                onClick={() => handleEditTransaction(item)}
+              >
+               <Pencil className="h-4 w-4" />
+              </button>
+              <button
+                className="text-red-500 hover:text-red-700 flex items-center cursor-pointer"
+                onClick={() => handleDeleteTransaction(item)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ),
+        }
+      : null,
+  ].filter(Boolean) as DataTableProps<Transaction>['columns'];
 
   return {
     pageTitle: 'Manage Transactions',
