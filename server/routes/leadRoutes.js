@@ -33,21 +33,21 @@ const upload = multer({ storage });
 router.post(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee'),
+  authorize('superadmin', 'admin', 'salesperson'),
   createLead
 );
 
 router.get(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee'),
+  authorize('superadmin', 'admin', 'salesperson'),
   getLeads
 );
 
 router.get(
   '/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee'),
+  authorize('superadmin', 'admin', 'salesperson',),
   getLead
 );
 
@@ -61,21 +61,21 @@ router.get(
 router.get(
   '/summary/status',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee'),
+  authorize('superadmin', 'admin', 'salesperson',),
   getLeadStatusSummary
 );
 
 router.get(
   '/summary/source',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee'),
+  authorize('superadmin', 'admin', 'salesperson',),
   getLeadSourceSummary
 );
 
 router.put(
   '/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee'),
+  authorize('superadmin', 'admin', 'salesperson'),
   updateLead
 );
 

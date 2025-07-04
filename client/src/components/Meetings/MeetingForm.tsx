@@ -16,11 +16,11 @@ import {
   SelectItem
 } from '@components/ui/select';
 import { RxCross2 } from 'react-icons/rx';
-import { Meeting, User } from '@customTypes/index'; // Import Meeting and User types
+import { Meeting, User } from '@customTypes/index'; 
 import { sendMeetingEmail } from './MeetingEmailSender';
 
 interface Props {
-  data?: Meeting; // Changed type to Meeting
+  data?: Meeting;
   mode: 'Create' | 'Edit';
   onClose: () => void;
 }
@@ -38,9 +38,9 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
     duration: data?.duration || 30,
     platform: data?.platform || '',
     meetlink: data?.meetlink || '',
-    participants: data?.participants?.map(p => typeof p === 'object' && 'email' in p ? p.email : p).join(', ') || '', // Handle User objects
+    participants: data?.participants?.map(p => typeof p === 'object' && 'email' in p ? p.email : p).join(', ') || '', 
     description: data?.description || '',
-    status: data?.status || 'Scheduled' // Changed to 'Scheduled' to match type
+    status: data?.status || 'Scheduled' 
   });
 
   const [users, setUsers] = useState<OptionType[]>([]);
@@ -50,12 +50,12 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
     const loadUsers = async () => {
       try {
         const response = await fetchUsers();
-        const formatted = response.users.map((user: User) => ({ // Changed type to User
+        const formatted = response.users.map((user: User) => ({ 
           label: `${user.name} (${user.email})`,
           value: user.email,
         }));
         setUsers(formatted);
-        if (mode === 'Edit' && data) { // Check if data exists
+        if (mode === 'Edit' && data) {
           const allParticipants = data.participants || [];
           const selected = formatted.filter((user) =>
             allParticipants.some(p => (typeof p === 'object' && 'email' in p ? p.email : p) === user.value)
@@ -63,7 +63,7 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
           setSelectedUsers(selected);
           const manualEmails = allParticipants.filter(
             (email) => !selected.find((u) => u.value === (typeof email === 'object' && 'email' in email ? email.email : email))
-          ).map(p => typeof p === 'object' && 'email' in p ? p.email : p); // Filter out already selected and map to string
+          ).map(p => typeof p === 'object' && 'email' in p ? p.email : p); 
           const isoString = new Date(data.date).toISOString();
           const localFormat = isoString.slice(0, 16);
           setFormData((prev) => ({
@@ -101,7 +101,7 @@ export default function MeetingForm({ data, mode, onClose }: Props) {
       if (mode === 'Create') {
         await createMeeting(payload);
         toast.success('Meeting created successfully!');
-      } else if (data?._id) { // Check if data and _id exist for edit mode
+      } else if (data?._id) { 
         await updateMeeting(data._id, payload);
         toast.success('Meeting updated successfully!');
       }

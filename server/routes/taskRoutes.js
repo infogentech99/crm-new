@@ -13,7 +13,7 @@ import { protect, authorize } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
 // Roles allowed across task endpoints
-const TASK_ROLES = ['superadmin', 'admin', 'salesperson', 'employee'];
+const TASK_ROLES = ['superadmin', 'admin', 'salesperson'];
 
 // List and create tasks
 router
