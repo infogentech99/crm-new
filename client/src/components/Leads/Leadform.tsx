@@ -78,7 +78,7 @@ const LeadForm: React.FC<LeadFormProps> = ({ initialData, onClose, mode }) => {
       onClose();
     },
     onError: () => {
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Email already in use.");
     },
   });
 

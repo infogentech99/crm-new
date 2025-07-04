@@ -26,6 +26,7 @@ export default function Page() {
       name: string;
       address: string;
       city: string;
+      state?: string;
       postalCode: string;
       email: string;
       phone: string;
@@ -46,9 +47,11 @@ export default function Page() {
       name: "",
       address: "",
       city: "",
+      state: "",
       postalCode: "",
       email: "",
       phone: "",
+      gstn: "",
     },
     items: [],
     invoiceDate: "",
@@ -66,7 +69,9 @@ export default function Page() {
         let cgst = 0,
           sgst = 0,
           igst = 0;
-        if ((q.user?.city || "").trim().toLowerCase() === "delhi") {
+      // ← check state instead of city
+      const userState = (q.user?.state || "").trim().toLowerCase();
+      if (userState === "delhi") {
           cgst = taxable * 0.09;
           sgst = taxable * 0.09;
         } else {
@@ -79,12 +84,13 @@ export default function Page() {
             name: q.user?.name || "",
             address: q.user?.address || "",
             city: q.user?.city || "",
+         state: q.user?.state || "",
             postalCode: q.user?.zipCode || "",
             email: q.user?.email || "",
             phone: q.user?.phone || "",
             gstn: q.user?.gstin || "",
           },
-          items: (q.items || []).map((it: QuotationItem) => ({
+          items: (q.items || []).map((it) => ({
             description: it.description,
             quantity: it.quantity,
             price: it.price,
@@ -223,7 +229,7 @@ export default function Page() {
                         </div>
                         <div className="mt-1">
                           <strong>Address:</strong> {customer.address},
-                          {customer.city} {customer.postalCode}
+                          {customer.city}, {customer.state} {customer.postalCode}
                         </div>
                         {customer.email && (
                           <div className="mt-1">

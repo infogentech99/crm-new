@@ -37,7 +37,7 @@ export default function Page() {
     totals: { taxable: number; cgst: number; sgst: number; igst: number; total: number };
   }>({
     order: { id: "", totalAmount: 0 },
-    customer: { name: "", address: "", city: "", postalCode: "", email: "", phone: "", gstn: "" },
+    customer: { name: "", address: "", city: "",state:"", postalCode: "", email: "", phone: "", gstn: "" },
     items: [],
     invoiceDate: "",
     totals: { taxable: 0, cgst: 0, sgst: 0, igst: 0, total: 0 },
@@ -55,7 +55,8 @@ export default function Page() {
         const taxable = invoice.totals?.taxable || 0;
         let cgst = 0, sgst = 0, igst = 0;
 
-        if ((invoice.user?.city || "").trim().toLowerCase() === "Delhi") {
+      const userState = (invoice.user?.state || "").trim().toLowerCase();
+      if (userState === "delhi") {
           cgst = taxable * 0.09;
           sgst = taxable * 0.09;
         } else {
@@ -70,17 +71,18 @@ export default function Page() {
             name: invoice.user?.name || "",
             address: invoice.user?.address || "",
             city: invoice.user?.city || "",
+         state:      invoice.user?.state   || "",
             postalCode: invoice.user?.zipCode || "",
             email: invoice.user?.email || "",
             phone: invoice.user?.phone || "",
             gstn: invoice.user?.gstin || "",
           },
-          items: (invoice.items || []).map((it: InvoiceItem) => ({
+          items: invoice.items?.map((it: InvoiceItem) => ({
             description: it.description,
             quantity: it.quantity,
             price: it.price,
             hsn: it.hsn,
-          })),
+          })) || [],
           invoiceDate: dayjs(invoice.date || invoice.createdAt).format("DD-MM-YYYY"),
           totals: { taxable, cgst, sgst, igst, total },
         });
@@ -240,8 +242,8 @@ export default function Page() {
                     </div>
                     <div className="mt-1">
                       <strong>Address:</strong> {customer.address},
-                      {customer.city} {customer.postalCode}
-                    </div>
+                      {customer.city}, {customer.state} {customer.postalCode}
+</div>
                     {customer.email && (
                       <div className="mt-1">
                         <strong>Email:</strong> {customer.email}
