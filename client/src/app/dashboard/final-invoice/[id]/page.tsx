@@ -20,25 +20,19 @@ export default function FinalInvoicePage() {
   const id = params?.id as string;
   const router = useRouter();
 
-  // Role guard state
   const userRole = useSelector((state: RootState) => state.user.role || '');
   const [isMounted, setIsMounted] = useState(false);
 
-  // mount effect
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // redirect non-superadmin/accounts
+
   useEffect(() => {
-    if (isMounted && !['superadmin', 'accounts'].includes(userRole)) {
+     if (isMounted && !['superadmin', 'accounts'].includes(userRole)) {
       router.replace('/dashboard');
     }
   }, [isMounted, userRole, router]);
-
-  if (!isMounted || !['superadmin', 'accounts'].includes(userRole)) {
-    return null;
-  }
 
   const invoiceRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +58,6 @@ export default function FinalInvoicePage() {
     async function fetchInvoice() {
       try {
         const response: InvoiceResponse = await getInvoiceById(id);
-        // Log the full response and data for debugging
         console.log('Fetched Invoice Response:', response);
         console.log('Fetched Invoice Data:', response.data);
 
@@ -111,6 +104,10 @@ export default function FinalInvoicePage() {
 
     fetchInvoice();
   }, [id]);
+
+  if (!isMounted || !['superadmin', 'accounts'].includes(userRole)) {
+    return null;
+  }
 
   const downloadPDF = async () => {
     setDownloading(true);

@@ -44,11 +44,6 @@ const ManageDealsPage: React.FC = () => {
     }
   }, [isMounted, userRole, router]);
 
-  // 3️⃣ Hide UI for accounts or before mount
-  if (!isMounted || userRole === 'accounts') {
-    return null;
-  }
-
   const handleViewDeal = useCallback((deal: Deal) => {
     setSelectedDeal(deal);
     setIsModalOpen(true);
@@ -71,8 +66,13 @@ const ManageDealsPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allDeals', search],
     queryFn: () => getDeals(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted, 
   });
+
+  
+  if (!isMounted || userRole === 'accounts') {
+    return null;
+  }
 
   const allDeals = data?.deals || [];
 

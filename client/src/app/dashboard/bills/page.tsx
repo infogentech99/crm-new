@@ -49,9 +49,6 @@ const ManageBillsPage: React.FC = () => {
     }
   }, [isMounted, userRole, router]);
 
-  // 3️⃣ Prevent rendering for accounts or before mount
-  if (!isMounted || userRole === 'accounts') return null;
-
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allBills', search],
     queryFn: () => getBills(1, 10000, search),
@@ -89,6 +86,9 @@ const ManageBillsPage: React.FC = () => {
     setBillToDelete(bill);
     setIsDeleteModalOpen(true);
   }, []);
+
+  
+  if (!isMounted || userRole === 'accounts') return null;
 
   const confirmDeleteBill = async () => {
     if (!billToDelete) return;

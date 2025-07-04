@@ -37,14 +37,10 @@ const ManageContactsPage: React.FC = () => {
     }
   }, [isMounted, userRole, router]);
 
-  if (!isMounted || userRole === 'accounts') {
-    return null;
-  }
-
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allLeadsForContacts', search], 
     queryFn: () => getLeads(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted, 
   });
 
   const allLeads = data?.leads || [];
@@ -58,6 +54,10 @@ const ManageContactsPage: React.FC = () => {
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
   const contactsToDisplay = filteredContacts.slice(startIndex, endIndex);
+
+  if (!isMounted || userRole === 'accounts') {
+    return null;
+  }
 
   const config = manageContactsConfig(page, limit); 
 
@@ -85,7 +85,7 @@ const ManageContactsPage: React.FC = () => {
       <div className="p-6 rounded-lg shadow-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-semibold text-gray-800">All contacts</h1>
-        </div> {/* Closing the h1's parent div */}
+        </div> 
 
         <div className="flex items-center justify-between mb-4 space-x-4">
           <Input

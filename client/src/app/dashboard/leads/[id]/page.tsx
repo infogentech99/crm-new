@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { getLeadById, updateLead } from '@services/leadService';
 import dayjs from 'dayjs';
 import Modal from '@components/Common/Modal';
@@ -21,7 +21,6 @@ import { RxCross2 } from 'react-icons/rx';
 import DeleteModal from '@components/Common/DeleteModal';
 export default function LeadDetailsPage() {
     const { id } = useParams();
-     const router = useRouter();  
     const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -38,37 +37,6 @@ export default function LeadDetailsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
-const handleCreateFinalInvoice = async () => {
-  if (!lead?.projects?.length) {
-    toast.error('Please add a project first.');
-    return;
-  }
-  const project = lead!.projects[selectedProject];
-
-    // If final invoice exists, navigate directly
-    const existing = lead!.transactions?.find(
-      (t) =>
-        String(t.projectId) === String(project._id) &&
-        t.invoiceId
-    );
-    if (project.status === 'final_invoice' && existing?.invoiceId) {
-      router.push(`/dashboard/final-invoice/${existing.invoiceId}`);
-      return;
-    }
-
-    try {
-    //   const invoice = await getOrCreateFinalInvoice(project._id);
-      await handleStatusChange('final_invoice');
-    //   router.push(`/dashboard/final-invoice/${invoice._id}`);
-    } catch (err) {
-      console.error(err);
-      if (err instanceof Error) {
-        toast.error(err.message || 'Could not create final invoice.');
-      } else {
-        toast.error('Could not create final invoice.');
-      }
-    }
-  };
 
      useEffect(() => {
        document.title = "Leads Details – CRM Application";
@@ -269,7 +237,6 @@ const handleCreateFinalInvoice = async () => {
         onStatusChange={(s) => handleStatusChange(s as LeadStatus)}
         onCreateQuotation={() => setIsQuotationOpen(true)}
         onCreateInvoice={() => setIsInvoiceOpen(true)}
-        onCreateFinalInvoice={handleCreateFinalInvoice}   // now returns void
       />
             </div>
             <TransactionList

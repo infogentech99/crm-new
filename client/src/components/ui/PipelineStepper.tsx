@@ -3,8 +3,6 @@
 import clsx from 'clsx';
 import { Check, CheckCheck, CheckCircle, CheckLine, FilePen, FileText, HandCoins, ReceiptText, X } from 'lucide-react';
 import { Button } from '@components/ui/button';
-import { RootState } from '@store/store';
-import { useSelector } from 'react-redux';
 
 const MAIN_PIPELINE_STEPS = [
   { value: 'new', label: 'New Lead', icon: FileText },
@@ -36,7 +34,6 @@ export default function PipelineStepper({
   onCreateQuotation,
   onCreateInvoice,
 }: PipelineStepperProps) {
-const userRole = useSelector((state: RootState) => state.user.role || '');
   const activeIndex = MAIN_PIPELINE_STEPS.findIndex(
     (s) => s.value === currentStatus
   );
