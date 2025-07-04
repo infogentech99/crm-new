@@ -71,6 +71,12 @@ export default function DashboardCards() {
         icon="💰"
         bgColor="bg-yellow-500"
       />
+        <StatCard
+          title="Final Invoices"
+          value={data?.totalFinalInvoices?.toLocaleString() ?? '0'}
+          icon="🧾"
+          bgColor="bg-purple-500"
+        />
         {/* <StatCard
           title="Approved Quotations"
           value={data.approvedQuotations?.toLocaleString() ?? '0'}
@@ -113,6 +119,12 @@ export default function DashboardCards() {
         value={data?.tasksDue?.toLocaleString() ?? '0'}
         icon="📅"
         bgColor="bg-red-500"
+      />
+      <StatCard
+        title="Final Invoices"
+        value={data?.totalFinalInvoices?.toLocaleString() ?? '0'}
+        icon="🧾"
+        bgColor="bg-purple-500"
       />
     </div>
   );

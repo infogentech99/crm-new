@@ -79,6 +79,10 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   const totalPaidInvoicesAmountData = await totalPaidInvoicesAmountResponse.json();
   const totalPaidInvoicesAmount = totalPaidInvoicesAmountData?.totalPaidInvoicesAmount.toFixed(2) || "0.00";
 
+  // Fetch total final invoices (leads with projects status 'completed')
+  const totalFinalInvoicesResponse = await fetch(`${API_URL}/leads?projects.status=completed&limit=1`, { headers });
+  const totalFinalInvoicesData = await totalFinalInvoicesResponse.json();
+  const totalFinalInvoices = totalFinalInvoicesData?.totalLeads || 0;
   return {
     totalLeads,
     newContacts,
@@ -90,6 +94,7 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
     pendingAmount,
     totalInvoicesAmount,
     totalPaidInvoicesAmount,
+    totalFinalInvoices,
     leadStatusSummary: leadStatusSummaryData,
     leadSourceSummary: leadSourceSummaryData,
     monthlyRevenue: monthlyRevenueData,

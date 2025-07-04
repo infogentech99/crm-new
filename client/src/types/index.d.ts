@@ -25,6 +25,7 @@ export interface DashboardSummary {
   pendingAmount: string;
   totalInvoicesAmount: string;
   totalPaidInvoicesAmount: string;
+  totalFinalInvoices: number;
   leadStatusSummary: { [key: string]: number };
   leadSourceSummary: { [key: string]: number };
   monthlyRevenue: { name: string; revenue: number }[];

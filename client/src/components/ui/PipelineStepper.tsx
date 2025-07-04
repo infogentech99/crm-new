@@ -28,7 +28,6 @@ interface PipelineStepperProps {
   onStatusChange: (status: Status) => void;
   onCreateQuotation?: () => void;
   onCreateInvoice?: () => void;
-  onCreateFinalInvoice?: () => Promise<void>;
 }
 
 export default function PipelineStepper({
@@ -36,9 +35,7 @@ export default function PipelineStepper({
   onStatusChange,
   onCreateQuotation,
   onCreateInvoice,
-  onCreateFinalInvoice,
 }: PipelineStepperProps) {
-  // const { id: projectId } = useParams(); // not used here
 const userRole = useSelector((state: RootState) => state.user.role || '');
   const activeIndex = MAIN_PIPELINE_STEPS.findIndex(
     (s) => s.value === currentStatus
@@ -53,14 +50,7 @@ const userRole = useSelector((state: RootState) => state.user.role || '');
   };
 
   const handleClick = async (stepValue: Status) => {
-    if (stepValue === 'final_invoice') {
-      onStatusChange('final_invoice');
-      if (onCreateFinalInvoice) {
-        await onCreateFinalInvoice();
-      }
-    } else {
-      onStatusChange(stepValue);
-    }
+   onStatusChange(stepValue);
   };
   return (
     <div className="w-full px-4 ">
@@ -131,16 +121,7 @@ const userRole = useSelector((state: RootState) => state.user.role || '');
                   </Button>
                 )}
 
-              {step.value === 'final_invoice' &&
-                status === 'active' && userRole === 'superadmin' &&
-                onCreateFinalInvoice && (
-                  <Button
-                    className="mt-2 text-xs bg-green-600 hover:bg-green-700 text-white"
-                    onClick={onCreateFinalInvoice}
-                  >
-                    <FilePen />Final Invoice
-                  </Button>
-                )}
+              
             </div>
           );
         })}
