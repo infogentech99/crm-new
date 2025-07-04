@@ -24,7 +24,7 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   // Fetch total deals value summary
   const totalDealsValueSummaryResponse = await fetch(`${API_URL}/deals/summary/total-value`, { headers });
   const totalDealsValueSummaryData = await totalDealsValueSummaryResponse.json();
-  const totalDealsValue = totalDealsValueSummaryData?.totalDealsValue.toFixed(2) || "0.00";
+  const totalDealsValue = (totalDealsValueSummaryData?.totalDealsValue ?? 0).toFixed(2);
 
   // Fetch tasks due summary
   const tasksDueSummaryResponse = await fetch(`${API_URL}/tasks/summary/due`, { headers });
@@ -67,17 +67,17 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   const pendingInvoiceAmountResponse = await fetch(`${API_URL}/invoice/summary/pending-amount`, { headers });
   const pendingInvoiceAmountData = await pendingInvoiceAmountResponse.json();
   console.log('Pending Invoice Amount Data:', pendingInvoiceAmountData);
-  const pendingAmount = pendingInvoiceAmountData?.totalPendingAmount.toFixed(2) || "0.00";
+  const pendingAmount = (pendingInvoiceAmountData?.totalPendingAmount ?? 0).toFixed(2);
 
   // Fetch total invoices amount
   const totalInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-amount`, { headers });
   const totalInvoicesAmountData = await totalInvoicesAmountResponse.json();
-  const totalInvoicesAmount = totalInvoicesAmountData?.totalInvoicesAmount.toFixed(2) || "0.00";
+  const totalInvoicesAmount = (totalInvoicesAmountData?.totalInvoicesAmount ?? 0).toFixed(2);
 
   // Fetch total paid invoices amount
   const totalPaidInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-paid-amount`, { headers });
   const totalPaidInvoicesAmountData = await totalPaidInvoicesAmountResponse.json();
-  const totalPaidInvoicesAmount = totalPaidInvoicesAmountData?.totalPaidInvoicesAmount.toFixed(2) || "0.00";
+  const totalPaidInvoicesAmount = (totalPaidInvoicesAmountData?.totalPaidInvoicesAmount ?? 0).toFixed(2);
 
   // Fetch total final invoices (leads with projects status 'completed')
   const totalFinalInvoicesResponse = await fetch(`${API_URL}/leads?projects.status=completed&limit=1`, { headers });
