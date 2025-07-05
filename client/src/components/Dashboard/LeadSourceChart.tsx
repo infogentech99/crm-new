@@ -4,6 +4,7 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { fetchDashboardSummary } from '@services/dashboardService';
+import NoDataFound from '@components/Common/NoDataFound';
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#FF8042', '#0088FE', '#A4DE6C', '#D0ED57', '#83A6ED', '#8DD1E1', '#82CA9D', '#C1F0F6', '#FFC0CB'];
 
@@ -50,7 +51,7 @@ export default function LeadSourceChart() {
   if (!hasData) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md h-80 flex items-center justify-center">
-        <p className="text-gray-500">No lead source data available.</p>
+        <p className="text-gray-500"><NoDataFound/></p>
       </div>
     );
   }
