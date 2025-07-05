@@ -20,7 +20,6 @@ const SUMMARY_ROLES = [
   'superadmin',
   'admin',
   'salesperson',
-  'employee',
   'accounts',
 ];
 
@@ -91,7 +90,7 @@ router.get(
 router.get(
   '/summary/final-invoices-count',
   protect,
-  authorize(...SUMMARY_ROLES),
+  authorize('superadmin', 'accounts'),
   getTotalFinalInvoicesCount
 );
 
