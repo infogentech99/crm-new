@@ -120,12 +120,14 @@ export default function DashboardCards() {
         icon="📅"
         bgColor="bg-red-500"
       />
-      <StatCard
-        title="Final Invoices"
-        value={data?.totalFinalInvoices?.toLocaleString() ?? '0'}
-        icon="🧾"
-        bgColor="bg-purple-500"
-      />
+      {role === 'superadmin' && (
+        <StatCard
+          title="Final Invoices"
+          value={data?.totalFinalInvoices?.toLocaleString() ?? '0'}
+          icon="🧾"
+          bgColor="bg-purple-500"
+        />
+      )}
     </div>
   );
 }
