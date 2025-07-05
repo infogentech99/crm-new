@@ -4,6 +4,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { fetchDashboardSummary } from '@services/dashboardService';
+import NoDataFound from '@components/Common/NoDataFound';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
@@ -38,8 +39,8 @@ export default function LeadStatusChart() {
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md h-80 flex items-center justify-center">
-        <p className="text-gray-500">No lead status data available.</p>
+      <div className="bg-white p-6 rounded-lg shadow-md h-100 flex items-center justify-center">
+        <p className="text-gray-500"><NoDataFound/></p>
       </div>
     );
   }
