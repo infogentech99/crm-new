@@ -3,7 +3,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
-import { fetchDashboardSummary } from '@services/dashboardService';
+import { useDashboardSummary } from '@hooks/useDashboardSummary';
 import { RootState } from '@store/store';
 import { useSelector } from 'react-redux';
 
@@ -11,10 +11,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28']; // Pending, In Progress, Compl
 
 export default function TaskStatusChart() {
   const role = useSelector((state: RootState) => state.user.role);
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['dashboardSummary'],
-    queryFn: () => fetchDashboardSummary(role || ""),
-  });
+  const { data, isLoading, isError, error } = useDashboardSummary();
 
   if (isLoading) {
     return (

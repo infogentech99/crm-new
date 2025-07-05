@@ -10,18 +10,17 @@ import LeadStatusChart from "@components/Dashboard/LeadStatusChart";
 import LeadSourceChart from "@components/Dashboard/LeadSourceChart";
 import RevenueChart from "@components/Dashboard/RevenueChart";
 import TaskStatusChart from "@components/Dashboard/TaskStatusChart";
+import { useDashboardSummary } from "@hooks/useDashboardSummary";
 
 export default function DashboardPage() {
   const router = useRouter();
   const token = useSelector((state: RootState) => state.token.token);
   const role = useSelector((state: RootState) => state.user.role);
 
-  // Set page title
   useEffect(() => {
     document.title = "Dashboard – CRM Application";
   }, []);
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!token) {
       router.push("/");
@@ -31,6 +30,7 @@ export default function DashboardPage() {
   if (!token) {
     return null;
   }
+  useDashboardSummary();
 
   return (
     <>

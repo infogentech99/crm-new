@@ -62,7 +62,6 @@ export const fetchDashboardSummary = async (role: string): Promise<DashboardSumm
   const taskStatusSummaryResponse = await fetch(`${API_URL}/tasks/summary/status`, { headers });
   const taskStatusSummaryData = await taskStatusSummaryResponse.json();
 
-
   const pendingInvoiceAmountResponse = await fetch(`${API_URL}/invoice/summary/pending-amount`, { headers });
   const pendingInvoiceAmountData = await pendingInvoiceAmountResponse.json();
   const pendingAmount = (pendingInvoiceAmountData?.totalPendingAmount ?? 0).toFixed(2);

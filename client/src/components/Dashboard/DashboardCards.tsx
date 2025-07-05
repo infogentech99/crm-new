@@ -3,8 +3,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
-import { useQuery } from '@tanstack/react-query';
-import { fetchDashboardSummary } from '@services/dashboardService';
+import { useDashboardSummary } from '@hooks/useDashboardSummary';
 
 interface StatCardProps {
   title: string;
@@ -26,10 +25,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, bgColor }) => (
 export default function DashboardCards() {
   const role = useSelector((state: RootState) => state.user.role);
 
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['dashboardSummary', role],
-    queryFn: () => fetchDashboardSummary(role || ''),
-  });
+  const { data, isLoading, isError, error } = useDashboardSummary();
 
   if (isLoading) {
     // accounts sees 3 placeholders, others 4

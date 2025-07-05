@@ -2,20 +2,14 @@
 
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { useQuery } from '@tanstack/react-query';
-import { fetchDashboardSummary } from '@services/dashboardService';
+import { useDashboardSummary } from '@hooks/useDashboardSummary';
 import NoDataFound from '@components/Common/NoDataFound';
 import { DashboardSummary } from '@customTypes/index';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
 export default function LeadStatusChart() {
-  const userRole = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null;
-
-  const { data, isLoading, isError, error } = useQuery<DashboardSummary>({
-    queryKey: ['dashboardSummary'],
-    queryFn: () => fetchDashboardSummary(userRole || ""),
-  });
+  const { data, isLoading, isError, error } = useDashboardSummary();
 
   if (isLoading) {
     return (

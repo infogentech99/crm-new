@@ -5,12 +5,15 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchRecentActivities } from '@services/dashboardService';
 import { RecentActivity } from '@customTypes/index';
 import NoDataFound from '@components/Common/NoDataFound';
+import { useDashboardSummary } from '@hooks/useDashboardSummary';
 
 export default function RecentActivityTable() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['recentActivities'],
     queryFn: fetchRecentActivities,
   });
+
+  useDashboardSummary();
 
   if (isLoading) {
     return (

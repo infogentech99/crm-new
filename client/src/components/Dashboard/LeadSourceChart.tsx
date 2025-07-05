@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useQuery } from '@tanstack/react-query';
-import { fetchDashboardSummary } from '@services/dashboardService';
+import { useDashboardSummary } from '@hooks/useDashboardSummary';
 import NoDataFound from '@components/Common/NoDataFound';
 import { RootState } from '@store/store';
 import { useSelector } from 'react-redux';
@@ -17,10 +16,7 @@ const ALL_LEAD_SOURCES = [
 
 export default function LeadSourceChart() {
   const role = useSelector((state: RootState) => state.user.role);
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['dashboardSummary'],
-    queryFn: () => fetchDashboardSummary(role || ''),
-  });
+  const { data, isLoading, isError, error } = useDashboardSummary();
 
   if (isLoading) {
     return (
