@@ -35,7 +35,7 @@ export default function UserDetailsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const onView = useCallback(
-    (act: RecentActivity) => router.push(`/dashboard/leads/${act.id}`),
+    (act: RecentActivity) => router.push(`/dashboard/leads/${act._id}`),
     [router]
   );
   const onDelete = useCallback((act: RecentActivity) => {
@@ -210,7 +210,7 @@ if (!isMounted || userRole !== 'superadmin') {
         </div>
 
         <DataTable
-          data={pageItems.map(item => ({ ...item, _id: String(item.id) }))}
+          data={pageItems.map(item => ({ ...item, _id: String(item._id) }))}
           columns={cfg.tableColumns}
           isLoading={false}
           error={null}
