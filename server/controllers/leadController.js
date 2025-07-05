@@ -144,13 +144,6 @@ export const getLead = async (req, res) => {
       return res.status(404).json({ message: 'Lead not found' });
     }
 
-    if (
-      req.user.role !== 'superadmin' &&
-      lead.createdBy._id.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).json({ message: 'Forbidden: not your lead' });
-    }
-
     res.status(200).json(lead);
   } catch (err) {
     console.error("getLead error:", err);
@@ -166,17 +159,11 @@ export const updateLead = async (req, res) => {
       return res.status(404).json({ message: 'Lead not found' });
     }
 
-    if (
-      req.user.role !== 'superadmin' &&
-      lead.createdBy.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).json({ message: 'Forbidden: not your lead' });
-    }
 
-    const { notes, projects, jobTitle, ...otherUpdates } = req.body; // Destructure jobTitle
+    const { notes, projects, jobTitle, ...otherUpdates } = req.body; 
     Object.assign(lead, otherUpdates);
 
-    if (jobTitle !== undefined) { // Update jobTitle if provided
+    if (jobTitle !== undefined) { 
       lead.jobTitle = jobTitle;
     }
 

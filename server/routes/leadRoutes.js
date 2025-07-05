@@ -51,12 +51,6 @@ router.get(
   getLead
 );
 
-router.get(
-  '/invoiceHistory/:id',
-  protect,
-  authorize('superadmin', 'admin', 'salesperson'),
-  getLeadHistory
-);
 
 router.get(
   '/summary/status',
@@ -79,40 +73,14 @@ router.put(
   updateLead
 );
 
-router.patch(
-  '/:id/approve',
-  protect,
-  authorize('superadmin', 'admin'),
-  approveLead
-);
-
-router.patch(
-  '/:id/deny',
-  protect,
-  authorize('superadmin', 'admin'),
-  denyLead
-);
 
 router.delete(
   '/:id',
   protect,
-  authorize('superadmin'),
+ authorize('superadmin', 'admin', 'salesperson'),
   deleteLead
 );
 
-router.post(
-  '/:id/quotations',
-  protect,
-  authorize('superadmin', 'admin'),
-  upload.single('file'),
-  uploadQuotation
-);
-router.get(
-  '/invoiceHistory/:id',
-  protect,
-  authorize('superadmin', 'admin', 'salesperson'),
-  getLeadHistory
-);
 
 
 export default router;
