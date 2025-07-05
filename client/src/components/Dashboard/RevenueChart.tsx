@@ -5,11 +5,14 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { useQuery } from '@tanstack/react-query';
 import { fetchDashboardSummary } from '@services/dashboardService';
 import NoDataFound from '@components/Common/NoDataFound';
+import { useSelector } from 'react-redux';
+import { RootState } from '@store/store';
 
 export default function RevenueChart() {
+  const role = useSelector((state: RootState) => state.user.role);
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['dashboardSummary'],
-    queryFn: fetchDashboardSummary,
+    queryFn: () => fetchDashboardSummary(role || ''),
   });
 
   if (isLoading) {

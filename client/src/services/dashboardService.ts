@@ -25,7 +25,21 @@ export const fetchDashboardSummary = async (role: string): Promise<DashboardSumm
   let tasksDue = 0;
   let taskStatusSummaryData = {};
 
-  // Only fetch these for non-accounts roles
+  const monthlyRevenueResponse = await fetch(`${API_URL}/invoice/summary/monthly-revenue`, { headers });
+  const monthlyRevenueData = await monthlyRevenueResponse.json();
+
+  const pendingInvoiceAmountResponse = await fetch(`${API_URL}/invoice/summary/pending-amount`, { headers });
+  const pendingInvoiceAmountData = await pendingInvoiceAmountResponse.json();
+  const pendingAmount = (pendingInvoiceAmountData?.totalPendingAmount ?? 0).toFixed(2);
+
+  const totalInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-amount`, { headers });
+  const totalInvoicesAmountData = await totalInvoicesAmountResponse.json();
+  const totalInvoicesAmount = (totalInvoicesAmountData?.totalInvoicesAmount ?? 0).toFixed(2);
+
+  const totalPaidInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-paid-amount`, { headers });
+  const totalPaidInvoicesAmountData = await totalPaidInvoicesAmountResponse.json();
+  const totalPaidInvoicesAmount = (totalPaidInvoicesAmountData?.totalPaidInvoicesAmount ?? 0).toFixed(2);
+  
   if (role === "superadmin" || role === "salesperson" || role === "admin") {
     const totalLeadsResponse = await fetch(`${API_URL}/leads?limit=1`, { headers });
     const totalLeadsData = await totalLeadsResponse.json();
@@ -62,20 +76,7 @@ export const fetchDashboardSummary = async (role: string): Promise<DashboardSumm
     taskStatusSummaryData = await taskStatusSummaryResponse.json();
   }
 
-  const monthlyRevenueResponse = await fetch(`${API_URL}/invoice/summary/monthly-revenue`, { headers });
-  const monthlyRevenueData = await monthlyRevenueResponse.json();
 
-  const pendingInvoiceAmountResponse = await fetch(`${API_URL}/invoice/summary/pending-amount`, { headers });
-  const pendingInvoiceAmountData = await pendingInvoiceAmountResponse.json();
-  const pendingAmount = (pendingInvoiceAmountData?.totalPendingAmount ?? 0).toFixed(2);
-
-  const totalInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-amount`, { headers });
-  const totalInvoicesAmountData = await totalInvoicesAmountResponse.json();
-  const totalInvoicesAmount = (totalInvoicesAmountData?.totalInvoicesAmount ?? 0).toFixed(2);
-
-  const totalPaidInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-paid-amount`, { headers });
-  const totalPaidInvoicesAmountData = await totalPaidInvoicesAmountResponse.json();
-  const totalPaidInvoicesAmount = (totalPaidInvoicesAmountData?.totalPaidInvoicesAmount ?? 0).toFixed(2);
 
   let totalFinalInvoices = 0;
   if (role === "superadmin" || role === "accounts") {
