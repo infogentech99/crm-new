@@ -84,14 +84,14 @@ export default function UserDetailsPage() {
   }, [load]);
 
   useEffect(() => {
-  if (isMounted && userRole !== 'superadmin') {
-    router.replace('/dashboard');
-  }
-}, [isMounted, userRole, router]);
+    if (isMounted && userRole !== 'superadmin') {
+      router.replace('/dashboard');
+    }
+  }, [isMounted, userRole, router]);
 
-if (!isMounted || userRole !== 'superadmin') {
-  return null;
-}
+  if (!isMounted || userRole !== 'superadmin') {
+    return null;
+  }
 
   const handleConfirmDelete = async () => {
     if (!deleting) return;
@@ -210,7 +210,7 @@ if (!isMounted || userRole !== 'superadmin') {
         </div>
 
         <DataTable
-data={pageItems}
+          data={pageItems}
           columns={cfg.tableColumns}
           isLoading={false}
           error={null}

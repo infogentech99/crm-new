@@ -140,10 +140,16 @@ export default function QuotationForm({ data, mode, onClose, currentProjectId }:
     (sum, item) => sum + item.quantity * item.price,
     0
   );
-  const igst = +(taxable * 0.18).toFixed(2);
-  const total = +(taxable + igst).toFixed(2);
+  
+  
   const currentUser: Lead =
     mode === 'Edit' && 'user' in data ? (data as Quotation).user : (data as Lead);
+  const isIntraState = currentUser?.state?.toLowerCase() === 'delhi';
+
+  const cgst = isIntraState ? +(taxable * 0.09).toFixed(2) : 0;
+  const sgst = isIntraState ? +(taxable * 0.09).toFixed(2) : 0;
+  const igst = !isIntraState ? +(taxable * 0.18).toFixed(2) : 0;
+  const total = +(taxable + cgst + sgst + igst).toFixed(2);
   const leadId = currentUser?._id;
 
   const handleSubmit = async () => {
@@ -179,6 +185,8 @@ export default function QuotationForm({ data, mode, onClose, currentProjectId }:
         })),
         totals: {
           taxable,
+          cgst,
+          sgst,
           igst,
           total,
         },
@@ -257,9 +265,15 @@ export default function QuotationForm({ data, mode, onClose, currentProjectId }:
           </label>
           <Input
             type="text"
-            value={currentUser?.address || ''}
             readOnly
             className="w-full border px-3 py-2 rounded bg-gray-100"
+            value={[
+              currentUser?.address,
+              currentUser?.city,
+              currentUser?.state
+            ]
+              .filter(Boolean)
+              .join(', ')}
           />
         </div>
         <div>
@@ -385,7 +399,14 @@ export default function QuotationForm({ data, mode, onClose, currentProjectId }:
       <div className="flex justify-end mt-6 text-sm">
         <div className="space-y-1 text-right">
           <p>Taxable: ₹{taxable.toLocaleString('en-IN')}</p>
+          {isIntraState ? (
+            <>
+              <p>CGST (9%): ₹{cgst.toLocaleString('en-IN')}</p>
+              <p>SGST (9%): ₹{sgst.toLocaleString('en-IN')}</p>
+            </>
+          ) : (
           <p>IGST (18%): ₹{igst.toLocaleString('en-IN')}</p>
+          )}
           <p className="font-semibold text-lg">
             Total: ₹{total.toLocaleString('en-IN')}
           </p>
