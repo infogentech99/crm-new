@@ -114,10 +114,23 @@ export const getTotalInvoicesAmount = async (req, res, next) => {
     ]);
 
     res.status(200).json({
-      totalInvoicesAmount: totalAmountResult.length > 0 ? totalAmountResult[0].totalInvoicesAmount : 0
+      totalPaidInvoicesAmount: totalPaidInvoicesAmountResult.length > 0 ? totalPaidInvoicesAmountResult[0].totalPaidInvoicesAmount : 0
     });
   } catch (err) {
-    console.error('getTotalInvoicesAmount error:', err);
+    console.error('getTotalPaidInvoicesAmount error:', err);
+    next(err);
+  }
+};
+
+export const getTotalFinalInvoicesCount = async (req, res, next) => {
+  try {
+    const totalFinalInvoices = await Invoice.countDocuments({
+      $expr: { $eq: ["$paidAmount", "$totals.total"] }
+    });
+
+    res.status(200).json({ totalFinalInvoices });
+  } catch (err) {
+    console.error('getTotalFinalInvoicesCount error:', err);
     next(err);
   }
 };
