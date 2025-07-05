@@ -40,7 +40,7 @@ router.post(
 router.get(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson'),
+  authorize('superadmin', 'admin', 'salesperson','accounts'),
   getLeads
 );
 
