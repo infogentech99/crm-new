@@ -26,6 +26,8 @@ interface PipelineStepperProps {
   onStatusChange: (status: Status) => void;
   onCreateQuotation?: () => void;
   onCreateInvoice?: () => void;
+  hasQuotation?: boolean;
+  hasInvoice?: boolean;
 }
 
 export default function PipelineStepper({
@@ -33,6 +35,8 @@ export default function PipelineStepper({
   onStatusChange,
   onCreateQuotation,
   onCreateInvoice,
+  hasQuotation = false,
+  hasInvoice = false,
 }: PipelineStepperProps) {
   const activeIndex = MAIN_PIPELINE_STEPS.findIndex(
     (s) => s.value === currentStatus
@@ -99,7 +103,8 @@ export default function PipelineStepper({
 
               {step.value === 'quotation_submitted' &&
                 status === 'active' &&
-                onCreateQuotation && (
+                onCreateQuotation &&
+                !hasQuotation && (
                   <Button
                     className="text-xs w-34 bg-green-600 hover:bg-green-700 text-white"
                     onClick={onCreateQuotation}
@@ -109,7 +114,8 @@ export default function PipelineStepper({
                 )}
               {step.value === 'invoice_issued' &&
                 status === 'active' &&
-                onCreateInvoice && (
+                onCreateInvoice &&
+                !hasInvoice && (
                   <Button
                     onClick={onCreateInvoice}
                     className="mt-2 text-xs bg-green-600 hover:bg-green-700 text-white"

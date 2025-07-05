@@ -5,7 +5,7 @@ import Quotation from '../models/Quotation.js';
 
 export const genrate = async (req, res) => {
   try {
-    const { _id, totals, items ,gstin} = req.body;
+    const { _id, totals, items, gstin, projectId } = req.body;
 
     if (!_id || typeof _id !== 'string') {
       return res.status(400).json({ message: 'Missing or invalid lead ID (_id).' });
@@ -28,6 +28,7 @@ export const genrate = async (req, res) => {
 
     const quotation = new Quotation({
       user: _id,
+      projectId,
       totals,
       createdBy: req.user?._id, 
       items: []
@@ -59,10 +60,15 @@ export const getAllQuotations = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search?.trim() || '';
+    const projectId = req.query.projectId?.trim() || ''; 
 
     let query = {};
     if (req.user.role !== 'superadmin' && req.user.role !== 'admin' && req.user.role !== 'accounts') {
       query.createdBy = req.user._id;
+    }
+
+    if (projectId) { 
+      query.projectId = projectId;
     }
 
     if (search) {      

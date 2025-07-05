@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { getLeadById, updateLead } from '@services/leadService';
+import { getQuotations } from '@services/quotationService';
+import { getInvoices } from '@services/invoiceService';
 import dayjs from 'dayjs';
 import Modal from '@components/Common/Modal';
 import LeadForm from '@components/Leads/Leadform';
@@ -36,26 +38,42 @@ export default function LeadDetailsPage() {
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+    const [hasQuotation, setHasQuotation] = useState(false);
+    const [hasInvoice, setHasInvoice] = useState(false);
 
 
      useEffect(() => {
        document.title = "Leads Details – CRM Application";
      }, []);
     useEffect(() => {
-        const fetchLead = async () => {
+        const fetchLeadAndRelatedData = async () => {
             if (!id) return;
             setLoading(true);
             try {
-                const data = await getLeadById(id as string);
-                setLead(data);
+                const leadData = await getLeadById(id as string);
+                setLead(leadData);
+                const { quotations } = await getQuotations(); 
+                const { invoices } = await getInvoices(); 
+
+                const currentProjectId = leadData.projects?.[selectedProject]?._id;
+                if (currentProjectId) {
+                    const projectHasQuotation = quotations.some(q => q.projectId === currentProjectId);
+                    const projectHasInvoice = invoices.some(inv => inv.projectId === currentProjectId);
+                    setHasQuotation(projectHasQuotation);
+                    setHasInvoice(projectHasInvoice);
+                } else {
+                    setHasQuotation(false);
+                    setHasInvoice(false);
+                }
+
             } catch (err: unknown) {
-                setError((err as Error).message || 'Failed to fetch lead');
+                setError((err as Error).message || 'Failed to fetch lead or related data');
             } finally {
                 setLoading(false);
             }
         };
-        fetchLead();
-    }, [id]);
+        fetchLeadAndRelatedData();
+    }, [id, selectedProject]); 
 
     const handleStatusChange = async (newStatus: LeadStatus) => {
         if (!lead || !lead.projects || lead.projects.length === 0 || selectedProject === undefined || lead.projects[selectedProject] === undefined) {
@@ -84,20 +102,20 @@ export default function LeadDetailsPage() {
     };
 
     const handleEditProject = (index: number) => {
-        if (!lead) return; // Add null check
+        if (!lead) return; 
         setEditTitle(lead.projects[index].title || '');
         setEditIndex(index);
         setIsEditModalOpen(true);
     };
 
     const handleDeleteProject = (index: number) => {
-        if (!lead) return; // Add null check
+        if (!lead) return; 
         setDeleteIndex(index);
         setIsDeleteModalOpen(true);
     };
 
     const confirmDeleteProject = async () => {
-        if (deleteIndex === null || !lead) return; // Add null check
+        if (deleteIndex === null || !lead) return; 
 
         const updatedProjects = lead.projects.filter((_: Project, i: number) => i !== deleteIndex);
 
@@ -237,6 +255,8 @@ export default function LeadDetailsPage() {
         onStatusChange={(s) => handleStatusChange(s as LeadStatus)}
         onCreateQuotation={() => setIsQuotationOpen(true)}
         onCreateInvoice={() => setIsInvoiceOpen(true)}
+        hasQuotation={hasQuotation}
+        hasInvoice={hasInvoice}
       />
             </div>
             <TransactionList
@@ -295,6 +315,7 @@ export default function LeadDetailsPage() {
                 <QuotationForm
                     mode="Create"
                     data={lead}
+                    currentProjectId={lead!.projects?.[selectedProject]?._id || null}
                     onClose={() => {
                         setIsQuotationOpen(false);
                     }}

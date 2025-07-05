@@ -307,12 +307,13 @@ export interface Quotation {
   createdAt: string;
   updatedAt: string;
   user: Lead;
+  projectId?: string | null; 
   totals: {
     taxable: number;
     igst: number;
     total: number;
   };
-  date?: string; // Added date as it's used in page.tsx
+  date?: string; 
 }
 export type LeadStatus =
   | 'new'

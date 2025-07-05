@@ -16,6 +16,7 @@ interface Props {
   data: Lead | Quotation;
   mode: 'Create' | 'Edit';
   onClose: () => void;
+  currentProjectId?: string | null;
 }
 
 interface PredefinedItem {
@@ -25,7 +26,7 @@ interface PredefinedItem {
   hsn: string;
 }
 
-export default function QuotationForm({ data, mode, onClose }: Props) {
+export default function QuotationForm({ data, mode, onClose, currentProjectId }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [bills, setBills] = useState<Bill[]>([]);
@@ -61,7 +62,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
         setBills(res.bills);
       } catch (err: unknown) {
         console.error('Failed to fetch bills:', err);
-        // setBillError(err.message || 'Failed to load bills'); // billError is unused
+        // setBillError(err.message || 'Failed to load bills');
       } finally {
         // setLoadingBills(false); // loadingBills is unused
       }
@@ -181,6 +182,7 @@ export default function QuotationForm({ data, mode, onClose }: Props) {
           igst,
           total,
         },
+        projectId: currentProjectId, // Pass projectId
       };
 
       if (mode === 'Create') {
