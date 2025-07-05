@@ -179,6 +179,7 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
               paidAmount: selectedInvoice.paidAmount,
               user: selectedInvoice.user._id,
               projectId: selectedInvoice.projectId ?? '',
+              projectTitle: selectedInvoice.user.projects, 
             }}
             onClose={() => {
               setIsTransactionModalOpen(false);
@@ -196,7 +197,7 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
               setInvoiceToDelete(null);
             }}
             onConfirm={handleConfirmDelete}
-            itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}
+            itemLabel={invoiceToDelete?._id || 'this quotation'}
           />
         )}
       </div>

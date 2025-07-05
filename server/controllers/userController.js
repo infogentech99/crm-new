@@ -26,7 +26,7 @@ export const getUsers = async (req, res, next) => {
 
     let query = User.find(filter).skip(skip).limit(limit);
 
-    if (req.user.role !== 'superadmin') {
+    if (req.user.role !== 'superadmin' ) {
       query = query.select('_id name email');
     } else {
       query = query.select('-password');
@@ -51,7 +51,7 @@ export const getUsers = async (req, res, next) => {
 export const createUser = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
-    if (!['admin','salesperson','employee', 'accounts'].includes(role)) {
+    if (!['admin','salesperson', 'accounts'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
     if (await User.findOne({ email })) {

@@ -24,12 +24,11 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, bgColor }) => (
 );
 
 export default function DashboardCards() {
-  // get user role from Redux
   const role = useSelector((state: RootState) => state.user.role);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['dashboardSummary'],
-    queryFn: fetchDashboardSummary,
+    queryKey: ['dashboardSummary', role],
+    queryFn: () => fetchDashboardSummary(role || ''),
   });
 
   if (isLoading) {
@@ -71,6 +70,12 @@ export default function DashboardCards() {
         icon="💰"
         bgColor="bg-yellow-500"
       />
+        <StatCard
+          title="Final Invoices"
+          value={data?.totalFinalInvoices?.toLocaleString() ?? '0'}
+          icon="🧾"
+          bgColor="bg-purple-500"
+        />
         {/* <StatCard
           title="Approved Quotations"
           value={data.approvedQuotations?.toLocaleString() ?? '0'}
@@ -114,6 +119,14 @@ export default function DashboardCards() {
         icon="📅"
         bgColor="bg-red-500"
       />
+      {role === 'superadmin' && (
+        <StatCard
+          title="Final Invoices"
+          value={data?.totalFinalInvoices?.toLocaleString() ?? '0'}
+          icon="🧾"
+          bgColor="bg-purple-500"
+        />
+      )}
     </div>
   );
 }

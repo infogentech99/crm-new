@@ -25,6 +25,7 @@ interface Props {
     paidAmount?: number;
     user: string;
     projectId: string;
+    projectTitle?: { _id: string; title: string }[];
   } | null;
   onClose: () => void;
 }
@@ -75,6 +76,10 @@ export default function TransactionModal({ selectedInvoice, onClose }: Props) {
       toast.error("Select a payment method.");
       return;
     }
+    const filteredProject = selectedInvoice.projectTitle?.find(
+      (project) => project._id === selectedInvoice.projectId
+    );
+
     const payload = {
       amount: amt,
       method,
@@ -82,6 +87,7 @@ export default function TransactionModal({ selectedInvoice, onClose }: Props) {
       invoiceId: selectedInvoice._id,
       leadId: selectedInvoice.user,
       projectId: selectedInvoice.projectId,
+      projectTitle: filteredProject ? filteredProject.title : "",
     };
 
     setLoading(true);

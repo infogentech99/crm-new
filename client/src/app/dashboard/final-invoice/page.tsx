@@ -43,9 +43,14 @@ const ManageFinalInvoicesPage: React.FC = () => {
     queryFn: () => getInvoices(1, 10000, search),
     enabled: mounted && isAllowed,
   });
+   
+    
+  
 
-  const all = data?.invoices || [];
-
+  const all = data?.invoices.filter((inv) => { 
+       return inv.paidAmount === inv.totals.total;
+  })|| [];
+  
   // Safe `.toLowerCase()` on possibly undefined fields
   const filtered = all.filter((inv) => {
     const invoiceNum = String(inv.invoiceNumber || inv._id).toLowerCase();
@@ -84,7 +89,7 @@ const ManageFinalInvoicesPage: React.FC = () => {
 
       <div className="flex items-center justify-between mb-4">
         <Input
-          placeholder="Search by invoice # or client..."
+          placeholder="Search by invoice"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);

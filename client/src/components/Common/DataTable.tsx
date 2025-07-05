@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { cn } from "@lib/utils";
+import NoDataFound from './NoDataFound'; // Import the new component
 
 export interface DataTableProps<T extends { _id: string }> { 
   columns: {
@@ -36,6 +37,10 @@ const DataTable = <T extends { _id: string }>( { columns, data, isLoading, error
         Error loading data: {error}
       </div>
     );
+  }
+
+  if (data.length === 0) {
+    return <NoDataFound />;
   }
 
   return (

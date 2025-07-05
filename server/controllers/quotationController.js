@@ -156,7 +156,7 @@ export const updateQuotation = async (req, res) => {
     if (!quotation) return res.status(404).json({ message: 'Quotation not found' });
 
     // enforce per-role access
-    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && req.user.role !== 'admin' &&
         !quotation.createdBy.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -198,7 +198,7 @@ export const deleteQuotation = async (req, res) => {
     if (!quotation) return res.status(404).json({ message: 'Not found' });
 
     // enforce per-role access
-    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && req.user.role !== 'admin' &&
         !quotation.createdBy.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }

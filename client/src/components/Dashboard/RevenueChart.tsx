@@ -4,6 +4,7 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { fetchDashboardSummary } from '@services/dashboardService';
+import NoDataFound from '@components/Common/NoDataFound';
 
 export default function RevenueChart() {
   const { data, isLoading, isError, error } = useQuery({
@@ -33,7 +34,7 @@ export default function RevenueChart() {
   if (revenueData.length === 0) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md h-80 flex items-center justify-center">
-        <p className="text-gray-500">No revenue data available.</p>
+        <p className="text-gray-500"><NoDataFound/></p>
       </div>
     );
   }

@@ -1,6 +1,7 @@
 import { DashboardSummary, RecentActivity, Lead, MeetingSummary } from '@customTypes/index';
 
-const API_URL = '/api'; // Base URL for all API endpoints
+
+const API_URL = '/api';
 
 const getAuthHeaders = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -10,79 +11,83 @@ const getAuthHeaders = () => {
   };
 };
 
-export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
+export const fetchDashboardSummary = async (role: string): Promise<DashboardSummary> => {
   const headers = getAuthHeaders();
 
-  // Fetch total leads
   const totalLeadsResponse = await fetch(`${API_URL}/leads?limit=1`, { headers });
   const totalLeadsData = await totalLeadsResponse.json();
   const totalLeads = totalLeadsData?.totalLeads || 0;
 
-  // As per user feedback, "leads equals to contacts", so newContacts will be totalLeads
+
   const newContacts = totalLeads;
 
-  // Fetch total deals value summary
+
   const totalDealsValueSummaryResponse = await fetch(`${API_URL}/deals/summary/total-value`, { headers });
   const totalDealsValueSummaryData = await totalDealsValueSummaryResponse.json();
-  const totalDealsValue = totalDealsValueSummaryData?.totalDealsValue.toFixed(2) || "0.00";
+  const totalDealsValue = (totalDealsValueSummaryData?.totalDealsValue ?? 0).toFixed(2);
 
-  // Fetch tasks due summary
+
   const tasksDueSummaryResponse = await fetch(`${API_URL}/tasks/summary/due`, { headers });
   const tasksDueSummaryData = await tasksDueSummaryResponse.json();
   const tasksDue = tasksDueSummaryData?.totalTasksDue || 0;
 
-  // Fetch approved quotations (leads with status 'quotation_approved')
+
   const approvedQuotationsResponse = await fetch(`${API_URL}/leads?status=quotation_approved&limit=1`, { headers });
   const approvedQuotationsData = await approvedQuotationsResponse.json();
   const approvedQuotations = approvedQuotationsData?.totalLeads || 0;
 
-  // Fetch approved invoices (leads with status 'invoice_accepted')
+
   const approvedInvoicesResponse = await fetch(`${API_URL}/leads?status=invoice_accepted&limit=1`, { headers });
   const approvedInvoicesData = await approvedInvoicesResponse.json();
   const approvedInvoices = approvedInvoicesData?.totalLeads || 0;
 
-  // Fetch lost leads (leads with status 'lost')
+
   const lostLeadsResponse = await fetch(`${API_URL}/leads?status=lost&limit=1`, { headers });
   const lostLeadsData = await lostLeadsResponse.json();
   const lostLeads = lostLeadsData?.totalLeads || 0;
 
-  // Fetch lead status summary
+
   const leadStatusSummaryResponse = await fetch(`${API_URL}/leads/summary/status`, { headers });
   const leadStatusSummaryData = await leadStatusSummaryResponse.json();
 
-  // Fetch lead source summary
+
   const leadSourceSummaryResponse = await fetch(`${API_URL}/leads/summary/source`, { headers });
   const leadSourceSummaryData = await leadSourceSummaryResponse.json();
 
-  // Fetch monthly revenue summary
+
   const monthlyRevenueResponse = await fetch(`${API_URL}/invoice/summary/monthly-revenue`, { headers });
   const monthlyRevenueData = await monthlyRevenueResponse.json();
 
-  // Fetch task status summary
+
   const taskStatusSummaryResponse = await fetch(`${API_URL}/tasks/summary/status`, { headers });
   const taskStatusSummaryData = await taskStatusSummaryResponse.json();
 
-  // Fetch pending invoice amount summary
-  console.log('Fetching Pending Invoice Amount...');
+
   const pendingInvoiceAmountResponse = await fetch(`${API_URL}/invoice/summary/pending-amount`, { headers });
   const pendingInvoiceAmountData = await pendingInvoiceAmountResponse.json();
-  console.log('Pending Invoice Amount Data:', pendingInvoiceAmountData);
-  const pendingAmount = pendingInvoiceAmountData?.totalPendingAmount.toFixed(2) || "0.00";
+  const pendingAmount = (pendingInvoiceAmountData?.totalPendingAmount ?? 0).toFixed(2);
 
-  // Fetch total invoices amount
+
   const totalInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-amount`, { headers });
   const totalInvoicesAmountData = await totalInvoicesAmountResponse.json();
-  const totalInvoicesAmount = totalInvoicesAmountData?.totalInvoicesAmount.toFixed(2) || "0.00";
+  const totalInvoicesAmount = (totalInvoicesAmountData?.totalInvoicesAmount ?? 0).toFixed(2);
 
-  // Fetch total paid invoices amount
+
   const totalPaidInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-paid-amount`, { headers });
   const totalPaidInvoicesAmountData = await totalPaidInvoicesAmountResponse.json();
-  const totalPaidInvoicesAmount = totalPaidInvoicesAmountData?.totalPaidInvoicesAmount.toFixed(2) || "0.00";
+  const totalPaidInvoicesAmount = (totalPaidInvoicesAmountData?.totalPaidInvoicesAmount ?? 0).toFixed(2);
+
+  let totalFinalInvoices = 0;
+  if (role === "superadmin" || role === "accounts") {
+    const totalFinalInvoicesResponse = await fetch(`${API_URL}/invoice/summary/final-invoices-count`, { headers });
+    const totalFinalInvoicesData = await totalFinalInvoicesResponse.json();
+    totalFinalInvoices = totalFinalInvoicesData?.totalFinalInvoices;
+  }
 
   return {
     totalLeads,
     newContacts,
-    openDeals: totalDealsValue, // Use the new totalDealsValue
+    openDeals: totalDealsValue,
     tasksDue,
     approvedQuotations,
     approvedInvoices,
@@ -90,6 +95,7 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
     pendingAmount,
     totalInvoicesAmount,
     totalPaidInvoicesAmount,
+    totalFinalInvoices,
     leadStatusSummary: leadStatusSummaryData,
     leadSourceSummary: leadSourceSummaryData,
     monthlyRevenue: monthlyRevenueData,
@@ -110,7 +116,7 @@ export const fetchMeetingSummary = async (): Promise<MeetingSummary> => {
 export const fetchRecentActivities = async (): Promise<RecentActivity[]> => {
   const headers = getAuthHeaders();
 
-  // Fetch recent leads as recent activities
+
   const leadsResponse = await fetch(`${API_URL}/leads?limit=5&sort=-createdAt`, { headers });
   const leadsData = await leadsResponse.json();
 

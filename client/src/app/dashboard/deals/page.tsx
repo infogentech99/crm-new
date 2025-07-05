@@ -19,6 +19,7 @@ import {
 import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
+import { useRouter } from 'next/navigation';
 
 const ManageDealsPage: React.FC = () => {
 
@@ -30,11 +31,18 @@ const ManageDealsPage: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
+  const router = useRouter();
 
   useEffect(() => {
     document.title = "Manage Deals – CRM Application";
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted && userRole === 'accounts') {
+      router.replace('/dashboard');
+    }
+  }, [isMounted, userRole, router]);
 
   const handleViewDeal = useCallback((deal: Deal) => {
     setSelectedDeal(deal);
@@ -58,8 +66,13 @@ const ManageDealsPage: React.FC = () => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allDeals', search],
     queryFn: () => getDeals(1, 10000, search),
-    enabled: isMounted, // Only fetch data if mounted
+    enabled: isMounted, 
   });
+
+  
+  if (!isMounted || userRole === 'accounts') {
+    return null;
+  }
 
   const allDeals = data?.deals || [];
 
@@ -95,10 +108,6 @@ const ManageDealsPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1); 
   };
-
-  if (!isMounted) {
-    return null; // Or a loading spinner, to prevent hydration mismatch
-  }
 
   return (
       <div className="p-6 rounded-lg shadow-md bg-white">

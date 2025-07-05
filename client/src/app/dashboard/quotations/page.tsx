@@ -174,7 +174,7 @@ const ManageQuotationsPage: React.FC = () => {
               setQuotationToDelete(null);
             }}
             onConfirm={handleConfirmDelete}
-            itemLabel={quotationToDelete?.quotationNumber || 'this quotation'}
+            itemLabel={quotationToDelete?._id || 'this quotation'}
           />
         )}
       </div>

@@ -21,6 +21,7 @@ import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import TaskForm from '@components/Task/TaskForm';
+import { useRouter } from 'next/navigation';
 
 const ManageTasksPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -32,6 +33,7 @@ const ManageTasksPage: React.FC = () => {
   const [limit, setLimit] = useState(10);
   const [search, setSearch] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
 
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
@@ -40,10 +42,16 @@ const ManageTasksPage: React.FC = () => {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (isMounted && userRole === 'accounts') {
+      router.replace('/dashboard');
+    }
+  }, [isMounted, userRole, router]);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allTasks', search],
     queryFn: () => getTasks(1, 10000, search),
-    enabled: isMounted, 
+    enabled: isMounted,
   });
   const allTasks = data?.tasks || [];
   const filteredTasks = allTasks.filter(task =>
@@ -51,11 +59,11 @@ const ManageTasksPage: React.FC = () => {
     (
       Array.isArray(task.assignee)
         ? task.assignee.some(
-            (assignee) => {
-              const assigneeName = typeof assignee === 'object' && 'name' in assignee ? assignee.name : assignee;
-              return (assigneeName?.toLowerCase() || '').includes(search.toLowerCase());
-            }
-          )
+          (assignee) => {
+            const assigneeName = typeof assignee === 'object' && 'name' in assignee ? assignee.name : assignee;
+            return (assigneeName?.toLowerCase() || '').includes(search.toLowerCase());
+          }
+        )
         : false
     )
   );
@@ -64,8 +72,6 @@ const ManageTasksPage: React.FC = () => {
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
   const tasksToDisplay = filteredTasks.slice(startIndex, endIndex);
-
-
 
   const handleEditTask = useCallback((task: Task) => {
     setSelectedTask(task);
@@ -119,7 +125,7 @@ const ManageTasksPage: React.FC = () => {
     setPage(1);
   };
 
-  if (!isMounted) {
+  if (!isMounted || userRole === 'accounts') {
     return null;
   }
 
@@ -181,7 +187,7 @@ const ManageTasksPage: React.FC = () => {
             onClose={() => {
               setIsModalOpen(false);
               setSelectedTask(null);
-               queryClient.invalidateQueries({ queryKey: ['allTasks'] });
+              queryClient.invalidateQueries({ queryKey: ['allTasks'] });
             }}
           />
         </Modal>

@@ -24,6 +24,8 @@ import {
 } from "@components/ui/pagination";
 import { toast } from "sonner";
 import { User, RecentActivity } from "@customTypes/index";
+import { useSelector } from "react-redux";
+import { RootState } from "@store/store";
 
 export default function UserDetailsPage() {
   const { id } = useParams();
@@ -52,7 +54,10 @@ export default function UserDetailsPage() {
   const [search, setSearch] = useState<string>("");
   const [limit, setLimit] = useState<number>(10);
   const [page, setPage] = useState<number>(1);
+  const userRole = useSelector((state: RootState) => state.user.role || "");
+  const [isMounted, setIsMounted] = useState(false);
 
+  // Load user and activities on mount, set document title and mount flag
   const load = useCallback(async () => {
     if (!id) return;
     const userId = Array.isArray(id) ? id[0] : id;
@@ -74,9 +79,19 @@ export default function UserDetailsPage() {
 
   useEffect(() => {
     document.title = "User Details – CRM Application";
+    setIsMounted(true);
     load();
   }, [load]);
 
+  useEffect(() => {
+  if (isMounted && userRole !== 'superadmin') {
+    router.replace('/dashboard');
+  }
+}, [isMounted, userRole, router]);
+
+if (!isMounted || userRole !== 'superadmin') {
+  return null;
+}
 
   const handleConfirmDelete = async () => {
     if (!deleting) return;

@@ -117,7 +117,20 @@ export const getTotalInvoicesAmount = async (req, res, next) => {
       totalInvoicesAmount: totalAmountResult.length > 0 ? totalAmountResult[0].totalInvoicesAmount : 0
     });
   } catch (err) {
-    console.error('getTotalInvoicesAmount error:', err);
+    console.error('getTotalPaidInvoicesAmount error:', err);
+    next(err);
+  }
+};
+
+export const getTotalFinalInvoicesCount = async (req, res, next) => {
+  try {
+    const totalFinalInvoices = await Invoice.countDocuments({
+      $expr: { $eq: ["$paidAmount", "$totals.total"] }
+    });
+
+    res.status(200).json({ totalFinalInvoices });
+  } catch (err) {
+    console.error('getTotalFinalInvoicesCount error:', err);
     next(err);
   }
 };
@@ -238,7 +251,7 @@ export const getInvoiceById = async (req, res) => {
     }
 
 
-    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && req.user.role !== 'admin' && 
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -263,7 +276,7 @@ export const updateInvoice = async (req, res) => {
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
-    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && req.user.role !== 'admin' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -303,7 +316,7 @@ export const deleteInvoice = async (req, res) => {
     }
 
     // enforce per-role access
-    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && req.user.role !== 'admin' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }

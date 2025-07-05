@@ -23,9 +23,11 @@ import { PaginationComponent } from '@components/ui/pagination';
 import { useSelector } from 'react-redux';
 import { RootState } from '@store/store';
 import MeetingView from '@components/Meetings/MeetingView';
+import { useRouter } from 'next/navigation';
 
 const ManageMeetingsPage: React.FC = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const userRole = useSelector((state: RootState) => state.user.role || '');
 
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
@@ -46,6 +48,12 @@ const ManageMeetingsPage: React.FC = () => {
     document.title = "Manage Meetings – CRM Application";
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted && userRole === 'accounts') {
+      router.replace('/dashboard');
+    }
+  }, [isMounted, userRole, router]);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['allMeetings', search],
@@ -121,96 +129,98 @@ const ManageMeetingsPage: React.FC = () => {
     setLimit(Number(value));
     setPage(1);
   };
-
-  if (!isMounted) {
+   if (!isMounted || userRole === 'accounts') {
     return null;
   }
-
   return (
-      <div className="p-6 bg-white rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
-          <AddMeetingButton onClick={handleCreateMeeting} />
-        </div>
+    <>
+      {(!isMounted || userRole === 'accounts') ? null : (
+        <div className="p-6 bg-white rounded-lg shadow-md">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-2xl font-semibold text-gray-800">{config.pageTitle}</h1>
+            <AddMeetingButton onClick={handleCreateMeeting} />
+          </div>
 
-        <div className="flex items-center justify-between mb-4 space-x-4">
-          <Input
-            placeholder="Search by title..."
-            value={search}
-            onChange={handleSearchChange}
-            className="max-w-sm"
-          />
-          <Select onValueChange={handleLimitChange} value={String(limit)}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue placeholder="Limit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="20">20</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+          <div className="flex items-center justify-between mb-4 space-x-4">
+            <Input
+              placeholder="Search by title..."
+              value={search}
+              onChange={handleSearchChange}
+              className="max-w-sm"
+            />
+            <Select onValueChange={handleLimitChange} value={String(limit)}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="Limit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-        <DataTable
-          columns={config.tableColumns}
-          data={meetingsToDisplay}
-          isLoading={isLoading}
-          error={isError ? error?.message || 'Unknown error' : null}
-        />
-
-        <div className="mt-4 flex justify-end">
-          <PaginationComponent
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
-
-        <Modal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          widthClass="max-w-3xl"
-        >
-          <MeetingForm
-            data={selectedMeeting ?? undefined}
-            mode={selectedMeeting ? 'Edit' : 'Create'}
-            onClose={() => {
-              setIsModalOpen(false);
-              queryClient.invalidateQueries({ queryKey: ['allMeetings'] });
-            }}
-
+          <DataTable
+            columns={config.tableColumns}
+            data={meetingsToDisplay}
+            isLoading={isLoading}
+            error={isError ? error?.message || 'Unknown error' : null}
           />
 
-        </Modal>
-        {viewMeeting && (
+          <div className="mt-4 flex justify-end">
+            <PaginationComponent
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+
           <Modal
-            isOpen={isViewModalOpen}
-            onClose={() => {
-              setIsViewModalOpen(false);
-              setViewMeeting(null);
-            }}
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
             widthClass="max-w-3xl"
           >
-            <MeetingView
-              data={viewMeeting}
+            <MeetingForm
+              data={selectedMeeting ?? undefined}
+              mode={selectedMeeting ? 'Edit' : 'Create'}
+              onClose={() => {
+                setIsModalOpen(false);
+                queryClient.invalidateQueries({ queryKey: ['allMeetings'] });
+              }}
+
+            />
+
+          </Modal>
+          {viewMeeting && (
+            <Modal
+              isOpen={isViewModalOpen}
               onClose={() => {
                 setIsViewModalOpen(false);
                 setViewMeeting(null);
               }}
+              widthClass="max-w-3xl"
+            >
+              <MeetingView
+                data={viewMeeting}
+                onClose={() => {
+                  setIsViewModalOpen(false);
+                  setViewMeeting(null);
+                }}
+              />
+            </Modal>
+          )}
+          {meetingToDelete && (
+            <DeleteModal
+              isOpen={isDeleteOpen}
+              onClose={() => { setIsDeleteOpen(false); setMeetingToDelete(null); }}
+              onConfirm={confirmDeleteMeeting}
+              itemLabel={meetingToDelete.title}
             />
-          </Modal>
-        )}
-        {meetingToDelete && (
-          <DeleteModal
-            isOpen={isDeleteOpen}
-            onClose={() => { setIsDeleteOpen(false); setMeetingToDelete(null); }}
-            onConfirm={confirmDeleteMeeting}
-            itemLabel={meetingToDelete.title}
-          />
-        )}
-      </div>
+          )}
+        </div>
+      )}
+    </>
   );
 };
 

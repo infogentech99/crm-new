@@ -30,6 +30,11 @@ export const manageTransactionsConfig = (
       render: (item: Transaction) => <span>{item.invoice?._id || 'N/A'}</span>,
     },
     {
+      key: 'projectTitle',
+      label: 'PROJECT TITLE',
+      render: (item: Transaction) => <span>{item.projectTitle || 'N/A'}</span>,
+    },
+    {
       key: 'transactionId',
       label: 'TRANSACTION ID',
     },

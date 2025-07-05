@@ -24,7 +24,7 @@ export default function CustomForm({ data, mode, onClose }: Props) {
     name: data?.name || "",
     email: data?.email || "",
     password: "",
-    role: data?.role || "employee",
+    role: data?.role ?? "",
   });
 
   const handleChange = (field: string, value: string) => {
@@ -96,7 +96,6 @@ export default function CustomForm({ data, mode, onClose }: Props) {
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="salesperson">Salesperson</SelectItem>
                 <SelectItem value="accounts">Accounts</SelectItem>
-                <SelectItem value="employee">Employee</SelectItem>
               </SelectContent>
             </Select>
           </div>

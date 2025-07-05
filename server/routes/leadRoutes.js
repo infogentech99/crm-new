@@ -33,86 +33,54 @@ const upload = multer({ storage });
 router.post(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson'),
   createLead
 );
 
 router.get(
   '/',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson'),
   getLeads
 );
 
 router.get(
   '/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson',),
   getLead
 );
 
-router.get(
-  '/invoiceHistory/:id',
-  protect,
-  authorize('superadmin', 'admin', 'salesperson','accounts'),
-  getLeadHistory
-);
 
 router.get(
   '/summary/status',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson',),
   getLeadStatusSummary
 );
 
 router.get(
   '/summary/source',
   protect,
-  authorize('superadmin', 'admin', 'salesperson', 'employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson',),
   getLeadSourceSummary
 );
 
 router.put(
   '/:id',
   protect,
-  authorize('superadmin', 'admin', 'salesperson','employee','accounts'),
+  authorize('superadmin', 'admin', 'salesperson'),
   updateLead
 );
 
-router.patch(
-  '/:id/approve',
-  protect,
-  authorize('superadmin', 'admin','accounts'),
-  approveLead
-);
-
-router.patch(
-  '/:id/deny',
-  protect,
-  authorize('superadmin', 'admin','accounts'),
-  denyLead
-);
 
 router.delete(
   '/:id',
   protect,
-  authorize('superadmin','accounts'),
+ authorize('superadmin', 'admin', 'salesperson'),
   deleteLead
 );
 
-router.post(
-  '/:id/quotations',
-  protect,
-  authorize('superadmin', 'admin','accounts'),
-  upload.single('file'),
-  uploadQuotation
-);
-router.get(
-  '/invoiceHistory/:id',
-  protect,
-  authorize('superadmin', 'admin', 'salesperson','accounts'),
-  getLeadHistory
-);
 
 
 export default router;

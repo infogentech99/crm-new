@@ -4,6 +4,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRecentActivities } from '@services/dashboardService';
 import { RecentActivity } from '@customTypes/index';
+import NoDataFound from '@components/Common/NoDataFound';
 
 export default function RecentActivityTable() {
   const { data, isLoading, isError, error } = useQuery({
@@ -69,7 +70,7 @@ export default function RecentActivityTable() {
           </table>
         </div>
       ) : (
-        <p className="text-gray-500">No recent activities found.</p>
+        <p className="text-gray-500"><NoDataFound/></p>
       )}
     </div>
   );
