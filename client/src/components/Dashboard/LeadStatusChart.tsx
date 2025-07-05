@@ -5,13 +5,16 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 import { useQuery } from '@tanstack/react-query';
 import { fetchDashboardSummary } from '@services/dashboardService';
 import NoDataFound from '@components/Common/NoDataFound';
+import { DashboardSummary } from '@customTypes/index';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
 export default function LeadStatusChart() {
-  const { data, isLoading, isError, error } = useQuery({
+  const userRole = typeof window !== 'undefined' ? localStorage.getItem('userRole') : null;
+
+  const { data, isLoading, isError, error } = useQuery<DashboardSummary>({
     queryKey: ['dashboardSummary'],
-    queryFn: fetchDashboardSummary,
+    queryFn: () => fetchDashboardSummary(userRole || ""),
   });
 
   if (isLoading) {
@@ -31,7 +34,7 @@ export default function LeadStatusChart() {
     );
   }
 
-  const summaryData = data?.leadStatusSummary || {};
+  const summaryData: { [key: string]: number } = data?.leadStatusSummary || {};
   const chartData = Object.keys(summaryData).map(status => ({
     name: status.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()), // Format status for display
     value: summaryData[status],
