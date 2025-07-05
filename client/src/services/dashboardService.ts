@@ -1,6 +1,7 @@
 import { DashboardSummary, RecentActivity, Lead, MeetingSummary } from '@customTypes/index';
 
-const API_URL = '/api'; 
+
+const API_URL = '/api';
 
 const getAuthHeaders = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -10,10 +11,9 @@ const getAuthHeaders = () => {
   };
 };
 
-export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
+export const fetchDashboardSummary = async (role: string): Promise<DashboardSummary> => {
   const headers = getAuthHeaders();
 
-  
   const totalLeadsResponse = await fetch(`${API_URL}/leads?limit=1`, { headers });
   const totalLeadsData = await totalLeadsResponse.json();
   const totalLeads = totalLeadsData?.totalLeads || 0;
@@ -26,22 +26,22 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   const totalDealsValueSummaryData = await totalDealsValueSummaryResponse.json();
   const totalDealsValue = (totalDealsValueSummaryData?.totalDealsValue ?? 0).toFixed(2);
 
- 
+
   const tasksDueSummaryResponse = await fetch(`${API_URL}/tasks/summary/due`, { headers });
   const tasksDueSummaryData = await tasksDueSummaryResponse.json();
   const tasksDue = tasksDueSummaryData?.totalTasksDue || 0;
 
- 
+
   const approvedQuotationsResponse = await fetch(`${API_URL}/leads?status=quotation_approved&limit=1`, { headers });
   const approvedQuotationsData = await approvedQuotationsResponse.json();
   const approvedQuotations = approvedQuotationsData?.totalLeads || 0;
 
-  
+
   const approvedInvoicesResponse = await fetch(`${API_URL}/leads?status=invoice_accepted&limit=1`, { headers });
   const approvedInvoicesData = await approvedInvoicesResponse.json();
   const approvedInvoices = approvedInvoicesData?.totalLeads || 0;
 
- 
+
   const lostLeadsResponse = await fetch(`${API_URL}/leads?status=lost&limit=1`, { headers });
   const lostLeadsData = await lostLeadsResponse.json();
   const lostLeads = lostLeadsData?.totalLeads || 0;
@@ -50,11 +50,11 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   const leadStatusSummaryResponse = await fetch(`${API_URL}/leads/summary/status`, { headers });
   const leadStatusSummaryData = await leadStatusSummaryResponse.json();
 
- 
+
   const leadSourceSummaryResponse = await fetch(`${API_URL}/leads/summary/source`, { headers });
   const leadSourceSummaryData = await leadSourceSummaryResponse.json();
 
-  
+
   const monthlyRevenueResponse = await fetch(`${API_URL}/invoice/summary/monthly-revenue`, { headers });
   const monthlyRevenueData = await monthlyRevenueResponse.json();
 
@@ -62,14 +62,12 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   const taskStatusSummaryResponse = await fetch(`${API_URL}/tasks/summary/status`, { headers });
   const taskStatusSummaryData = await taskStatusSummaryResponse.json();
 
- 
-  console.log('Fetching Pending Invoice Amount...');
+
   const pendingInvoiceAmountResponse = await fetch(`${API_URL}/invoice/summary/pending-amount`, { headers });
   const pendingInvoiceAmountData = await pendingInvoiceAmountResponse.json();
-  console.log('Pending Invoice Amount Data:', pendingInvoiceAmountData);
   const pendingAmount = (pendingInvoiceAmountData?.totalPendingAmount ?? 0).toFixed(2);
 
- 
+
   const totalInvoicesAmountResponse = await fetch(`${API_URL}/invoice/summary/total-amount`, { headers });
   const totalInvoicesAmountData = await totalInvoicesAmountResponse.json();
   const totalInvoicesAmount = (totalInvoicesAmountData?.totalInvoicesAmount ?? 0).toFixed(2);
@@ -79,10 +77,13 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   const totalPaidInvoicesAmountData = await totalPaidInvoicesAmountResponse.json();
   const totalPaidInvoicesAmount = (totalPaidInvoicesAmountData?.totalPaidInvoicesAmount ?? 0).toFixed(2);
 
-  
-  const totalFinalInvoicesResponse = await fetch(`${API_URL}/invoice/summary/final-invoices-count`, { headers });
-  const totalFinalInvoicesData = await totalFinalInvoicesResponse.json();
-  const totalFinalInvoices = totalFinalInvoicesData?.totalFinalInvoices || 0;
+  let totalFinalInvoices = 0;
+  if (role === "superadmin" || role === "accounts") {
+    const totalFinalInvoicesResponse = await fetch(`${API_URL}/invoice/summary/final-invoices-count`, { headers });
+    const totalFinalInvoicesData = await totalFinalInvoicesResponse.json();
+    totalFinalInvoices = totalFinalInvoicesData?.totalFinalInvoices;
+  }
+
   return {
     totalLeads,
     newContacts,
@@ -115,7 +116,7 @@ export const fetchMeetingSummary = async (): Promise<MeetingSummary> => {
 export const fetchRecentActivities = async (): Promise<RecentActivity[]> => {
   const headers = getAuthHeaders();
 
-  
+
   const leadsResponse = await fetch(`${API_URL}/leads?limit=5&sort=-createdAt`, { headers });
   const leadsData = await leadsResponse.json();
 

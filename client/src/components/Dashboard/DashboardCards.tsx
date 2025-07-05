@@ -24,12 +24,11 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, bgColor }) => (
 );
 
 export default function DashboardCards() {
-  // get user role from Redux
   const role = useSelector((state: RootState) => state.user.role);
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['dashboardSummary'],
-    queryFn: fetchDashboardSummary,
+    queryKey: ['dashboardSummary', role],
+    queryFn: () => fetchDashboardSummary(role || ''),
   });
 
   if (isLoading) {

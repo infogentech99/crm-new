@@ -41,13 +41,10 @@ export default function DashboardPage() {
         Here&apos;s a quick overview of your CRM activities.
       </p>
 
-      {/* Show DashboardCards only for non-accounts*/}
-      {/* {role !== "accounts" && <DashboardCards />} */}
 
       <DashboardCards />
 
       <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Show these only for non-accounts */}
         {role !== "accounts" && (
           <>
             <LeadStatusChart />
@@ -56,7 +53,6 @@ export default function DashboardPage() {
           </>
         )}
 
-        {/* Always show revenue chart */}
         <RevenueChart />
       </div>
 
