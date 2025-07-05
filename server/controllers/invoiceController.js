@@ -114,7 +114,7 @@ export const getTotalInvoicesAmount = async (req, res, next) => {
     ]);
 
     res.status(200).json({
-      totalPaidInvoicesAmount: totalPaidInvoicesAmountResult.length > 0 ? totalPaidInvoicesAmountResult[0].totalPaidInvoicesAmount : 0
+      totalInvoicesAmount: totalAmountResult.length > 0 ? totalAmountResult[0].totalInvoicesAmount : 0
     });
   } catch (err) {
     console.error('getTotalPaidInvoicesAmount error:', err);
