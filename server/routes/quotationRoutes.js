@@ -18,22 +18,22 @@ router.post(
 );
 router.get(
   '/',
-  authorize('superadmin','accounts', 'salesperson'),
+  authorize('superadmin','admin', 'accounts', 'salesperson'),
   getAllQuotations
 );
 router.get(
   '/:id',
-  authorize('superadmin','accounts', 'salesperson'),
+  authorize('superadmin','admin','accounts', 'salesperson'),
   getQuotationById
 );
 router.put(
   '/:id',
-  authorize('superadmin','accounts', 'salesperson'),
+  authorize('superadmin','admin', 'accounts', 'salesperson'),
   updateQuotation
 );
 router.delete(
   '/:id',
-  authorize('superadmin','accounts', 'salesperson'),
+  authorize('superadmin','admin', 'accounts', 'salesperson'),
   deleteQuotation
 );
 

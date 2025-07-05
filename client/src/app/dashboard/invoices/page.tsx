@@ -197,7 +197,7 @@ const invoicesToDisplay = allInvoices.slice(startIndex, endIndex);
               setInvoiceToDelete(null);
             }}
             onConfirm={handleConfirmDelete}
-            itemLabel={invoiceToDelete?.invoiceNumber || 'this quotation'}
+            itemLabel={invoiceToDelete?._id || 'this quotation'}
           />
         )}
       </div>

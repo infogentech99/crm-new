@@ -251,7 +251,7 @@ export const getInvoiceById = async (req, res) => {
     }
 
 
-    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && req.user.role !== 'admin' && 
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -276,7 +276,7 @@ export const updateInvoice = async (req, res) => {
       return res.status(404).json({ message: 'Invoice not found' });
     }
 
-    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && req.user.role !== 'admin' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
@@ -316,7 +316,7 @@ export const deleteInvoice = async (req, res) => {
     }
 
     // enforce per-role access
-    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' &&
+    if (req.user.role !== 'superadmin' && req.user.role !== 'accounts' && req.user.role !== 'admin' &&
         !invoice.createdBy._id.equals(req.user._id)) {
       return res.status(403).json({ message: 'Forbidden' });
     }
