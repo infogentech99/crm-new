@@ -33,7 +33,7 @@ export default function UserDetailsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const onView = useCallback(
-    (act: RecentActivity) => router.push(`/dashboard/leads/${act.id}`),
+    (act: RecentActivity) => router.push(`/dashboard/leads/${act._id}`),
     [router]
   );
   const onDelete = useCallback((act: RecentActivity) => {
@@ -81,7 +81,7 @@ export default function UserDetailsPage() {
   const handleConfirmDelete = async () => {
     if (!deleting) return;
     try {
-      await deleteLead(String(deleting.id));
+      await deleteLead(String(deleting._id));
       toast.success("Activity deleted");
       await load();
     } catch (e: unknown) { // Changed to unknown
@@ -195,7 +195,7 @@ export default function UserDetailsPage() {
         </div>
 
         <DataTable
-          data={pageItems.map(item => ({ ...item, _id: String(item.id) }))}
+data={pageItems}
           columns={cfg.tableColumns}
           isLoading={false}
           error={null}
